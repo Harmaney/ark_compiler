@@ -1,6 +1,7 @@
 #pragma once
 #include <sstream>
 #include <string>
+#include <stack>
 #include <vector>
 
 #include "data.h"
@@ -44,7 +45,7 @@ std::string mapVariableType(VariableType type);
 void genVariable(Variable *var);
 
 enum PlaceHolder{
-    PLACE_BEGIN,PLACE_END,
+    PLACE_VOID,PLACE_BEGIN=1,PLACE_END=2
 };
 
 /// 直接存储代码
@@ -54,10 +55,10 @@ enum PlaceHolder{
 class CodeCollector {
    private:
     static std::vector<std::string> section_order;
-    static std::map<std::string, std::vector<std::string>> codes;
+    static std::map<std::string, std::vector<std::string>*> codes;
 
-    static std::vector<std::string> cur_section;
-    static std::string cur_section_name;
+    static std::vector<std::string> *cur_section;
+    static std::stack<std::string> cur_section_name;
 
     static std::stringstream ss;
 
@@ -75,7 +76,7 @@ class CodeCollector {
     /// 将代码压入段首
     static void push_front();
     /// 结束段并压入全局
-    static void end_section(PlaceHolder place);
+    static void end_section(PlaceHolder place=PLACE_END);
 
     /// 重排段序列
     static void rearrange_section();

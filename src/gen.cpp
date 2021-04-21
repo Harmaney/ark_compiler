@@ -1,6 +1,7 @@
 
 #include "gen.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "data.h"
@@ -29,11 +30,12 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
             break;
     }
 
-    // TODO: add integer
+    CodeCollector::begin_section("global_define");
     CodeCollector::src() << mapVariableType(t->type) << " " << t->sig << ";";
     CodeCollector::push_back();
     CodeCollector::src() << t->sig << "=" << ast->val << ";";
     CodeCollector::push_back();
+    CodeCollector::end_section();
     ast->value = t;
 }
 
@@ -126,23 +128,23 @@ void genVariable(Variable *var) {
 
 ////////////////////////////
 
-std::map<std::string, std::vector<std::string>> CodeCollector::codes;
+std::map<std::string, std::vector<std::string> *> CodeCollector::codes;
 std::stringstream CodeCollector::ss;
-std::string CodeCollector::cur_section_name;
-std::vector<std::string> CodeCollector::cur_section;
+std::stack<std::string> CodeCollector::cur_section_name;
+std::vector<std::string> *CodeCollector::cur_section;
 std::vector<std::string> CodeCollector::section_order;
 
-void CodeCollector::push_back(std::string str) { cur_section.push_back(str); }
+void CodeCollector::push_back(std::string str) { cur_section->push_back(str); }
 void CodeCollector::push_front(std::string str) {
-    cur_section.insert(cur_section.begin(), str);
+    cur_section->insert(cur_section->begin(), str);
 }
 
 void CodeCollector::push_back() {
-    cur_section.push_back(ss.str());
+    cur_section->push_back(ss.str());
     ss.str(std::string());
 }
 void CodeCollector::push_front() {
-    cur_section.insert(cur_section.begin(), ss.str());
+    cur_section->insert(cur_section->begin(), ss.str());
     ss.str(std::string());
 }
 
@@ -151,38 +153,48 @@ void CodeCollector::begin_section(std::string section_name) {
         section_name = std::to_string(section_order.size());
     }
 
-    cur_section.clear();
     // 重新打开对应代码段
     if (codes.count(section_name)) {
         cur_section = codes[section_name];
+    } else {
+        cur_section = new std::vector<std::string>();
+        codes[section_name] = cur_section;
     }
-    cur_section_name = section_name;
+    cur_section_name.push(section_name);
     ss.str(std::string());
 }
 
 std::stringstream &CodeCollector::src() { return ss; }
 
 void CodeCollector::end_section(PlaceHolder place) {
-    codes[cur_section_name] = cur_section;
-    cur_section.clear();
-    switch (place) {
-        case PLACE_BEGIN:
-            section_order.insert(section_order.begin(), cur_section_name);
-            break;
+    assert(!cur_section_name.empty());
+    if (std::find(section_order.begin(), section_order.end(),
+                  cur_section_name.top()) == section_order.end()) {
+        switch (place) {
+            case PLACE_BEGIN:
+                section_order.insert(section_order.begin(),
+                                     cur_section_name.top());
+                break;
 
-        case PLACE_END:
-            section_order.push_back(cur_section_name);
-            break;
-        default:
-            // TODO: wrong
-            spdlog::error("unknown inserting place: {}", place);
-            break;
+            case PLACE_END:
+                section_order.push_back(cur_section_name.top());
+                break;
+            default:
+                // TODO: wrong
+                spdlog::error("unknown inserting place: {}", place);
+                break;
+        }
+    }
+    cur_section_name.pop();
+    if (!cur_section_name.empty()) {
+        cur_section = codes[cur_section_name.top()];
     }
 }
 
 void CodeCollector::output() {
     for (auto sid : section_order) {
-        for (auto str : codes[sid]) {
+        spdlog::debug("section[{}]-----", sid);
+        for (auto str : *codes[sid]) {
             spdlog::debug(str);
         }
     }
