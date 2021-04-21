@@ -79,7 +79,8 @@ class CodeCollector {
     static void end_section(PlaceHolder place=PLACE_END);
 
     /// 重排段序列
-    static void rearrange_section();
+    static void rearrange_section(std::vector<std::string> order);
+    static void rearrange_section(std::string section,int newPos);
     /// 清空段
     static void clear();
     /// 输出代码

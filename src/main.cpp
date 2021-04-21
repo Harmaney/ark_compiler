@@ -26,13 +26,14 @@ int main(int argc, char **argv) {
     block->exprs.push_back(decl);
 
     BinaryExprAST *t1 = new BinaryExprAST('=', new VariableExprAST("a"),
-                                          new NumberExprAST(123,CONSTANT_INT));
+                                          new NumberExprAST(123, CONSTANT_INT));
     block->exprs.push_back(t1);
 
     vector<ExprAST *> callargs;
     callargs.push_back(
-        new BinaryExprAST('+', new NumberExprAST(1.1,CONSTANT_REAL), new NumberExprAST(2.2,CONSTANT_REAL)));
-    callargs.push_back(new NumberExprAST(114.514,CONSTANT_REAL));
+        new BinaryExprAST('+', new NumberExprAST(1.1, CONSTANT_REAL),
+                          new NumberExprAST(2.2, CONSTANT_REAL)));
+    callargs.push_back(new NumberExprAST(114.514, CONSTANT_REAL));
     callargs.push_back(new VariableExprAST("a"));
     CallExprAST *call = new CallExprAST("write", callargs);
     block->exprs.push_back(call);
@@ -41,11 +42,15 @@ int main(int argc, char **argv) {
         new FunctionSignatureAST("main", vector<VariableDeclAST *>(), INT);
     FunctionAST *func = new FunctionAST(funcsig, block);
 
+    GlobalAST *global=new GlobalAST({func});
+
     ASTDispatcher dispacher;
     CodeCollector::begin_section();
-    func->accept(dispacher);
+    global->accept(dispacher);
     CodeCollector::end_section(PLACE_END);
 
+    CodeCollector::rearrange_section("global_define", 0);
+    CodeCollector::rearrange_section("prelude", 0);
     CodeCollector::output();
 
     return 0;

@@ -107,6 +107,10 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("into global ast");
     dispatcher.genGlobalBegin(this);
 
+    for(auto func:functions){
+        func->accept(dispatcher);
+    }
+
     dispatcher.genGlobalEnd(this);
     spdlog::trace("out global ast");
 }

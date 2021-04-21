@@ -9,6 +9,11 @@
 
 void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
     // TODO:
+    CodeCollector::begin_section("prelude");
+    CodeCollector::push_back("#include <iostream>;");
+    CodeCollector::push_back("using namespace std;");
+    CodeCollector::push_back("void write(int x){cout<<x;}");
+    CodeCollector::end_section();
 }
 
 void ASTDispatcher::genGlobalEnd(GlobalAST *ast) {
@@ -197,6 +202,19 @@ void CodeCollector::output() {
         for (auto str : *codes[sid]) {
             spdlog::debug(str);
         }
+    }
+}
+
+void CodeCollector::rearrange_section(std::vector<std::string> order) {
+    section_order = order;
+}
+void CodeCollector::rearrange_section(std::string section, int newPos) {
+    if (std::find(section_order.begin(), section_order.end(), section) !=
+        section_order.end()) {
+        section_order.erase(std::find(section_order.begin(), section_order.end(), section));
+        section_order.insert(section_order.begin() + newPos, section);
+    }else{
+        spdlog::warn("rearranging section[{}] failed: no such section",section);
     }
 }
 
