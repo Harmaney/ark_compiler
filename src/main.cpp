@@ -26,13 +26,13 @@ int main(int argc, char **argv) {
     block->exprs.push_back(decl);
 
     BinaryExprAST *t1 = new BinaryExprAST('=', new VariableExprAST("a"),
-                                          new NumberExprAST(123));
+                                          new NumberExprAST(123,CONSTANT_INT));
     block->exprs.push_back(t1);
 
     vector<ExprAST *> callargs;
     callargs.push_back(
-        new BinaryExprAST('+', new NumberExprAST(1.1), new NumberExprAST(2.2)));
-    callargs.push_back(new NumberExprAST(114.514));
+        new BinaryExprAST('+', new NumberExprAST(1.1,CONSTANT_REAL), new NumberExprAST(2.2,CONSTANT_REAL)));
+    callargs.push_back(new NumberExprAST(114.514,CONSTANT_REAL));
     callargs.push_back(new VariableExprAST("a"));
     CallExprAST *call = new CallExprAST("write", callargs);
     block->exprs.push_back(call);
@@ -42,7 +42,9 @@ int main(int argc, char **argv) {
     FunctionAST *func = new FunctionAST(funcsig, block);
 
     ASTDispatcher dispacher;
+    CodeCollector::begin_section();
     func->accept(dispacher);
+    CodeCollector::end_section(PLACE_END);
 
     CodeCollector::output();
 

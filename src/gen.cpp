@@ -15,10 +15,22 @@ void ASTDispatcher::genGlobalEnd(GlobalAST *ast) {
 }
 
 void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
-    Variable *t = SymbolTable::createVariableG(REAL);
+    Variable *t = nullptr;
+
+    switch (ast->const_type) {
+        case CONSTANT_INT:
+            t = SymbolTable::createVariableG(INT);
+            break;
+        case CONSTANT_REAL:
+            t = SymbolTable::createVariableG(REAL);
+            break;
+        default:
+            spdlog::error("unknown constant type: {}", ast->const_type);
+            break;
+    }
 
     // TODO: add integer
-    CodeCollector::src() << "double " << t->sig << ";";
+    CodeCollector::src() << mapVariableType(t->type) << " " << t->sig << ";";
     CodeCollector::push_back();
     CodeCollector::src() << t->sig << "=" << ast->val << ";";
     CodeCollector::push_back();
@@ -125,9 +137,13 @@ void CodeCollector::push_front(std::string str) {
     cur_section.insert(cur_section.begin(), str);
 }
 
-void CodeCollector::push_back() { cur_section.push_back(ss.str()); }
+void CodeCollector::push_back() {
+    cur_section.push_back(ss.str());
+    ss.str(std::string());
+}
 void CodeCollector::push_front() {
     cur_section.insert(cur_section.begin(), ss.str());
+    ss.str(std::string());
 }
 
 void CodeCollector::begin_section(std::string section_name) {
@@ -137,8 +153,8 @@ void CodeCollector::begin_section(std::string section_name) {
 
     cur_section.clear();
     // 重新打开对应代码段
-    if(codes.count(section_name)){
-        cur_section=codes[section_name];
+    if (codes.count(section_name)) {
+        cur_section = codes[section_name];
     }
     cur_section_name = section_name;
     ss.str(std::string());
@@ -165,7 +181,7 @@ void CodeCollector::end_section(PlaceHolder place) {
 }
 
 void CodeCollector::output() {
-    for (auto sid :section_order){
+    for (auto sid : section_order) {
         for (auto str : codes[sid]) {
             spdlog::debug(str);
         }

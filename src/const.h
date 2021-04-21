@@ -15,3 +15,8 @@ enum VariableType {
     REAL=1,
     INT,
 };
+
+enum ConstantType{
+    CONSTANT_REAL,
+    CONSTANT_INT,
+};

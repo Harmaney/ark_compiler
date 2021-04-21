@@ -9,8 +9,6 @@
 
 class ASTDispatcher;
 
-
-
 class AST {
    public:
     ASTKind type;
@@ -37,7 +35,9 @@ class ExprAST : public AST {
 class NumberExprAST : public ExprAST {
    public:
     double val;
-    NumberExprAST(double val) : ExprAST(NUMBER_EXPR), val(val) {}
+    ConstantType const_type;
+    NumberExprAST(double val, ConstantType const_type)
+        : ExprAST(NUMBER_EXPR), val(val), const_type(const_type) {}
     void accept(ASTDispatcher &dispacher) override;
 };
 
