@@ -91,9 +91,13 @@ void ASTDispatcher::genFunctionSignature(FunctionSignatureAST *ast) {
     CodeCollector::src() << mapVariableType(ast->result) << " ";
     CodeCollector::src() << ast->sig;
     CodeCollector::src() << "(";
-    for (auto item : ast->args) {
-        CodeCollector::src() << "double " << item->sig << ", ";
+    for (int i = 0; i < (int)ast->args.size() - 1; i++) {
+        CodeCollector::src() << mapVariableType(ast->args[i]->type) << " "
+                             << ast->args[i]->sig->name << ", ";
     }
+    if (!ast->args.empty())
+        CodeCollector::src() << mapVariableType(ast->args.back()->type) << " "
+                             << ast->args.back()->sig->name;
     CodeCollector::src() << ")";
     CodeCollector::push_back();
 }
@@ -211,10 +215,12 @@ void CodeCollector::rearrange_section(std::vector<std::string> order) {
 void CodeCollector::rearrange_section(std::string section, int newPos) {
     if (std::find(section_order.begin(), section_order.end(), section) !=
         section_order.end()) {
-        section_order.erase(std::find(section_order.begin(), section_order.end(), section));
+        section_order.erase(
+            std::find(section_order.begin(), section_order.end(), section));
         section_order.insert(section_order.begin() + newPos, section);
-    }else{
-        spdlog::warn("rearranging section[{}] failed: no such section",section);
+    } else {
+        spdlog::warn("rearranging section[{}] failed: no such section",
+                     section);
     }
 }
 
