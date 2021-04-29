@@ -1,7 +1,9 @@
 add_rules("mode.debug", "mode.release")
 add_requires("spdlog")
 
+
 target("ark")
+    -- add_cxxflags("-fsanitize=undefined")
     set_kind("binary")
     add_headerfiles("src/*.h")
     add_files("src/*.cpp")
