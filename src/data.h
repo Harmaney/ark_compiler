@@ -99,6 +99,14 @@ class FunctionAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+class StructAST : public AST{
+    public:
+    std::string name;
+    std::vector<VariableDeclAST*> varDecl;
+    std::vector<FunctionAST*> functions;
+    void accept(ASTDispatcher &dispatcher) override;
+};
+
 class GlobalAST : public AST {
    public:
     std::vector<FunctionAST *> functions;

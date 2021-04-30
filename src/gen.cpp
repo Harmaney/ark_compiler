@@ -36,9 +36,7 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
     }
 
     CodeCollector::begin_section("global_define");
-    CodeCollector::src() << mapVariableType(t->type) << " " << t->sig << ";";
-    CodeCollector::push_back();
-    CodeCollector::src() << t->sig << "=" << ast->val << ";";
+    CodeCollector::src() << mapVariableType(t->type) << " " << t->sig <<"=" << ast->val << ";";
     CodeCollector::push_back();
     CodeCollector::end_section();
     ast->value = t;
