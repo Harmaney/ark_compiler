@@ -36,7 +36,9 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
     }
 
     CodeCollector::begin_section("global_define");
-    CodeCollector::src() << mapVariableType(t->type) << " " << t->sig <<"=" << ast->val << ";";
+    CodeCollector::src() << mapVariableType(t->type) << " " << t->sig <<"=";
+    if(ast->const_type==CONSTANT_REAL)CodeCollector::src()<< ast->val_float << ";";
+    if(ast->const_type==CONSTANT_INT)CodeCollector::src()<< ast->val_int << ";";
     CodeCollector::push_back();
     CodeCollector::end_section();
     ast->value = t;
@@ -84,6 +86,69 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     CodeCollector::src() << ");";
     CodeCollector::push_back();
 }
+
+
+void ASTDispatcher::genIfStatementBegin(IfStatementAST *ast){
+    CodeCollector::src()<<"if ("<<static_cast<Variable *>(ast->condition->value)->sig<<")";
+
+    std::string *L0=TagTable::createTagG();
+    CodeCollector::src()<<"goto "<<*L0<<";";
+    ast->extraData["L0"]=L0;
+}
+
+void ASTDispatcher::genWhileStatementBegin(WhileStatementAST *ast){
+    CodeCollector::src()<<"if (!"<<static_cast<Variable *>(ast->condition->value)->sig<<")";
+
+    std::string *L0=TagTable::createTagG();
+    CodeCollector::src()<<"goto "<<L0<<";";
+    CodeCollector::push_back();
+    ast->extraData["end"]=L0;
+
+    std::string *begin=TagTable::createTagG();
+    CodeCollector::src()<<*begin<<":";
+    CodeCollector::push_back();
+    ast->extraData["begin"]=L0;
+
+}
+
+void ASTDispatcher::genForStatementBegin(ForStatementAST *ast){
+    ast->extraData["end"]=TagTable::createTagG();
+    ast->extraData["begin"]=TagTable::createTagG();
+
+    CodeCollector::src()<<static_cast<Variable *>(ast->itervar->value)->sig<<" = "<<ast->rangeL<<";";
+    CodeCollector::push_back();
+
+
+
+    CodeCollector::src()<<"if ("<<static_cast<Variable *>(ast->itervar->value)->sig<<">"<<ast->rangeR<<")";
+    CodeCollector::src()<<"goto "<<*(std::string *)ast->extraData["end"]<<";";
+    CodeCollector::push_back();
+
+    CodeCollector::src()<<*(std::string *)ast->extraData["begin"]<<":";
+    CodeCollector::push_back();
+}
+
+void ASTDispatcher::genForStatementEnd(ForStatementAST *ast){
+    CodeCollector::src()<<static_cast<Variable *>(ast->itervar->value)->sig<<"++;";
+    CodeCollector::push_back();
+
+    CodeCollector::src()<<"if ("<<static_cast<Variable*>(ast->itervar->value)->sig<<"<="<<ast->rangeR<<")";
+    CodeCollector::src()<<"goto "<<*(std::string *)ast->extraData["begin"]<<";";
+    CodeCollector::push_back();
+
+    CodeCollector::src()<<*(std::string *)ast->extraData["end"]<<":";
+    CodeCollector::push_back();
+}
+
+void ASTDispatcher::genWhileStatementEnd(WhileStatementAST *ast){
+    CodeCollector::src()<<"if ("<<static_cast<Variable *>(ast->condition->value)->sig<<")";
+    CodeCollector::src()<<"goto "<<*(std::string *)ast->extraData["begin"]<<";";
+
+    CodeCollector::push_back();
+    CodeCollector::src()<<*(std::string *)ast->extraData["end"]<<":";
+    CodeCollector::push_back();
+}
+
 
 void ASTDispatcher::genFunctionSignature(FunctionSignatureAST *ast) {
     CodeCollector::src() << mapVariableType(ast->result) << " ";

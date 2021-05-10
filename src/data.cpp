@@ -2,6 +2,22 @@
 
 #include "spdlog/spdlog.h"
 
+void ExprAST::accept(ASTDispatcher &dispatcher) {
+    switch (type) {
+        case BINARY_EXPR:
+            dynamic_cast<BinaryExprAST *>(this)->accept(dispatcher);
+            break;
+        case NUMBER_EXPR:
+            dynamic_cast<NumberExprAST *>(this)->accept(dispatcher);
+            break;
+        case VARIABLE_EXPR:
+            dynamic_cast<VariableExprAST *>(this)->accept(dispatcher);
+            break;
+        default:
+            spdlog::error("unknown type of expr: {}", type);
+            break;
+    }
+}
 void NumberExprAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("into number ast");
     dispatcher.genNumberExpr(this);
@@ -15,51 +31,15 @@ void VariableExprAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
-    switch (LHS->type) {
-        case BINARY_EXPR:
-            dynamic_cast<BinaryExprAST *>(LHS)->accept(dispatcher);
-            break;
-        case NUMBER_EXPR:
-            dynamic_cast<NumberExprAST *>(LHS)->accept(dispatcher);
-            break;
-        case VARIABLE_EXPR:
-            dynamic_cast<VariableExprAST *>(LHS)->accept(dispatcher);
-            break;
-        default:
-            break;
-    }
-    switch (RHS->type) {
-        case BINARY_EXPR:
-            dynamic_cast<BinaryExprAST *>(RHS)->accept(dispatcher);
-            break;
-        case NUMBER_EXPR:
-            dynamic_cast<NumberExprAST *>(RHS)->accept(dispatcher);
-            break;
-        case VARIABLE_EXPR:
-            dynamic_cast<VariableExprAST *>(RHS)->accept(dispatcher);
-            break;
-        default:
-            break;
-    }
+    LHS->accept(dispatcher);
+    RHS->accept(dispatcher);
 
     dispatcher.genBinaryExpr(this);
 }
 
 void CallExprAST::accept(ASTDispatcher &dispatcher) {
     for (auto arg : args) {
-        switch (arg->type) {
-            case BINARY_EXPR:
-                dynamic_cast<BinaryExprAST *>(arg)->accept(dispatcher);
-                break;
-            case NUMBER_EXPR:
-                dynamic_cast<NumberExprAST *>(arg)->accept(dispatcher);
-                break;
-            case VARIABLE_EXPR:
-                dynamic_cast<VariableExprAST *>(arg)->accept(dispatcher);
-                break;
-            default:
-                break;
-        }
+        arg->accept(dispatcher);
     }
 
     spdlog::trace("into call ast");
@@ -88,7 +68,11 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
             case VARIABLE_DECL:
                 static_cast<VariableDeclAST *>(expr)->accept(dispatcher);
                 break;
+            case FOR_STATEMENT:
+                static_cast<ForStatementAST *>(expr)->accept(dispatcher);
+                break;
             default:
+                spdlog::error("unknown type of AST in Block: {}", expr->type);
                 break;
         }
     }
@@ -103,11 +87,39 @@ void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("out variable ast");
 }
 
+void ForStatementAST::accept(ASTDispatcher &dispatcher) {
+    this->itervar->accept(dispatcher);
+
+    spdlog::trace("into for ast");
+    dispatcher.genForStatementBegin(this);
+    this->body->accept(dispatcher);
+    dispatcher.genForStatementEnd(this);
+    spdlog::trace("out for ast");
+}
+
+void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
+    spdlog::trace("into variable ast");
+    this->condition->accept(dispatcher);
+
+    dispatcher.genWhileStatementBegin(this);
+    this->body->accept(dispatcher);
+    dispatcher.genWhileStatementEnd(this);
+    spdlog::trace("out variable ast");
+}
+
+void IfStatementAST::accept(ASTDispatcher &dispatcher) {
+    spdlog::trace("into variable ast");
+    this->condition->accept(dispatcher);
+    dispatcher.genIfStatementBegin(this);
+    // TODO: body and else if
+    spdlog::trace("out variable ast");
+}
+
 void GlobalAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("into global ast");
     dispatcher.genGlobalBegin(this);
 
-    for(auto func:functions){
+    for (auto func : functions) {
         func->accept(dispatcher);
     }
 
@@ -115,13 +127,13 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("out global ast");
 }
 
-void FunctionAST::accept(ASTDispatcher &dispatcher){
+void FunctionAST::accept(ASTDispatcher &dispatcher) {
     // TODO: symboltable
     sig->accept(dispatcher);
     body->accept(dispatcher);
 }
 
-void FunctionSignatureAST::accept(ASTDispatcher &dispatcher){
+void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {
     dispatcher.genFunctionSignature(this);
 }
 
@@ -192,4 +204,16 @@ Variable *SymbolTable::lookfor(std::string sig) {
         table = table->parent;
     }
     return NULL;
+}
+
+///////////////////////////////////////////////
+
+int TagTable::nextSlot;
+
+void TagTable::init() {
+    TagTable::nextSlot=0;
+}
+
+std::string* TagTable::createTagG() {
+    return new std::string("L"+std::to_string(TagTable::nextSlot++));
 }

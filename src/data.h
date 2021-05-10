@@ -12,6 +12,7 @@ class ASTDispatcher;
 class AST {
    public:
     ASTKind type;
+    std::map<std::string, void *> extraData;
     AST(ASTKind type) : type(type) {}
     virtual void accept(ASTDispatcher &dispatcher) = 0;
 };
@@ -30,14 +31,19 @@ class ExprAST : public AST {
     void *value;
     ExprAST(ASTKind type) : AST(type) {}
     virtual ~ExprAST() {}
+    void accept(ASTDispatcher &dispatcher) override;
 };
 
 class NumberExprAST : public ExprAST {
    public:
-    double val;
+    double val_float;
+    int val_int;
     ConstantType const_type;
-    NumberExprAST(double val, ConstantType const_type)
-        : ExprAST(NUMBER_EXPR), val(val), const_type(const_type) {}
+    NumberExprAST(double val)
+        : ExprAST(NUMBER_EXPR), val_float(val), const_type(CONSTANT_REAL) {}
+    NumberExprAST(int val)
+        : ExprAST(NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {}
+    
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -82,7 +88,7 @@ class VariableDeclAST : public AST {
 class ForStatementAST : public AST {
    public:
     VariableExprAST *itervar;
-    int rangeL, rangeR;
+    int rangeL, rangeR; //TODO: honestly, this should be written as Constant AST
     BlockAST *body;
 
     ForStatementAST(VariableExprAST *itervar, int rangeL, int rangeR,
@@ -191,4 +197,12 @@ class SymbolTable {
     static Variable *createVariableG(VariableType type);
 
     static Variable *lookfor(std::string sig);
+};
+
+class TagTable {
+    static int nextSlot;
+
+   public:
+    static void init();
+    static std::string *createTagG();
 };

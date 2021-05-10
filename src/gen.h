@@ -13,6 +13,10 @@ class BinaryExprAST;
 class CallExprAST;
 class VariableDeclAST;
 
+class IfStatementAST;
+class WhileStatementAST;
+class ForStatementAST;
+
 class GlobalAST;
 class FunctionSignatureAST;
 class FunctionAST;
@@ -31,6 +35,16 @@ class ASTDispatcher {
     void genVariableExpr(VariableExprAST *ast);
     void genBinaryExpr(BinaryExprAST *ast);
     void genCallExpr(CallExprAST *ast);
+
+    /// 只生产if，不包含block
+    void genIfStatementBegin(IfStatementAST *ast);
+    void genIfStatementEnd(IfStatementAST *ast);
+    /// 只生产while，不包含block
+    void genWhileStatementBegin(WhileStatementAST *ast);
+    void genWhileStatementEnd(WhileStatementAST *ast);
+    /// 只生产for，不包含block
+    void genForStatementBegin(ForStatementAST *ast);
+    void genForStatementEnd(ForStatementAST *ast);
 
     void genFunctionSignature(FunctionSignatureAST *ast);
 
