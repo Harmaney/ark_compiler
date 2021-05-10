@@ -9,6 +9,9 @@ enum ASTKind {
     FUNCTION,
     BLOCK,
     VARIABLE_DECL,
+    FOR_STATEMENT,
+    WHILE_STATEMENT,
+    IF_STATEMENT,
 };
 
 enum VariableType {

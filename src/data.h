@@ -79,6 +79,47 @@ class VariableDeclAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+class ForStatementAST : public AST {
+   public:
+    VariableExprAST *itervar;
+    int rangeL, rangeR;
+    BlockAST *body;
+
+    ForStatementAST(VariableExprAST *itervar, int rangeL, int rangeR,
+                    BlockAST *body)
+        : AST(FOR_STATEMENT),
+          itervar(itervar),
+          rangeL(rangeL),
+          rangeR(rangeR),
+          body(body) {}
+    void accept(ASTDispatcher &dispatcher) override;
+};
+
+class WhileStatementAST : public AST {
+   public:
+    ExprAST *condition;
+    BlockAST *body;
+
+    WhileStatementAST(ExprAST *condition, BlockAST *body)
+        : AST(WHILE_STATEMENT), condition(condition), body(body) {}
+    void accept(ASTDispatcher &dispatcher) override;
+};
+
+class IfStatementAST : public AST {
+   public:
+    ExprAST *condition;
+    BlockAST *body_true;
+    BlockAST *body_false;
+
+    IfStatementAST(ExprAST *condition, BlockAST *body_true,
+                   BlockAST *body_false)
+        : AST(IF_STATEMENT),
+          condition(condition),
+          body_true(body_true),
+          body_false(body_false) {}
+    void accept(ASTDispatcher &dispatcher) override;
+};
+
 class FunctionSignatureAST : public AST {
    public:
     std::string sig;
@@ -99,11 +140,11 @@ class FunctionAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
-class StructAST : public AST{
-    public:
+class StructAST : public AST {
+   public:
     std::string name;
-    std::vector<VariableDeclAST*> varDecl;
-    std::vector<FunctionAST*> functions;
+    std::vector<VariableDeclAST *> varDecl;
+    std::vector<FunctionAST *> functions;
     void accept(ASTDispatcher &dispatcher) override;
 };
 
