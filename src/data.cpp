@@ -71,6 +71,9 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
             case FOR_STATEMENT:
                 static_cast<ForStatementAST *>(expr)->accept(dispatcher);
                 break;
+            case WHILE_STATEMENT:
+                static_cast<WhileStatementAST*>(expr)->accept(dispatcher);
+                break;
             default:
                 spdlog::error("unknown type of AST in Block: {}", expr->type);
                 break;
@@ -89,6 +92,8 @@ void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
 
 void ForStatementAST::accept(ASTDispatcher &dispatcher) {
     this->itervar->accept(dispatcher);
+    this->rangeL->accept(dispatcher);
+    this->rangeR->accept(dispatcher);
 
     spdlog::trace("into for ast");
     dispatcher.genForStatementBegin(this);
@@ -103,6 +108,8 @@ void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
 
     dispatcher.genWhileStatementBegin(this);
     this->body->accept(dispatcher);
+
+    this->condition->accept(dispatcher);
     dispatcher.genWhileStatementEnd(this);
     spdlog::trace("out variable ast");
 }

@@ -88,10 +88,10 @@ class VariableDeclAST : public AST {
 class ForStatementAST : public AST {
    public:
     VariableExprAST *itervar;
-    int rangeL, rangeR; //TODO: honestly, this should be written as Constant AST
+    NumberExprAST *rangeL, *rangeR;
     BlockAST *body;
 
-    ForStatementAST(VariableExprAST *itervar, int rangeL, int rangeR,
+    ForStatementAST(VariableExprAST *itervar, NumberExprAST* rangeL, NumberExprAST* rangeR,
                     BlockAST *body)
         : AST(FOR_STATEMENT),
           itervar(itervar),

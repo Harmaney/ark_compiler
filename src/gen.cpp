@@ -96,31 +96,23 @@ void ASTDispatcher::genIfStatementBegin(IfStatementAST *ast){
     ast->extraData["L0"]=L0;
 }
 
-void ASTDispatcher::genWhileStatementBegin(WhileStatementAST *ast){
-    CodeCollector::src()<<"if (!"<<static_cast<Variable *>(ast->condition->value)->sig<<")";
-
-    std::string *L0=TagTable::createTagG();
-    CodeCollector::src()<<"goto "<<L0<<";";
-    CodeCollector::push_back();
-    ast->extraData["end"]=L0;
-
-    std::string *begin=TagTable::createTagG();
-    CodeCollector::src()<<*begin<<":";
-    CodeCollector::push_back();
-    ast->extraData["begin"]=L0;
-
-}
-
 void ASTDispatcher::genForStatementBegin(ForStatementAST *ast){
     ast->extraData["end"]=TagTable::createTagG();
     ast->extraData["begin"]=TagTable::createTagG();
 
-    CodeCollector::src()<<static_cast<Variable *>(ast->itervar->value)->sig<<" = "<<ast->rangeL<<";";
+    if(ast->rangeL->const_type!=CONSTANT_INT){
+        spdlog::warn("the left range of `for` is not integer");
+    }
+    if(ast->rangeR->const_type!=CONSTANT_INT){
+        spdlog::warn("the left range of `for` is not integer");
+    }
+
+    CodeCollector::src()<<static_cast<Variable *>(ast->itervar->value)->sig<<" = "<<static_cast<Variable*>(ast->rangeL->value)->sig<<";";
     CodeCollector::push_back();
 
 
 
-    CodeCollector::src()<<"if ("<<static_cast<Variable *>(ast->itervar->value)->sig<<">"<<ast->rangeR<<")";
+    CodeCollector::src()<<"if ("<<static_cast<Variable *>(ast->itervar->value)->sig<<">"<<static_cast<Variable*>(ast->rangeR->value)->sig<<")";
     CodeCollector::src()<<"goto "<<*(std::string *)ast->extraData["end"]<<";";
     CodeCollector::push_back();
 
@@ -132,12 +124,27 @@ void ASTDispatcher::genForStatementEnd(ForStatementAST *ast){
     CodeCollector::src()<<static_cast<Variable *>(ast->itervar->value)->sig<<"++;";
     CodeCollector::push_back();
 
-    CodeCollector::src()<<"if ("<<static_cast<Variable*>(ast->itervar->value)->sig<<"<="<<ast->rangeR<<")";
+    CodeCollector::src()<<"if ("<<static_cast<Variable*>(ast->itervar->value)->sig<<"<="<<static_cast<Variable*>(ast->rangeR->value)->sig<<")";
     CodeCollector::src()<<"goto "<<*(std::string *)ast->extraData["begin"]<<";";
     CodeCollector::push_back();
 
     CodeCollector::src()<<*(std::string *)ast->extraData["end"]<<":";
     CodeCollector::push_back();
+}
+
+void ASTDispatcher::genWhileStatementBegin(WhileStatementAST *ast){
+    CodeCollector::src()<<"if (!"<<static_cast<Variable *>(ast->condition->value)->sig<<")";
+
+    std::string *L0=TagTable::createTagG();
+    CodeCollector::src()<<"goto "<<*L0<<";";
+    CodeCollector::push_back();
+    ast->extraData["end"]=L0;
+
+    std::string *begin=TagTable::createTagG();
+    CodeCollector::src()<<*begin<<":";
+    CodeCollector::push_back();
+    ast->extraData["begin"]=begin;
+
 }
 
 void ASTDispatcher::genWhileStatementEnd(WhileStatementAST *ast){
