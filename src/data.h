@@ -1,4 +1,5 @@
 #pragma once
+#include <any>
 #include <map>
 #include <string>
 #include <vector>
@@ -12,7 +13,7 @@ class ASTDispatcher;
 class AST {
    public:
     ASTKind type;
-    std::map<std::string, void *> extraData;
+    std::map<std::string, std::any> extraData;
     AST(ASTKind type) : type(type) {}
     virtual void accept(ASTDispatcher &dispatcher) = 0;
 };
@@ -28,7 +29,7 @@ class BlockAST : public AST {
 /// Expr，具有返回值的表达式
 class ExprAST : public AST {
    public:
-    void *value;
+    std::any value;
     ExprAST(ASTKind type) : AST(type) {}
     virtual ~ExprAST() {}
     void accept(ASTDispatcher &dispatcher) override;
@@ -47,10 +48,10 @@ class NumberExprAST : public ExprAST {
     void accept(ASTDispatcher &dispacher) override;
 };
 
-class StringExprAST:public ExprAST{
-    public:
+class StringExprAST : public ExprAST {
+   public:
     std::string val;
-    StringExprAST(std::string val):ExprAST(AST_STRING_EXPR),val(val){}
+    StringExprAST(std::string val) : ExprAST(AST_STRING_EXPR), val(val) {}
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -140,7 +141,10 @@ class FunctionSignatureAST : public AST {
     std::string resultType;
     FunctionSignatureAST(std::string sig, std::vector<VariableDeclAST *> args,
                          std::string result)
-        : AST(AST_FUNCTION_SIGNATURE), sig(sig), args(args), resultType(result) {}
+        : AST(AST_FUNCTION_SIGNATURE),
+          sig(sig),
+          args(args),
+          resultType(result) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -164,11 +168,15 @@ class StructDeclAST : public AST {
 
 class GlobalAST : public AST {
    public:
-    std::vector<VariableDeclAST*> vars;
+    std::vector<VariableDeclAST *> vars;
     std::vector<FunctionAST *> functions;
     BlockAST *mainBlock;
-    GlobalAST(std::vector<VariableDeclAST*> vars,std::vector<FunctionAST *> functions,BlockAST *mainBlock)
-        : AST(AST_GLOBAL),vars(vars), functions(functions),mainBlock(mainBlock) {}
+    GlobalAST(std::vector<VariableDeclAST *> vars,
+              std::vector<FunctionAST *> functions, BlockAST *mainBlock)
+        : AST(AST_GLOBAL),
+          vars(vars),
+          functions(functions),
+          mainBlock(mainBlock) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -197,7 +205,7 @@ class StructDescriptor : public TypeDescriptor {
    public:
     std::map<std::string, TypeDescriptor *> refVar;
 
-    StructDescriptor():TypeDescriptor(DESCRIPTOR_STRUCT){}
+    StructDescriptor() : TypeDescriptor(DESCRIPTOR_STRUCT) {}
 
     void push(std::string sig, TypeDescriptor *varDescriptor) {
         refVar[sig] = varDescriptor;
@@ -237,7 +245,7 @@ class SymbolTable {
 
     static VariableDescriptor *lookforVariable(std::string sig);
 
-    static void insertType(std::string sig,TypeDescriptor *descriptor);
+    static void insertType(std::string sig, TypeDescriptor *descriptor);
     static TypeDescriptor *lookforType(std::string sig);
 };
 

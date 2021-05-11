@@ -1,6 +1,8 @@
 add_rules("mode.debug", "mode.release")
 add_requires("spdlog")
 
+set_languages("c++17")
+
 
 target("ark")
     -- add_cxxflags("-fsanitize=undefined")

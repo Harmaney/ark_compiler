@@ -88,7 +88,7 @@ void TEST_funccall() {
         "main", vector<VariableDeclAST *>(), TYPE_BASIC_DOUBLE);
     FunctionAST *func = new FunctionAST(funcsig, block);
 
-    GlobalAST *global = new GlobalAST({func});
+    GlobalAST *global = new GlobalAST({},{func},{});
 
     ASTDispatcher dispacher;
     global->accept(dispacher);
