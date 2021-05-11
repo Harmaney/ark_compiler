@@ -21,7 +21,7 @@ class AST {
 class BlockAST : public AST {
    public:
     std::vector<AST *> exprs;
-    BlockAST() : AST(BLOCK) {}
+    BlockAST() : AST(AST_BLOCK) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -40,10 +40,17 @@ class NumberExprAST : public ExprAST {
     int val_int;
     ConstantType const_type;
     NumberExprAST(double val)
-        : ExprAST(NUMBER_EXPR), val_float(val), const_type(CONSTANT_REAL) {}
+        : ExprAST(AST_NUMBER_EXPR), val_float(val), const_type(CONSTANT_REAL) {}
     NumberExprAST(int val)
-        : ExprAST(NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {}
+        : ExprAST(AST_NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {}
 
+    void accept(ASTDispatcher &dispacher) override;
+};
+
+class StringExprAST:public ExprAST{
+    public:
+    std::string val;
+    StringExprAST(std::string val):ExprAST(AST_STRING_EXPR),val(val){}
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -52,7 +59,7 @@ class VariableExprAST : public ExprAST {
    public:
     std::string name;
     VariableExprAST(const std::string &name)
-        : ExprAST(VARIABLE_EXPR), name(name) {}
+        : ExprAST(AST_VARIABLE_EXPR), name(name) {}
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -62,7 +69,7 @@ class BinaryExprAST : public ExprAST {
     ExprAST *LHS, *RHS;
     char op;
     BinaryExprAST(char op, ExprAST *lhs, ExprAST *rhs)
-        : ExprAST(BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {}
+        : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {}
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -72,7 +79,7 @@ class CallExprAST : public ExprAST {
     std::string callee;
     std::vector<ExprAST *> args;
     CallExprAST(const std::string &callee, std::vector<ExprAST *> &args)
-        : ExprAST(CALL_EXPR), callee(callee), args(args) {}
+        : ExprAST(AST_CALL_EXPR), callee(callee), args(args) {}
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -81,7 +88,7 @@ class VariableDeclAST : public AST {
     VariableExprAST *sig;
     std::string varType;
     VariableDeclAST(VariableExprAST *sig, std::string type)
-        : AST(VARIABLE_DECL), sig(sig), varType(type) {}
+        : AST(AST_VARIABLE_DECL), sig(sig), varType(type) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -93,7 +100,7 @@ class ForStatementAST : public AST {
 
     ForStatementAST(VariableExprAST *itervar, NumberExprAST *rangeL,
                     NumberExprAST *rangeR, BlockAST *body)
-        : AST(FOR_STATEMENT),
+        : AST(AST_FOR_STATEMENT),
           itervar(itervar),
           rangeL(rangeL),
           rangeR(rangeR),
@@ -107,7 +114,7 @@ class WhileStatementAST : public AST {
     BlockAST *body;
 
     WhileStatementAST(ExprAST *condition, BlockAST *body)
-        : AST(WHILE_STATEMENT), condition(condition), body(body) {}
+        : AST(AST_WHILE_STATEMENT), condition(condition), body(body) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -119,7 +126,7 @@ class IfStatementAST : public AST {
 
     IfStatementAST(ExprAST *condition, BlockAST *body_true,
                    BlockAST *body_false)
-        : AST(IF_STATEMENT),
+        : AST(AST_IF_STATEMENT),
           condition(condition),
           body_true(body_true),
           body_false(body_false) {}
@@ -133,7 +140,7 @@ class FunctionSignatureAST : public AST {
     std::string resultType;
     FunctionSignatureAST(std::string sig, std::vector<VariableDeclAST *> args,
                          std::string result)
-        : AST(FUNCTION_SIGNATURE), sig(sig), args(args), resultType(result) {}
+        : AST(AST_FUNCTION_SIGNATURE), sig(sig), args(args), resultType(result) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -142,7 +149,7 @@ class FunctionAST : public AST {
     FunctionSignatureAST *sig;
     BlockAST *body;
     FunctionAST(FunctionSignatureAST *sig, BlockAST *body)
-        : AST(FUNCTION), sig(sig), body(body) {}
+        : AST(AST_FUNCTION), sig(sig), body(body) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -151,15 +158,17 @@ class StructDeclAST : public AST {
     std::string sig;
     std::vector<VariableDeclAST *> varDecl;
     StructDeclAST(std::string sig, std::vector<VariableDeclAST *> varDecl)
-        : AST(STRUCT_DECL), sig(sig), varDecl(varDecl) {}
+        : AST(AST_STRUCT_DECL), sig(sig), varDecl(varDecl) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
 class GlobalAST : public AST {
    public:
+    std::vector<VariableDeclAST*> vars;
     std::vector<FunctionAST *> functions;
-    GlobalAST(std::vector<FunctionAST *> functions)
-        : AST(GLOBAL), functions(functions) {}
+    BlockAST *mainBlock;
+    GlobalAST(std::vector<VariableDeclAST*> vars,std::vector<FunctionAST *> functions,BlockAST *mainBlock)
+        : AST(AST_GLOBAL),vars(vars), functions(functions),mainBlock(mainBlock) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 

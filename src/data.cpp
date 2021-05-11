@@ -4,13 +4,13 @@
 
 void ExprAST::accept(ASTDispatcher &dispatcher) {
     switch (type) {
-        case BINARY_EXPR:
+        case AST_BINARY_EXPR:
             dynamic_cast<BinaryExprAST *>(this)->accept(dispatcher);
             break;
-        case NUMBER_EXPR:
+        case AST_NUMBER_EXPR:
             dynamic_cast<NumberExprAST *>(this)->accept(dispatcher);
             break;
-        case VARIABLE_EXPR:
+        case AST_VARIABLE_EXPR:
             dynamic_cast<VariableExprAST *>(this)->accept(dispatcher);
             break;
         default:
@@ -53,25 +53,25 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
 
     for (auto expr : exprs) {
         switch (expr->type) {
-            case BINARY_EXPR:
+            case AST_BINARY_EXPR:
                 static_cast<BinaryExprAST *>(expr)->accept(dispatcher);
                 break;
-            case NUMBER_EXPR:
+            case AST_NUMBER_EXPR:
                 static_cast<NumberExprAST *>(expr)->accept(dispatcher);
                 break;
-            case VARIABLE_EXPR:
+            case AST_VARIABLE_EXPR:
                 static_cast<VariableExprAST *>(expr)->accept(dispatcher);
                 break;
-            case CALL_EXPR:
+            case AST_CALL_EXPR:
                 static_cast<CallExprAST *>(expr)->accept(dispatcher);
                 break;
-            case VARIABLE_DECL:
+            case AST_VARIABLE_DECL:
                 static_cast<VariableDeclAST *>(expr)->accept(dispatcher);
                 break;
-            case FOR_STATEMENT:
+            case AST_FOR_STATEMENT:
                 static_cast<ForStatementAST *>(expr)->accept(dispatcher);
                 break;
-            case WHILE_STATEMENT:
+            case AST_WHILE_STATEMENT:
                 static_cast<WhileStatementAST*>(expr)->accept(dispatcher);
                 break;
             default:
