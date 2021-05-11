@@ -8,6 +8,7 @@ target("ark")
     -- add_cxxflags("-fsanitize=undefined")
     set_kind("binary")
     add_headerfiles("src/*.h")
+    -- fuck you
     add_files("src/*.cpp")
     add_packages("spdlog")
 
