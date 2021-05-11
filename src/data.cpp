@@ -24,6 +24,12 @@ void NumberExprAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("out number ast");
 }
 
+void StringExprAST::accept(ASTDispatcher &dispatcher) {
+    spdlog::trace("into string ast");
+    dispatcher.genStringExpr(this);
+    spdlog::trace("out string ast");
+}
+
 void VariableExprAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("into variable ast");
     dispatcher.genVariableExpr(this);
@@ -126,6 +132,13 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("into global ast");
     dispatcher.genGlobalBegin(this);
 
+    for(auto var:this->vars){
+        var->accept(dispatcher);
+    }
+
+    // convert mainBlock into main function
+    this->functions.push_back(new FunctionAST(new FunctionSignatureAST("main",{},TYPE_BASIC_INT),this->mainBlock));
+
     for (auto func : functions) {
         func->accept(dispatcher);
     }
@@ -157,8 +170,8 @@ _SymbolTable::_SymbolTable() {
 
 std::string _SymbolTable::getSlot() { return "t" + std::to_string(nextSlot++); }
 
-void _SymbolTable::insert(std::string sig, VariableDescriptor *var) { refVar[sig] = var; }
-void _SymbolTable::insert(std::string sig, TypeDescriptor *var) { refType[sig] = var; }
+void _SymbolTable::insert_variable(std::string sig, VariableDescriptor *var) { refVar[sig] = var; }
+void _SymbolTable::insert_type(std::string sig, SymbolDescriptor *var) { refType[sig] = var; }
 
 VariableDescriptor *_SymbolTable::searchVariable(std::string sig) {
     if (refVar.count(sig)) {
@@ -168,7 +181,7 @@ VariableDescriptor *_SymbolTable::searchVariable(std::string sig) {
 }
 
 
-TypeDescriptor *_SymbolTable::searchType(std::string sig) {
+SymbolDescriptor *_SymbolTable::searchType(std::string sig) {
     if (refType.count(sig)) {
         return refType[sig];
     } else
@@ -196,24 +209,24 @@ void SymbolTable::exit() {
 }
 
 VariableDescriptor *SymbolTable::createVariable(std::string sig, std::string type) {
-    current->insert(sig, new VariableDescriptor(sig, type, false));
+    current->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return current->searchVariable(sig);
 }
 
 VariableDescriptor *SymbolTable::createVariableG(std::string sig, std::string type) {
-    root->insert(sig, new VariableDescriptor(sig, type, false));
+    root->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return root->searchVariable(sig);
 }
 
 VariableDescriptor *SymbolTable::createVariable(std::string type) {
     std::string sig = current->getSlot();
-    current->insert(sig, new VariableDescriptor(sig, type, false));
+    current->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return current->searchVariable(sig);
 }
 
 VariableDescriptor *SymbolTable::createVariableG(std::string type) {
     std::string sig = current->getSlot();
-    root->insert(sig, new VariableDescriptor(sig, type, false));
+    root->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return root->searchVariable(sig);
 }
 
@@ -226,14 +239,15 @@ VariableDescriptor *SymbolTable::lookforVariable(std::string sig) {
     return NULL;
 }
 
-void SymbolTable::insertType(std::string sig,TypeDescriptor *descriptor) {
-    current->insert(sig,descriptor);
+void SymbolTable::insertType(std::string sig,SymbolDescriptor *descriptor) {
+    spdlog::debug("insert type `{}`",sig);
+    current->insert_type(sig,descriptor);
 }
 
-TypeDescriptor *SymbolTable::lookforType(std::string sig) {
+SymbolDescriptor *SymbolTable::lookforType(std::string sig) {
     _SymbolTable *table = current;
     while (table) {
-        if (table->searchVariable(sig)) return table->searchType(sig);
+        if (table->searchType(sig)) return table->searchType(sig);
         table = table->parent;
     }
     return NULL;

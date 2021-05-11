@@ -13,9 +13,9 @@ void init_code_generator() {
 
 void init_basic_type() {
     SymbolTable::insertType(TYPE_BASIC_INT,
-                            new TypeDescriptor(DESCRIPTOR_BASIC));
+                            new SymbolDescriptor(DESCRIPTOR_BASIC));
     SymbolTable::insertType(TYPE_BASIC_DOUBLE,
-                            new TypeDescriptor(DESCRIPTOR_BASIC));
+                            new SymbolDescriptor(DESCRIPTOR_BASIC));
 }
 
 void TEST_struct() {
@@ -28,11 +28,11 @@ void TEST_struct() {
 }
 
 void TEST_while() {
-    BlockAST *env = new BlockAST();
+    BlockAST *env = new BlockAST({});
     env->exprs.push_back(
         new VariableDeclAST(new VariableExprAST("i"), TYPE_BASIC_INT));
 
-    BlockAST *while_block = new BlockAST();
+    BlockAST *while_block = new BlockAST({});
 
     while_block->exprs.push_back(
         new VariableDeclAST(new VariableExprAST("domjudge"), TYPE_BASIC_INT));
@@ -47,11 +47,11 @@ void TEST_while() {
 }
 
 void TEST_for() {
-    BlockAST *env = new BlockAST();
+    BlockAST *env = new BlockAST({});
     env->exprs.push_back(
         new VariableDeclAST(new VariableExprAST("i"), TYPE_BASIC_INT));
 
-    BlockAST *for_block = new BlockAST();
+    BlockAST *for_block = new BlockAST({});
 
     for_block->exprs.push_back(new VariableDeclAST(
         new VariableExprAST("domjudge"), TYPE_BASIC_DOUBLE));
@@ -65,8 +65,18 @@ void TEST_for() {
     env->accept(dispacher);
 }
 
+void TEST_case1() {
+    GlobalAST *global = new GlobalAST(
+        {}, {},
+        new BlockAST(
+            {new CallExprAST("write", {new StringExprAST("hello, world")})}));
+    
+    ASTDispatcher dispacher;
+    global->accept(dispacher);
+}
+
 void TEST_funccall() {
-    BlockAST *block = new BlockAST();
+    BlockAST *block = new BlockAST({});
 
     VariableDeclAST *decl =
         new VariableDeclAST(new VariableExprAST("a"), TYPE_BASIC_DOUBLE);
@@ -88,7 +98,7 @@ void TEST_funccall() {
         "main", vector<VariableDeclAST *>(), TYPE_BASIC_DOUBLE);
     FunctionAST *func = new FunctionAST(funcsig, block);
 
-    GlobalAST *global = new GlobalAST({},{func},{});
+    GlobalAST *global = new GlobalAST({}, {func}, {});
 
     ASTDispatcher dispacher;
     global->accept(dispacher);
@@ -102,7 +112,8 @@ int main(int argc, char **argv) {
     CodeCollector::begin_section();
     // TEST_while();
     // TEST_funccall();
-    TEST_struct();
+    // TEST_struct();
+    TEST_case1();
 
     CodeCollector::end_section(PLACE_END);
 

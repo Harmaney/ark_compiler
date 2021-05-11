@@ -8,6 +8,7 @@
 
 class BlockAST;
 class NumberExprAST;
+class StringExprAST;
 class VariableExprAST;
 class BinaryExprAST;
 class CallExprAST;
@@ -35,6 +36,7 @@ class ASTDispatcher {
     void genGlobalEnd(GlobalAST *ast);
 
     void genNumberExpr(NumberExprAST *ast);
+    void genStringExpr(StringExprAST *ast);
     void genVariableExpr(VariableExprAST *ast);
     void genBinaryExpr(BinaryExprAST *ast);
     void genCallExpr(CallExprAST *ast);

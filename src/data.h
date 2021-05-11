@@ -22,7 +22,7 @@ class AST {
 class BlockAST : public AST {
    public:
     std::vector<AST *> exprs;
-    BlockAST() : AST(AST_BLOCK) {}
+    BlockAST(const std::vector<AST *> exprs) : AST(AST_BLOCK), exprs(exprs) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -79,7 +79,7 @@ class CallExprAST : public ExprAST {
    public:
     std::string callee;
     std::vector<ExprAST *> args;
-    CallExprAST(const std::string &callee, std::vector<ExprAST *> &args)
+    CallExprAST(const std::string &callee, const std::vector<ExprAST *> &args)
         : ExprAST(AST_CALL_EXPR), callee(callee), args(args) {}
     void accept(ASTDispatcher &dispacher) override;
 };
@@ -182,49 +182,70 @@ class GlobalAST : public AST {
 
 ////////////////////////////////////////////
 
-class TypeDescriptor {
+class SymbolDescriptor {
    public:
     DescriptorType type;
-    TypeDescriptor(DescriptorType type) : type(type) {}
+    SymbolDescriptor(DescriptorType type) : type(type) {}
 };
 
-class VariableDescriptor : public TypeDescriptor {
+class TypeDescriptor : SymbolDescriptor {
+   public:
+    std::string name;
+    TypeDescriptor() : SymbolDescriptor(DESCRIPTOR_TYPE) {}
+};
+
+class VariableDescriptor : public SymbolDescriptor {
    public:
     std::string sig;
+    // TODO: replace this with typedescirptor
     std::string varType;
     bool isConst;
 
     VariableDescriptor(std::string sig, std::string varType, bool isConst)
-        : TypeDescriptor(DESCRIPTOR_VARIABLE),
+        : SymbolDescriptor(DESCRIPTOR_VARIABLE),
           sig(sig),
           varType(varType),
           isConst(isConst) {}
 };
 
-class StructDescriptor : public TypeDescriptor {
+class StructDescriptor : public SymbolDescriptor {
    public:
-    std::map<std::string, TypeDescriptor *> refVar;
+    std::map<std::string, SymbolDescriptor *> refVar;
 
-    StructDescriptor() : TypeDescriptor(DESCRIPTOR_STRUCT) {}
+    StructDescriptor(std::map<std::string, SymbolDescriptor *> refVar)
+        : SymbolDescriptor(DESCRIPTOR_STRUCT), refVar(refVar) {}
 
-    void push(std::string sig, TypeDescriptor *varDescriptor) {
+    void push(std::string sig, SymbolDescriptor *varDescriptor) {
         refVar[sig] = varDescriptor;
     }
 };
 
+class FunctionDescriptor : public SymbolDescriptor {
+   public:
+    std::string name;
+    std::vector<VariableDescriptor *> args;
+    SymbolDescriptor *resultDescriptor;
+    FunctionDescriptor(std::string name, std::vector<VariableDescriptor *> args,
+                       SymbolDescriptor *resultDescriptor)
+        : SymbolDescriptor(DESCRIPTOR_FUNCTION),
+          name(name),
+          args(args),
+          resultDescriptor(resultDescriptor) {}
+};
+
 class _SymbolTable {
     int nextSlot;
-    std::map<std::string, TypeDescriptor *> refType;
+    std::map<std::string, SymbolDescriptor *> refType;
     std::map<std::string, VariableDescriptor *> refVar;
 
    public:
     _SymbolTable *parent;
     _SymbolTable();
     std::string getSlot();
-    void insert(std::string sig, VariableDescriptor *var);
-    void insert(std::string sig, TypeDescriptor *var);
+    void insert_variable(std::string sig, VariableDescriptor *var);
+    void insert_type(std::string sig, SymbolDescriptor *var);
     VariableDescriptor *searchVariable(std::string sig);
-    TypeDescriptor *searchType(std::string sig);
+    SymbolDescriptor *searchType(std::string sig);
 };
 
 class SymbolTable {
@@ -245,8 +266,8 @@ class SymbolTable {
 
     static VariableDescriptor *lookforVariable(std::string sig);
 
-    static void insertType(std::string sig, TypeDescriptor *descriptor);
-    static TypeDescriptor *lookforType(std::string sig);
+    static void insertType(std::string sig, SymbolDescriptor *descriptor);
+    static SymbolDescriptor *lookforType(std::string sig);
 };
 
 class TagTable {
