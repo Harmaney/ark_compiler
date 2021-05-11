@@ -1,0 +1,95 @@
+S -> ProgramStruct @
+ProgramStruct -> ProgramHead ; ProgramBody . @
+ProgramHead -> program ID @
+ProgramHead -> program ID ( IDList ) @
+ProgramBody -> ConstDeclarations VarDeclarations SubprogramDeclarations CompoundStatement @
+IDList -> IDList , ID @
+IDList -> ID @                                                                    
+ConstDeclarations -> const ConstDeclaration ; @
+ConstDeclarations -> @
+ConstDeclaration -> ConstDeclaration ; ID = ConstValue @
+ConstDeclaration -> ID = ConstValue @
+ConstValue -> + num @
+ConstValue -> - num @
+ConstValue -> num @
+ConstValue -> ' letter ' @
+TypeDeclarations -> type TypeDeclaration ; @
+TypeDeclarations -> @
+TypeDeclaration -> TypeDeclaration ; ID = ActualType @
+ActualType -> Type @
+ActualType -> record VarDeclaration ; end @
+VarDeclarations -> var VarDeclaration ; VarDeclarations @
+VarDeclarations -> @
+VarDeclaration -> VarDeclaration ; IDList : Type @
+VarDeclaration -> IDList : Type @
+Type -> ^ BasicType @
+Type -> BasicType @
+Type -> array [ Period ] of BasicType @
+BasicType -> integer @
+BasicType -> longint @
+BasicType -> int64 @
+BasicType -> real @
+BasicType -> boolean @
+BasicType -> char @
+BasicType -> recordtype @
+Period -> Period , digits .. digits @
+Period -> digits .. digits @
+SubprogramDeclarations -> SubprogramDeclarations Subprogram ; @
+SubprogramDeclarations -> @
+Subprogram -> SubprogramHead ; SubprogramBody @
+SubprogramHead -> procedure ID FormalParameter @
+SubprogramHead -> function ID FormalParameter : BasicType @
+FormalParameter -> ( ParameterList ) @
+FormalParameter -> @
+ParameterList -> ParameterList ; Parameter @
+ParameterList -> Parameter @
+Parameter -> VarParameter @
+Parameter -> ValueParameter @
+VarParameter -> var ValueParameter @
+ValueParameter -> IDList : BasicType @
+SubprogramBody -> ConstDeclarations VarDeclarations CompoundStatement @
+CompoundStatement -> begin StatementList end @
+StatementList -> StatementList ; Statement @
+StatementList -> Statement @
+Statement -> Variable assignOP Expression @
+Statement -> ProcedureCall @
+Statement -> CompoundStatement @
+Statement -> if Expression then Statement ElsePart @
+Statement -> for ID assignOP Expression to Expression do Statement @
+Statement -> while Expression do Statement @
+Statement -> read ( VariableList ) @
+Statement -> write ( ExpressionList ) @
+Statement -> writeln ( ExpressionList ) @
+Statement -> writeln ( ) @
+Statement -> @
+VariableList -> VariableList , Variable @
+VariableList -> Variable @
+Variable -> ID IDVarpart @
+IDVarpart -> [ ExpressionList ] @
+IDVarpart -> @
+ProcedureCall -> ID @
+ProcedureCall -> ID ( ExpressionList ) @
+ElsePart -> else Statement @
+ElsePart -> @
+ExpressionList -> ExpressionList , Expression @
+ExpressionList -> Expression @
+Expression -> SimpleExpression relOP SimpleExpression @
+Expression -> string @
+Expression -> SimpleExpression @
+Expression -> Expression ^ @
+SimpleExpression -> SimpleExpression addOP Term @
+SimpleExpression -> Term @
+Term -> Term mulOP Factor @
+Term -> Factor @
+Factor -> num @
+Factor -> Variable @
+Factor -> ID ( ExpressionList ) @
+Factor -> ( Expression ) @
+Factor -> not Factor @
+Factor -> uminus Factor @
+num -> int @
+num -> float @
+digits -> int @
+addOP -> + @
+addOP -> - @
+addOP -> or

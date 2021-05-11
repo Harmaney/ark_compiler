@@ -107,7 +107,10 @@ void TEST_funccall() {
 }
 
 int main(int argc, char **argv) {
-    spdlog::set_level(spdlog::level::debug);
+	lex_work("../files/1.pas"); 
+	parser_work("../files/lex_out.txt");
+
+    /*spdlog::set_level(spdlog::level::debug);
     init_code_generator();
     init_basic_type();
 
@@ -121,7 +124,7 @@ int main(int argc, char **argv) {
 
     CodeCollector::rearrange_section("global_define", 0);
     CodeCollector::rearrange_section("prelude", 0);
-    CodeCollector::output();
+    CodeCollector::output();*/
 
     return 0;
 }

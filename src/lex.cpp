@@ -24,7 +24,7 @@ string load_file(string file_name){
 set <string> key_words;
 
 void load_key_words(){
-    ifstream input("./key_words.txt");
+    ifstream input("../files/key_words.txt");
     string word;
     while(input >> word)
         key_words.insert(word);
@@ -303,8 +303,8 @@ void lex_work(string file_name){
 
         }
     }
-    ofstream lout("lex_out.txt");
-    ofstream lerr("lex_err.txt");
+    ofstream lout("../files/lex_out.txt");
+    ofstream lerr("../files/lex_err.txt");
     for(auto s : token_stream){
         lout << s.word << " " << s.row << " " << s.colomn << " ";
         if(inset(s.word,key_words)){

@@ -17,7 +17,7 @@ map<string,set<vector<string> > > RHS_set;
 set<string> Get_epsilon;
 
 void init(){
-	ifstream input("./grammar.txt");
+	ifstream input("../files/./grammar.txt");
 	int mode = 0;
 	string LHS;
 	vector<string> RHS;
@@ -270,7 +270,7 @@ void add_Action(pair<ACTION,int> act,pair<int,string> pos){
 }
 
 void load_table(){
-	ifstream inf("./analyse_table.txt");
+	ifstream inf("../files/analyse_table.txt");
 	int I,id,ACT_id;
 	string a;
 	while(!inf.eof()){
@@ -311,7 +311,7 @@ void generate_table(){
 			Goto[make_pair(I.second,A)]=Item_set[GoIA];
 		}
 	}
-	ofstream of("./analyse_table.txt");
+	ofstream of("../files/analyse_table.txt");
 	for(auto I:Item_set){
 		for(auto a:Terminal){
 			if(Action.count(make_pair(I.second,a))){
@@ -410,6 +410,7 @@ void analyse(string file_name){
 
 void parser_work(string file_name){
 	init();
+    cout<<"?"<<endl;
 	get_first();
 	generate_table();
 	analyse(file_name);
