@@ -107,8 +107,16 @@ void TEST_funccall() {
 }
 
 int main(int argc, char **argv) {
-	lex_work("../files/1.pas"); 
-	parser_work("../files/lex_out.txt");
+    std::ifstream ifff("../files/keywords.txt");
+    std::string x;ifff>>x;
+    std::cerr<<x<<'\n';
+    
+    ofstream of("../files/text.txt");
+    of<<"???"<<endl;
+    std::cerr<<"ffff";
+    of.close();
+	// lex_work("../files/1.pas"); 
+	// parser_work("../files/lex_out.txt");
 
     /*spdlog::set_level(spdlog::level::debug);
     init_code_generator();
