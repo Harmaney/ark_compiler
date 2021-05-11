@@ -18,6 +18,8 @@ enum ASTKind {
 
 #define TYPE_BASIC_DOUBLE "double"
 #define TYPE_BASIC_INT "int"
+// in fact this is somehow not basic
+#define TYPE_BASIC_STRING "string"
 
 enum ConstantType{
     CONSTANT_REAL,
@@ -28,4 +30,6 @@ enum DescriptorType{
     DESCRIPTOR_BASIC,
     DESCRIPTOR_VARIABLE,
     DESCRIPTOR_STRUCT,
+    DESCRIPTOR_FUNCTION,
+    DESCRIPTOR_TYPE
 };
