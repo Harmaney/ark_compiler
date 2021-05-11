@@ -3,6 +3,8 @@
 
 #include "data.h"
 #include "gen.h"
+#include "lex.h"
+#include "parser.h"
 #include "spdlog/spdlog.h"
 using namespace std;
 
