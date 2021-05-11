@@ -17,11 +17,14 @@ class IfStatementAST;
 class WhileStatementAST;
 class ForStatementAST;
 
+class StructDeclAST;
+
 class GlobalAST;
 class FunctionSignatureAST;
 class FunctionAST;
 
-struct Variable;
+
+struct VariableDescriptor;
 
 /// 输出代码的 visitor
 ///
@@ -48,15 +51,17 @@ class ASTDispatcher {
 
     void genFunctionSignature(FunctionSignatureAST *ast);
 
+    void genStruct(StructDeclAST *ast);
+
     void genBlockBegin(BlockAST *ast);
     void genBlockEnd(BlockAST *ast);
 
     void genVariableDecl(VariableDeclAST *ast);
 };
 
-std::string mapVariableType(VariableType type);
+std::string mapVariableType(std::string type);
 
-void genVariable(Variable *var);
+void genVariable(VariableDescriptor *var);
 
 enum PlaceHolder{
     PLACE_VOID,PLACE_BEGIN=1,PLACE_END=2

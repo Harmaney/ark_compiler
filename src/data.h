@@ -43,7 +43,7 @@ class NumberExprAST : public ExprAST {
         : ExprAST(NUMBER_EXPR), val_float(val), const_type(CONSTANT_REAL) {}
     NumberExprAST(int val)
         : ExprAST(NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {}
-    
+
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -79,9 +79,9 @@ class CallExprAST : public ExprAST {
 class VariableDeclAST : public AST {
    public:
     VariableExprAST *sig;
-    VariableType type;
-    VariableDeclAST(VariableExprAST *sig, VariableType type)
-        : AST(VARIABLE_DECL), sig(sig), type(type) {}
+    std::string varType;
+    VariableDeclAST(VariableExprAST *sig, std::string type)
+        : AST(VARIABLE_DECL), sig(sig), varType(type) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -91,8 +91,8 @@ class ForStatementAST : public AST {
     NumberExprAST *rangeL, *rangeR;
     BlockAST *body;
 
-    ForStatementAST(VariableExprAST *itervar, NumberExprAST* rangeL, NumberExprAST* rangeR,
-                    BlockAST *body)
+    ForStatementAST(VariableExprAST *itervar, NumberExprAST *rangeL,
+                    NumberExprAST *rangeR, BlockAST *body)
         : AST(FOR_STATEMENT),
           itervar(itervar),
           rangeL(rangeL),
@@ -130,10 +130,10 @@ class FunctionSignatureAST : public AST {
    public:
     std::string sig;
     std::vector<VariableDeclAST *> args;
-    VariableType result;
+    std::string resultType;
     FunctionSignatureAST(std::string sig, std::vector<VariableDeclAST *> args,
-                         VariableType result)
-        : AST(FUNCTION_SIGNATURE), sig(sig), args(args), result(result) {}
+                         std::string result)
+        : AST(FUNCTION_SIGNATURE), sig(sig), args(args), resultType(result) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -146,11 +146,12 @@ class FunctionAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
-class StructAST : public AST {
+class StructDeclAST : public AST {
    public:
-    std::string name;
+    std::string sig;
     std::vector<VariableDeclAST *> varDecl;
-    std::vector<FunctionAST *> functions;
+    StructDeclAST(std::string sig, std::vector<VariableDeclAST *> varDecl)
+        : AST(STRUCT_DECL), sig(sig), varDecl(varDecl) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -164,22 +165,49 @@ class GlobalAST : public AST {
 
 ////////////////////////////////////////////
 
-struct Variable {
+class TypeDescriptor {
+   public:
+    DescriptorType type;
+    TypeDescriptor(DescriptorType type) : type(type) {}
+};
+
+class VariableDescriptor : public TypeDescriptor {
+   public:
     std::string sig;
-    VariableType type;
+    std::string varType;
     bool isConst;
+
+    VariableDescriptor(std::string sig, std::string varType, bool isConst)
+        : TypeDescriptor(DESCRIPTOR_VARIABLE),
+          sig(sig),
+          varType(varType),
+          isConst(isConst) {}
+};
+
+class StructDescriptor : public TypeDescriptor {
+   public:
+    std::map<std::string, TypeDescriptor *> refVar;
+
+    StructDescriptor():TypeDescriptor(DESCRIPTOR_STRUCT){}
+
+    void push(std::string sig, TypeDescriptor *varDescriptor) {
+        refVar[sig] = varDescriptor;
+    }
 };
 
 class _SymbolTable {
     int nextSlot;
-    std::map<std::string, Variable *> refVar;
+    std::map<std::string, TypeDescriptor *> refType;
+    std::map<std::string, VariableDescriptor *> refVar;
 
    public:
     _SymbolTable *parent;
     _SymbolTable();
     std::string getSlot();
-    void insert(std::string sig, Variable *var);
-    Variable *search(std::string sig);
+    void insert(std::string sig, VariableDescriptor *var);
+    void insert(std::string sig, TypeDescriptor *var);
+    VariableDescriptor *searchVariable(std::string sig);
+    TypeDescriptor *searchType(std::string sig);
 };
 
 class SymbolTable {
@@ -191,12 +219,17 @@ class SymbolTable {
     static void init();
     static void enter();
     static void exit();
-    static Variable *createVariable(std::string sig, VariableType type);
-    static Variable *createVariableG(std::string sig, VariableType type);
-    static Variable *createVariable(VariableType type);
-    static Variable *createVariableG(VariableType type);
+    static VariableDescriptor *createVariable(std::string sig,
+                                              std::string type);
+    static VariableDescriptor *createVariableG(std::string sig,
+                                               std::string type);
+    static VariableDescriptor *createVariable(std::string type);
+    static VariableDescriptor *createVariableG(std::string type);
 
-    static Variable *lookfor(std::string sig);
+    static VariableDescriptor *lookforVariable(std::string sig);
+
+    static void insertType(std::string sig,TypeDescriptor *descriptor);
+    static TypeDescriptor *lookforType(std::string sig);
 };
 
 class TagTable {

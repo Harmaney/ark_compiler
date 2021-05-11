@@ -9,17 +9,22 @@ enum ASTKind {
     FUNCTION,
     BLOCK,
     VARIABLE_DECL,
+    STRUCT_DECL,
     FOR_STATEMENT,
     WHILE_STATEMENT,
     IF_STATEMENT,
 };
 
-enum VariableType {
-    REAL=1,
-    INT,
-};
+#define TYPE_BASIC_DOUBLE "double"
+#define TYPE_BASIC_INT "int"
 
 enum ConstantType{
     CONSTANT_REAL,
     CONSTANT_INT,
+};
+
+enum DescriptorType{
+    DESCRIPTOR_BASIC,
+    DESCRIPTOR_VARIABLE,
+    DESCRIPTOR_STRUCT,
 };

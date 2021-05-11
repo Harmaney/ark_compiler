@@ -144,6 +144,10 @@ void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {
     dispatcher.genFunctionSignature(this);
 }
 
+void StructDeclAST::accept(ASTDispatcher &dispatcher) {
+    dispatcher.genStruct(this);
+}
+
 ///////////////////////////////////////
 
 _SymbolTable::_SymbolTable() {
@@ -153,11 +157,20 @@ _SymbolTable::_SymbolTable() {
 
 std::string _SymbolTable::getSlot() { return "t" + std::to_string(nextSlot++); }
 
-void _SymbolTable::insert(std::string sig, Variable *var) { refVar[sig] = var; }
+void _SymbolTable::insert(std::string sig, VariableDescriptor *var) { refVar[sig] = var; }
+void _SymbolTable::insert(std::string sig, TypeDescriptor *var) { refType[sig] = var; }
 
-Variable *_SymbolTable::search(std::string sig) {
+VariableDescriptor *_SymbolTable::searchVariable(std::string sig) {
     if (refVar.count(sig)) {
         return refVar[sig];
+    } else
+        return NULL;
+}
+
+
+TypeDescriptor *_SymbolTable::searchType(std::string sig) {
+    if (refType.count(sig)) {
+        return refType[sig];
     } else
         return NULL;
 }
@@ -182,32 +195,45 @@ void SymbolTable::exit() {
     delete t;
 }
 
-Variable *SymbolTable::createVariable(std::string sig, VariableType type) {
-    current->insert(sig, new Variable{sig, type, false});
-    return current->search(sig);
+VariableDescriptor *SymbolTable::createVariable(std::string sig, std::string type) {
+    current->insert(sig, new VariableDescriptor(sig, type, false));
+    return current->searchVariable(sig);
 }
 
-Variable *SymbolTable::createVariableG(std::string sig, VariableType type) {
-    root->insert(sig, new Variable{sig, type, false});
-    return root->search(sig);
+VariableDescriptor *SymbolTable::createVariableG(std::string sig, std::string type) {
+    root->insert(sig, new VariableDescriptor(sig, type, false));
+    return root->searchVariable(sig);
 }
 
-Variable *SymbolTable::createVariable(VariableType type) {
+VariableDescriptor *SymbolTable::createVariable(std::string type) {
     std::string sig = current->getSlot();
-    current->insert(sig, new Variable{sig, type, false});
-    return current->search(sig);
+    current->insert(sig, new VariableDescriptor(sig, type, false));
+    return current->searchVariable(sig);
 }
 
-Variable *SymbolTable::createVariableG(VariableType type) {
+VariableDescriptor *SymbolTable::createVariableG(std::string type) {
     std::string sig = current->getSlot();
-    root->insert(sig, new Variable{sig, type, false});
-    return root->search(sig);
+    root->insert(sig, new VariableDescriptor(sig, type, false));
+    return root->searchVariable(sig);
 }
 
-Variable *SymbolTable::lookfor(std::string sig) {
+VariableDescriptor *SymbolTable::lookforVariable(std::string sig) {
     _SymbolTable *table = current;
     while (table) {
-        if (table->search(sig)) return table->search(sig);
+        if (table->searchVariable(sig)) return table->searchVariable(sig);
+        table = table->parent;
+    }
+    return NULL;
+}
+
+void SymbolTable::insertType(std::string sig,TypeDescriptor *descriptor) {
+    current->insert(sig,descriptor);
+}
+
+TypeDescriptor *SymbolTable::lookforType(std::string sig) {
+    _SymbolTable *table = current;
+    while (table) {
+        if (table->searchVariable(sig)) return table->searchType(sig);
         table = table->parent;
     }
     return NULL;

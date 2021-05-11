@@ -11,46 +11,65 @@ void init_code_generator() {
     TagTable::init();
 }
 
-void TEST_while(){
-    BlockAST *env=new BlockAST();
-    env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),INT));
+void init_basic_type() {
+    SymbolTable::insertType(TYPE_BASIC_INT,
+                            new TypeDescriptor(DESCRIPTOR_BASIC));
+    SymbolTable::insertType(TYPE_BASIC_DOUBLE,
+                            new TypeDescriptor(DESCRIPTOR_BASIC));
+}
+
+void TEST_struct() {
+    std::vector<VariableDeclAST *> t;
+    t.push_back(new VariableDeclAST(new VariableExprAST("a"), "int"));
+    StructDeclAST *ast = new StructDeclAST("Test", t);
+
+    ASTDispatcher dispacher;
+    ast->accept(dispacher);
+}
+
+void TEST_while() {
+    BlockAST *env = new BlockAST();
+    env->exprs.push_back(
+        new VariableDeclAST(new VariableExprAST("i"), TYPE_BASIC_INT));
 
     BlockAST *while_block = new BlockAST();
 
-    while_block->exprs.push_back(new VariableDeclAST(new VariableExprAST("domjudge"),REAL));
-    WhileStatementAST *while_ast=new WhileStatementAST(new BinaryExprAST('<',new VariableExprAST("i"),new NumberExprAST(5)),while_block);
+    while_block->exprs.push_back(
+        new VariableDeclAST(new VariableExprAST("domjudge"), TYPE_BASIC_INT));
+    WhileStatementAST *while_ast = new WhileStatementAST(
+        new BinaryExprAST('<', new VariableExprAST("i"), new NumberExprAST(5)),
+        while_block);
 
     env->exprs.push_back(while_ast);
 
-    CodeCollector::begin_section();
     ASTDispatcher dispacher;
     env->accept(dispacher);
-    CodeCollector::end_section(PLACE_END);
-    CodeCollector::output();    
 }
 
-void TEST_for(){
-    BlockAST *env=new BlockAST();
-    env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),INT));
+void TEST_for() {
+    BlockAST *env = new BlockAST();
+    env->exprs.push_back(
+        new VariableDeclAST(new VariableExprAST("i"), TYPE_BASIC_INT));
 
     BlockAST *for_block = new BlockAST();
 
-    for_block->exprs.push_back(new VariableDeclAST(new VariableExprAST("domjudge"),REAL));
-    ForStatementAST *for_ast=new ForStatementAST(new VariableExprAST("i"),new NumberExprAST(1),new NumberExprAST(5),for_block);
+    for_block->exprs.push_back(new VariableDeclAST(
+        new VariableExprAST("domjudge"), TYPE_BASIC_DOUBLE));
+    ForStatementAST *for_ast =
+        new ForStatementAST(new VariableExprAST("i"), new NumberExprAST(1),
+                            new NumberExprAST(5), for_block);
 
     env->exprs.push_back(for_ast);
 
-    CodeCollector::begin_section();
     ASTDispatcher dispacher;
     env->accept(dispacher);
-    CodeCollector::end_section(PLACE_END);
-    CodeCollector::output();
 }
 
 void TEST_funccall() {
     BlockAST *block = new BlockAST();
 
-    VariableDeclAST *decl = new VariableDeclAST(new VariableExprAST("a"), REAL);
+    VariableDeclAST *decl =
+        new VariableDeclAST(new VariableExprAST("a"), TYPE_BASIC_DOUBLE);
     block->exprs.push_back(decl);
 
     BinaryExprAST *t1 = new BinaryExprAST('=', new VariableExprAST("a"),
@@ -65,27 +84,31 @@ void TEST_funccall() {
     CallExprAST *call = new CallExprAST("write", callargs);
     block->exprs.push_back(call);
 
-    FunctionSignatureAST *funcsig =
-        new FunctionSignatureAST("main", vector<VariableDeclAST *>(), INT);
+    FunctionSignatureAST *funcsig = new FunctionSignatureAST(
+        "main", vector<VariableDeclAST *>(), TYPE_BASIC_DOUBLE);
     FunctionAST *func = new FunctionAST(funcsig, block);
 
     GlobalAST *global = new GlobalAST({func});
 
     ASTDispatcher dispacher;
-    CodeCollector::begin_section();
     global->accept(dispacher);
-    CodeCollector::end_section(PLACE_END);
-
-    CodeCollector::rearrange_section("global_define", 0);
-    CodeCollector::rearrange_section("prelude", 0);
-    CodeCollector::output();
 }
 
 int main(int argc, char **argv) {
     spdlog::set_level(spdlog::level::debug);
     init_code_generator();
+    init_basic_type();
 
-    TEST_while();
+    CodeCollector::begin_section();
+    // TEST_while();
+    // TEST_funccall();
+    TEST_struct();
+
+    CodeCollector::end_section(PLACE_END);
+
+    CodeCollector::rearrange_section("global_define", 0);
+    CodeCollector::rearrange_section("prelude", 0);
+    CodeCollector::output();
 
     return 0;
 }
