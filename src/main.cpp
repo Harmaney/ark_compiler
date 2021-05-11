@@ -11,6 +11,24 @@ void init_code_generator() {
     TagTable::init();
 }
 
+void TEST_while(){
+    BlockAST *env=new BlockAST();
+    env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),INT));
+
+    BlockAST *while_block = new BlockAST();
+
+    while_block->exprs.push_back(new VariableDeclAST(new VariableExprAST("domjudge"),REAL));
+    WhileStatementAST *while_ast=new WhileStatementAST(new BinaryExprAST('<',new VariableExprAST("i"),new NumberExprAST(5)),while_block);
+
+    env->exprs.push_back(while_ast);
+
+    CodeCollector::begin_section();
+    ASTDispatcher dispacher;
+    env->accept(dispacher);
+    CodeCollector::end_section(PLACE_END);
+    CodeCollector::output();    
+}
+
 void TEST_for(){
     BlockAST *env=new BlockAST();
     env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),INT));
@@ -18,7 +36,7 @@ void TEST_for(){
     BlockAST *for_block = new BlockAST();
 
     for_block->exprs.push_back(new VariableDeclAST(new VariableExprAST("domjudge"),REAL));
-    ForStatementAST *for_ast=new ForStatementAST(new VariableExprAST("i"),1,5,for_block);
+    ForStatementAST *for_ast=new ForStatementAST(new VariableExprAST("i"),new NumberExprAST(1),new NumberExprAST(5),for_block);
 
     env->exprs.push_back(for_ast);
 
@@ -67,7 +85,7 @@ int main(int argc, char **argv) {
     spdlog::set_level(spdlog::level::debug);
     init_code_generator();
 
-    TEST_for();
+    TEST_while();
 
     return 0;
 }
