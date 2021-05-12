@@ -43,6 +43,12 @@ void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
     dispatcher.genBinaryExpr(this);
 }
 
+void ReturnAST::accept(ASTDispatcher &dispatcher) {
+    this->expr->accept(dispatcher);
+
+    dispatcher.genReturn(this);
+}
+
 void CallExprAST::accept(ASTDispatcher &dispatcher) {
     for (auto arg : args) {
         arg->accept(dispatcher);
@@ -67,6 +73,9 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
                 break;
             case AST_VARIABLE_EXPR:
                 static_cast<VariableExprAST *>(expr)->accept(dispatcher);
+                break;
+            case AST_RETURN:
+                static_cast<ReturnAST *>(expr)->accept(dispatcher);
                 break;
             case AST_CALL_EXPR:
                 static_cast<CallExprAST *>(expr)->accept(dispatcher);
@@ -138,6 +147,8 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
 
     // convert mainBlock into main function
     this->functions.push_back(new FunctionAST(new FunctionSignatureAST("main",{},TYPE_BASIC_INT),this->mainBlock));
+    // add return 0 to mainBlock
+    this->mainBlock->exprs.push_back(new ReturnAST(new NumberExprAST(0)));
 
     for (auto func : functions) {
         func->accept(dispatcher);
@@ -225,7 +236,7 @@ VariableDescriptor *SymbolTable::createVariable(std::string type) {
 }
 
 VariableDescriptor *SymbolTable::createVariableG(std::string type) {
-    std::string sig = current->getSlot();
+    std::string sig = root->getSlot();
     root->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return root->searchVariable(sig);
 }

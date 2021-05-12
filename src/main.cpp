@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 
 #include "data.h"
 #include "gen.h"
@@ -69,10 +70,13 @@ void TEST_for() {
 
 void TEST_case1() {
     GlobalAST *global = new GlobalAST(
-        {}, {},
+        {new VariableDeclAST(new VariableExprAST("i"), TYPE_BASIC_INT)}, {},
         new BlockAST(
-            {new CallExprAST("write", {new StringExprAST("hello, world")})}));
-    
+            {new ForStatementAST(new VariableExprAST("i"), new NumberExprAST(1),
+                                 new NumberExprAST(5),
+                                 new BlockAST({new CallExprAST(
+                                     "write", {new VariableExprAST("i")})}))}));
+
     ASTDispatcher dispacher;
     global->accept(dispacher);
 }
@@ -107,18 +111,18 @@ void TEST_funccall() {
 }
 
 int main(int argc, char **argv) {
-    std::ifstream ifff("../files/keywords.txt");
-    std::string x;ifff>>x;
-    std::cerr<<x<<'\n';
-    
-    ofstream of("../files/text.txt");
-    of<<"???"<<endl;
-    std::cerr<<"ffff";
-    of.close();
-	// lex_work("../files/1.pas"); 
-	// parser_work("../files/lex_out.txt");
+    // std::ifstream ifff("../files/keywords.txt");
+    // std::string x;ifff>>x;
+    // std::cerr<<x<<'\n';
 
-    /*spdlog::set_level(spdlog::level::debug);
+    // ofstream of("../files/text.txt");
+    // of<<"???"<<endl;
+    // std::cerr<<"ffff";
+    // of.close();
+    // lex_work("../files/1.pas");
+    // parser_work("../files/lex_out.txt");
+
+    spdlog::set_level(spdlog::level::debug);
     init_code_generator();
     init_basic_type();
 
@@ -132,7 +136,9 @@ int main(int argc, char **argv) {
 
     CodeCollector::rearrange_section("global_define", 0);
     CodeCollector::rearrange_section("prelude", 0);
-    CodeCollector::output();*/
+
+    ofstream codeOut("out.cpp");
+    CodeCollector::output(codeOut);
 
     return 0;
 }

@@ -74,6 +74,13 @@ class BinaryExprAST : public ExprAST {
     void accept(ASTDispatcher &dispacher) override;
 };
 
+class ReturnAST:public AST{
+    public:
+    ExprAST *expr;
+    ReturnAST(ExprAST *expr):AST(AST_RETURN),expr(expr){}
+    void accept(ASTDispatcher &dispacher) override;
+};
+
 /// CallExprAST - Expression class for function calls.
 class CallExprAST : public ExprAST {
    public:

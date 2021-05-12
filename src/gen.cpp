@@ -75,6 +75,12 @@ void ASTDispatcher::genVariableExpr(VariableExprAST *ast) {
     ast->value = t;
 }
 
+void ASTDispatcher::genReturn(ReturnAST *ast) {
+    CodeCollector::src()<<"return "<<std::any_cast<VariableDescriptor*>(ast->expr->value)->sig<<";";
+    CodeCollector::push_back();
+}
+
+
 void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
     VariableDescriptor *lhs =
         std::any_cast<VariableDescriptor *>(ast->LHS->value);
@@ -376,7 +382,7 @@ void CodeCollector::output() {
     }
 }
 
-void CodeCollector::output(std::ostream out) {
+void CodeCollector::output(std::ostream &out) {
     for (auto sid : section_order) {
         out<<"//"<<sid<<std::endl;
         for (auto str : *codes[sid]) {

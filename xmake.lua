@@ -9,6 +9,8 @@ target("ark")
     set_kind("binary")
     add_headerfiles("src/*.h")
     add_files("src/*.cpp")
+
+    set_rundir("$(projectdir)/files")
     add_packages("spdlog")
 
 --

@@ -11,6 +11,7 @@ class BlockAST;
 class NumberExprAST;
 class StringExprAST;
 class VariableExprAST;
+class ReturnAST;
 class BinaryExprAST;
 class CallExprAST;
 class VariableDeclAST;
@@ -39,6 +40,7 @@ class ASTDispatcher {
     void genNumberExpr(NumberExprAST *ast);
     void genStringExpr(StringExprAST *ast);
     void genVariableExpr(VariableExprAST *ast);
+    void genReturn(ReturnAST *ast);
     void genBinaryExpr(BinaryExprAST *ast);
     void genCallExpr(CallExprAST *ast);
 
@@ -106,6 +108,6 @@ class CodeCollector {
     /// 清空段
     static void clear();
     /// 输出代码
-    static void output(std::ostream out);
+    static void output(std::ostream &out);
     static void output();
 };
