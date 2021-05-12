@@ -119,26 +119,26 @@ int main(int argc, char **argv) {
     // of<<"???"<<endl;
     // std::cerr<<"ffff";
     // of.close();
-    // lex_work("../files/1.pas");
-    // parser_work("../files/lex_out.txt");
+    lex_work("../files/1.pas");
+    parser_work("../files/lex_out.txt");
 
-    spdlog::set_level(spdlog::level::debug);
-    init_code_generator();
-    init_basic_type();
+    // spdlog::set_level(spdlog::level::debug);
+    // init_code_generator();
+    // init_basic_type();
 
-    CodeCollector::begin_section();
+    // CodeCollector::begin_section();
     // TEST_while();
     // TEST_funccall();
     // TEST_struct();
-    TEST_case1();
+    // TEST_case1();
 
-    CodeCollector::end_section(PLACE_END);
+    // CodeCollector::end_section(PLACE_END);
 
-    CodeCollector::rearrange_section("global_define", 0);
-    CodeCollector::rearrange_section("prelude", 0);
+    // CodeCollector::rearrange_section("global_define", 0);
+    // CodeCollector::rearrange_section("prelude", 0);
 
-    ofstream codeOut("out.cpp");
-    CodeCollector::output(codeOut);
+    // ofstream codeOut("out.cpp");
+    // CodeCollector::output(codeOut);
 
     return 0;
 }

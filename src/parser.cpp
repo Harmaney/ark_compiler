@@ -410,8 +410,8 @@ void analyse(string file_name){
 
 void parser_work(string file_name){
 	init();
-    cout<<"?"<<endl;
 	get_first();
 	generate_table();
+	cout<<"?"<<endl;
 	analyse(file_name);
 }

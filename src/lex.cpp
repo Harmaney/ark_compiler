@@ -24,7 +24,7 @@ string load_file(string file_name){
 set <string> key_words;
 
 void load_key_words(){
-    ifstream input("../files/key_words.txt");
+    ifstream input("../files/keywords.txt");
     string word;
     while(input >> word)
         key_words.insert(word);
@@ -334,4 +334,6 @@ void lex_work(string file_name){
         }
         lout << endl;
     }
+    lout.close();
+    lerr.close();
 }
