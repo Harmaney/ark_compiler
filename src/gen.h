@@ -1,6 +1,7 @@
 #pragma once
 #include <sstream>
 #include <string>
+#include <ostream>
 #include <stack>
 #include <vector>
 
@@ -105,5 +106,6 @@ class CodeCollector {
     /// 清空段
     static void clear();
     /// 输出代码
+    static void output(std::ostream out);
     static void output();
 };

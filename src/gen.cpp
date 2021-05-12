@@ -376,6 +376,15 @@ void CodeCollector::output() {
     }
 }
 
+void CodeCollector::output(std::ostream out) {
+    for (auto sid : section_order) {
+        out<<"//"<<sid<<std::endl;
+        for (auto str : *codes[sid]) {
+            out<<str<<std::endl;
+        }
+    }
+}
+
 void CodeCollector::rearrange_section(std::vector<std::string> order) {
     section_order = order;
 }
