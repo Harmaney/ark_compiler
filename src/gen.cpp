@@ -84,8 +84,7 @@ void ASTDispatcher::genPointerTypeDecl(PointerTypeDeclAST *ast) {
 void ASTDispatcher::genBasicType(BasicTypeAST *ast) {
     auto descriptor = SymbolTable::lookforType(ast->varType);
     if (descriptor == nullptr) {
-        // TODO: spdlog::error("undefined type `{}`, you basterd",
-        // ast->varType);
+        throw std::invalid_argument("undefined type "+ast->varType);;
     }
     ast->_descriptor = descriptor;
 }
@@ -103,8 +102,7 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
                 SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
             break;
         default:
-            // TODO: spdlog::error("unknown constant type: {}",
-            // ast->const_type);
+            throw std::invalid_argument("unknown constant type: "+ast->const_type);
             break;
     }
 
@@ -232,26 +230,21 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     // check whether function exists.
     SymbolDescriptor *raw_descriptor = SymbolTable::lookforType(ast->callee);
     if (!raw_descriptor || raw_descriptor->type != DESCRIPTOR_FUNCTION) {
-        // TODO: spdlog::error("try to call invalid function `{}`, you
-        // basterd.",
-        //   ast->callee);
+            throw std::invalid_argument("try to call invalid function "+ast->callee);
+
     }
     FunctionDescriptor *descriptor =
         static_cast<FunctionDescriptor *>(raw_descriptor);
 
     if (descriptor->args.size() != ast->args.size()) {
-        // TODO: spdlog::error("lose args for function `{}`: {}/{}, you
-        // basterd.",
-        //   ast->callee, ast->args.size(), descriptor->args.size());
+            throw std::invalid_argument("args not matched for function "+ast->callee);
     }
 
     CodeCollector::src() << ast->callee << "(";
     for (int i = 0; i < ast->args.size() - 1; i++) {
         if (std::any_cast<VariableDescriptor *>(ast->args[i]->value)->varType !=
             descriptor->args[i]->varType) {
-            // TODO: spdlog::error(
-            // "wrong type of arg for function `{}` at place {}, you basterd.",
-            // ast->callee, i);
+            throw std::invalid_argument("wrong type of arg of function "+ast->callee+" at pos "+std::to_string(i));
         }
         CodeCollector::src()
             << std::any_cast<VariableDescriptor *>(ast->args[i]->value)->name
@@ -259,9 +252,7 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     }
     if (std::any_cast<VariableDescriptor *>(ast->args.back()->value)->varType !=
         descriptor->args.back()->varType) {
-        // TODO: spdlog::error(
-        // "wrong type of arg for function `{}` at place {}, you basterd.",
-        // ast->callee, ast->args.size() - 1);
+            throw std::invalid_argument("wrong type of arg of function "+ast->callee+" at pos "+std::to_string(ast->args.size() - 1));
     }
     CodeCollector::src()
         << std::any_cast<VariableDescriptor *>(ast->args.back()->value)->name;
@@ -285,10 +276,10 @@ void ASTDispatcher::genForStatementBegin(ForStatementAST *ast) {
     ast->extraData["begin"] = TagTable::createTagG();
 
     if (ast->rangeL->const_type != CONSTANT_INT) {
-        // TODO: spdlog::warn("the left range of `for` is not integer");
+        throw std::invalid_argument("the left range of `for` is not an integer");
     }
     if (ast->rangeR->const_type != CONSTANT_INT) {
-        // TODO: spdlog::warn("the left range of `for` is not integer");
+        throw std::invalid_argument("the right range of `for` is not an integer");
     }
 
     CodeCollector::src()
@@ -479,8 +470,7 @@ void CodeCollector::end_section(PlaceHolder place) {
                 section_order.push_back(cur_section_name.top());
                 break;
             default:
-                // TODO: wrong
-                // TODO: spdlog::error("unknown inserting place: {}", place);
+                throw std::invalid_argument("unknown inserting place in `end_section` of CodeCollector");
                 break;
         }
     }
@@ -518,8 +508,7 @@ void CodeCollector::rearrange_section(std::string section, int newPos) {
             std::find(section_order.begin(), section_order.end(), section));
         section_order.insert(section_order.begin() + newPos, section);
     } else {
-        // TODO: spdlog::warn("rearranging section[{}] failed: no such section",
-        //  section);
+        WARN(std::cerr<<"rearranging section `"<<section<<"` failed: no such section"<<std::endl;)
     }
 }
 

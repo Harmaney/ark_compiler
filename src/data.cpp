@@ -59,9 +59,9 @@ void StringExprAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void VariableExprAST::accept(ASTDispatcher &dispatcher) {
-    // TODO: spdlog::trace("into variable ast");
+    TRACE(std::cerr << "into variable ast" << std::endl;)
     dispatcher.genVariableExpr(this);
-    // TODO: spdlog::trace("out variable ast");
+    TRACE(std::cerr << "out variable ast" << std::endl;)
 }
 
 void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
@@ -88,9 +88,9 @@ void CallExprAST::accept(ASTDispatcher &dispatcher) {
         arg->accept(dispatcher);
     }
 
-    // TODO: spdlog::trace("into call ast");
+    TRACE(std::cerr<<"into cell ast"<<std::endl;)
     dispatcher.genCallExpr(this);
-    // TODO: spdlog::trace("out call ast");
+    TRACE(std::cerr<<"out cell ast"<<std::endl;)
 }
 
 void BlockAST::accept(ASTDispatcher &dispatcher) {
@@ -144,9 +144,9 @@ void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
         throw std::invalid_argument(
             "unknown method to declar a type for variable");
     }
-    // TODO: spdlog::trace("into variable ast");
+    TRACE(std::cerr<<"into variable ast"<<std::endl;)
     dispatcher.genVariableDecl(this);
-    // TODO: spdlog::trace("out variable ast");
+    TRACE(std::cerr<<"out variable ast"<<std::endl;)
 }
 
 void ForStatementAST::accept(ASTDispatcher &dispatcher) {
@@ -154,35 +154,36 @@ void ForStatementAST::accept(ASTDispatcher &dispatcher) {
     this->rangeL->accept(dispatcher);
     this->rangeR->accept(dispatcher);
 
-    // TODO: spdlog::trace("into for ast");
+    TRACE(std::cerr<<"into for ast"<<std::endl;)
     dispatcher.genForStatementBegin(this);
     this->body->accept(dispatcher);
     dispatcher.genForStatementEnd(this);
-    // TODO: spdlog::trace("out for ast");
+    TRACE(std::cerr<<"into for ast"<<std::endl;)
 }
 
 void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
-    // TODO: spdlog::trace("into variable ast");
+    TRACE(std::cerr<<"into condition of while"<<std::endl;)
     this->condition->accept(dispatcher);
+    TRACE(std::cerr<<"out condition of while"<<std::endl;)
+
 
     dispatcher.genWhileStatementBegin(this);
     this->body->accept(dispatcher);
 
     this->condition->accept(dispatcher);
     dispatcher.genWhileStatementEnd(this);
-    // TODO: spdlog::trace("out variable ast");
 }
 
 void IfStatementAST::accept(ASTDispatcher &dispatcher) {
-    // TODO: spdlog::trace("into variable ast");
+    TRACE(std::cerr<<"into if ast"<<std::endl;)
     this->condition->accept(dispatcher);
     dispatcher.genIfStatementBegin(this);
     // TODO: body and else if
-    // TODO: spdlog::trace("out variable ast");
+    TRACE(std::cerr<<"out if ast"<<std::endl;)
 }
 
 void GlobalAST::accept(ASTDispatcher &dispatcher) {
-    // TODO: spdlog::trace("into global ast");
+    TRACE(std::cerr<<"into global ast"<<std::endl;)
     dispatcher.genGlobalBegin(this);
 
     for (auto var : this->vars) {
@@ -202,7 +203,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     }
 
     dispatcher.genGlobalEnd(this);
-    // TODO: spdlog::trace("out global ast");
+    TRACE(std::cerr<<"out global ast"<<std::endl;)
 }
 
 void FunctionAST::accept(ASTDispatcher &dispatcher) {
@@ -330,7 +331,7 @@ VariableDescriptor *SymbolTable::lookforVariable(std::string sig) {
 }
 
 void SymbolTable::insertType(std::string sig, SymbolDescriptor *descriptor) {
-    // TODO: spdlog::debug("insert type `{}`", sig);
+    DEBUG(std::cerr<<"insert type "<<sig<<std::endl;)
     current->insert_type(sig, descriptor);
 }
 
