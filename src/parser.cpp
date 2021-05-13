@@ -1,7 +1,8 @@
-#include "parser.h"
-
-#include <bits/stdc++.h>
-#define inset(y, x) x.find(y) != x.end()
+#include<bits/stdc++.h>
+#include"parser.h"
+#include"data.h"
+#include"cJSON.h"
+#define inset(y,x) x.find(y)!=x.end()
 #define table_exist 1
 using namespace std;
 
@@ -387,77 +388,109 @@ newinput get_newinput(ifstream &inf) {
   return newinput(word, type, now_str, row, column);
 }
 
+struct GrammarTreeNode{
+	string word,type;
+	int row,column;
+	ull ID;
+	GrammarTreeNode(string word,string type,int row,int column,ull ID):
+		word(word),type(type),row(row),column(column),ID(ID) {}
+};
+
 vector<int> State;
 vector<string> Symbol;
-vector<AST> Ast_Node;
-vector<string> IDlist, Varlist, Paralist;
-vector<AST> Statelist;
+vector<GrammarTreeNode> GNode;
+vector<AST*> Ast_Node;
+map<ull,vector<GrammarTreeNode> > GrammarTree;
+vector<string> IDlist,Varlist,Paralist;
+vector<AST*> Statelist;
 int now_state;
 
-void do_reduce(Production prod, vector<int> &State, vector<string> &Symbol,
-               vector<AST> &Ast_Node) {
-  int pop_num = prod.second.size();
-  vector<AST> Reduced_AST;
-  for (int i = 0; i < pop_num; i++) {
-    State.pop_back();
-    Symbol.pop_back();
-    Reduced_AST.push_back(*Ast_Node.rbegin());
-    Ast_Node.pop_back();
-  }
-  now_state = *State.rbegin();
-  State.push_back(Goto[make_pair(now_state, prod.first)]);
-  Symbol.push_back(prod.first);
+void do_reduce(Production prod,vector<int> &State,vector<string> &Symbol,vector<AST*> &Ast_Node){
+	//cout<<"?????"<<endl;
+	int pop_num = prod.second.size();
+	vector<AST*> Reduced_AST;
+	vector<GrammarTreeNode> Reduced_Node;
+	for(int i = 0; i < pop_num; i++){
+		State.pop_back();
+		Symbol.pop_back();
+		Reduced_Node.push_back(*GNode.rbegin());
+		GNode.pop_back();
+		//Reduced_AST.push_back(*Ast_Node.rbegin());
+		//Ast_Node.pop_back();
+	}
+	now_state = *State.rbegin();
+	State.push_back(Goto[make_pair(now_state,prod.first)]);
+	Symbol.push_back(prod.first);
+	ull gid=ran();
+	GrammarTreeNode new_Node = GrammarTreeNode(prod.first,prod.first,0,0,gid);
+	reverse(Reduced_Node.begin(),Reduced_Node.end());
+	for(auto node:Reduced_Node) GrammarTree[gid].push_back(node);
+	GNode.push_back(new_Node);
+
 }
 
-void analyse(string file_name) {
-  /*for(auto I:Item_content){
-          cout<<I.first<<endl;
-          for(auto it:I.second){
-                  cout<<it.LHS<<"-> ";
-                  for(auto str:it.previous) cout<<str<<" ";
-                  cout<<". ";
-                  for(auto str:it.next) cout<<str<<" ";
-                  cout<<","<<it.LookAhead<<endl;
-          }
-  }*/
-  cout << "start analyse" << endl;
+void analyse(string file_name){
+	
+	/*for(auto I:Item_content){
+		cout<<I.first<<endl;
+		for(auto it:I.second){
+			cout<<it.LHS<<"-> ";
+			for(auto str:it.previous) cout<<str<<" ";
+			cout<<". ";
+			for(auto str:it.next) cout<<str<<" ";
+			cout<<","<<it.LookAhead<<endl;
+		}
+	}*/
+	cout<<"start analyse"<<endl;
+	
+	ifstream inf(file_name);
+	string now_str;
+	State.push_back(0);
+	Symbol.push_back("");
+	newinput N = get_newinput(inf);
+	do{
+		
+		now_state = *State.rbegin();
+//		cout<<"state:"<<now_state<<" str: "<<N.word<<" type: "<<N.now_str<<endl;
+		
+		if(Action.count(make_pair(now_state,N.now_str)) == 0) assert(0);
+		pair<ACTION,int> act = Action[make_pair(now_state,N.now_str)];
+		if(act.first == Shift) {
+			State.push_back(act.second);
+			Symbol.push_back(N.now_str);
+			//cout<<"shift"<<endl;
+			GNode.push_back(GrammarTreeNode(N.now_str,N.type,N.row,N.column,ran()));
+			N = get_newinput(inf);
+		}else if(act.first == Reduce) {
+			Production prod = Production_content[act.second];
+			// cout<<"Reduce by:"<<prod.first<<"->";
+			// for(auto str:prod.second) cout<<" "<<str;
+			// cout<<endl;
 
-  ifstream inf(file_name);
-  string now_str;
-  State.push_back(0);
-  Symbol.push_back("");
-  newinput N = get_newinput(inf);
-  do {
-    now_state = *State.rbegin();
-    //		cout<<"state:"<<now_state<<" str: "<<N.word<<" type:
-    //"<<N.now_str<<endl;
+			do_reduce(prod,State,Symbol,Ast_Node);
 
-    if (Action.count(make_pair(now_state, N.now_str)) == 0) assert(0);
-    pair<ACTION, int> act = Action[make_pair(now_state, N.now_str)];
-    if (act.first == Shift) {
-      State.push_back(act.second);
-      Symbol.push_back(N.now_str);
-      N = get_newinput(inf);
-    } else if (act.first == Reduce) {
-      Production prod = Production_content[act.second];
-      // cout<<"Reduce by:"<<prod.first<<"->";
-      // for(auto str:prod.second) cout<<" "<<str;
-      // cout<<endl;
-
-      do_reduce(prod, State, Symbol, Ast_Node);
-
-    } else if (act.first == ACC) {
-      cout << "ACCEPT!" << endl;
-      break;
-    }
-
-  } while (1);
+			
+		}else if(act.first == ACC) {
+			ull gid = 0;
+			GrammarTreeNode new_Node = GrammarTreeNode("","S",0,0,gid);
+			GrammarTree[gid].push_back(*GNode.rbegin());
+			cout<<"ACCEPT!"<<endl;
+			break;
+		}
+		
+	}while(1);
 }
-
-void parser_work(string file_name) {
-  init();
-  get_first();
-  generate_table();
-  cout << "?" << endl;
-  analyse(file_name);
+void check_grammar_tree(ull gid,int dep){
+	for(auto x:GrammarTree[gid]){
+		cout<<dep<<" "<<x.word<<" "<<x.type<<endl;
+		check_grammar_tree(x.ID,dep+1);
+	}
+}
+void parser_work(string file_name){
+	init();
+	get_first();
+	generate_table();
+	cout<<"?"<<endl;
+	analyse(file_name);
+	check_grammar_tree(0,0);
 }
