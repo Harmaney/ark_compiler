@@ -27,7 +27,17 @@ void BasicTypeAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
-    this->itemAST->accept(dispatcher);
+    switch (this->itemAST->type) {
+        case AST_BASIC_TYPE:
+            static_cast<BasicTypeAST *>(this->itemAST)->accept(dispatcher);
+            break;
+        case AST_ARRAY_TYPE:
+            static_cast<ArrayTypeDeclAST *>(this->itemAST)->accept(dispatcher);
+            break;
+        default:
+            throw std::invalid_argument("not support type in array");
+            break;
+    }
     dispatcher.genArrayTypeDecl(this);
 }
 
