@@ -241,7 +241,7 @@ void lex_work(string file_name){
                         add_end
                         add_and_reset
                         break;
-                    null_char
+                    return_char
                         //error
                         break;
                     default:
@@ -291,8 +291,8 @@ void lex_work(string file_name){
                     case '\"':
                         add_end
                         add_and_reset
-                        break;
-                    null_char
+                          break;
+                    return_char
                         //error
                         break;
                     default:
