@@ -16,6 +16,15 @@ map<string,set<string> > First;
 map<string,set<vector<string> > > RHS_set;
 set<string> Get_epsilon;
 
+typedef unsigned long long ull;
+ull ran(){
+	static ull x=2018210789;
+	x^=(x<<17);
+	x^=(x>>13);
+	x^=(x<<7);
+	return x;
+}
+
 void init(){
 	ifstream input("../files/./grammar.txt");
 	int mode = 0;
@@ -354,6 +363,23 @@ newinput get_newinput(ifstream &inf){
 	return newinput(word,type,now_str,row,column);
 }
 
+void do_reduce(Production prod,vector<int> &State,vector<string> &Symbol,vector<AST> &Ast_Node){
+	int pop_num = prod.second.size();
+	vector<AST> Reduced_AST;
+	for(int i = 0; i < pop_num; i++){
+		State.pop_back();
+		Symbol.pop_back();
+		Reduced_AST.push_back(*Ast_Node.rbegin());
+		Ast_Node.pop_back();
+	}
+	now_state = *State.rbegin();
+	State.push_back(Goto[make_pair(now_state,prod.first)]);
+	Symbol.push_back(prod.first);
+
+	
+
+}
+
 void analyse(string file_name){
 	
 	/*for(auto I:Item_content){
@@ -373,6 +399,7 @@ void analyse(string file_name){
 	string now_str;
 	vector<int> State;
 	vector<string> Symbol;
+	vector<AST> Ast_Node;
 	State.push_back(0);
 	Symbol.push_back("");
 	newinput N = get_newinput(inf);
@@ -389,17 +416,13 @@ void analyse(string file_name){
 			N = get_newinput(inf);
 		}else if(act.first == Reduce) {
 			Production prod = Production_content[act.second];
-			cout<<"Reduce by:"<<prod.first<<"->";
-			for(auto str:prod.second) cout<<" "<<str;
-			cout<<endl;
-			int pop_num = prod.second.size();
-			for(int i = 0; i < pop_num; i++){
-				State.pop_back();
-				Symbol.pop_back();
-			}
-			now_state = *State.rbegin();
-			State.push_back(Goto[make_pair(now_state,prod.first)]);
-			Symbol.push_back(prod.first);
+			// cout<<"Reduce by:"<<prod.first<<"->";
+			// for(auto str:prod.second) cout<<" "<<str;
+			// cout<<endl;
+
+			do_reduce(prod,State,Symbol,Ast_Node);
+
+			
 		}else if(act.first == ACC) {
 			cout<<"ACCEPT!"<<endl;
 			break;
