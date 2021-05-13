@@ -10,6 +10,8 @@
 class ASTDispatcher;
 
 ////////////////////////////////////////
+
+/// 符号定义
 class SymbolDescriptor {
    public:
     DescriptorType type;
@@ -18,12 +20,16 @@ class SymbolDescriptor {
         : type(type), name(name) {}
 };
 
+/// 类型定义。因为编译到C++，所以类型定义中并不需要携带任何关于大小和长度一类的信息
 class TypeDescriptor : public SymbolDescriptor {
    public:
     TypeDescriptor(std::string name)
         : SymbolDescriptor(DESCRIPTOR_TYPE, name) {}
 };
 
+/// 指针定义
+///
+/// 一定注意，此处的指针定义是和Pascal中的指针对应的。变量中的ref标记，指的是某种pascal的写法，使得对于该变量的访问成为了引用格式的，翻译到代码时对应到C++指针。
 class PointerTypeDescriptor : public SymbolDescriptor {
    public:
     SymbolDescriptor *ref;
@@ -31,6 +37,7 @@ class PointerTypeDescriptor : public SymbolDescriptor {
         : SymbolDescriptor(DESCRIPTOR_POINTER_TYPE, name), ref(ref) {}
 };
 
+/// 数组定义
 class ArrayTypeDescriptor : public SymbolDescriptor {
    public:
     int sz;
@@ -42,11 +49,13 @@ class ArrayTypeDescriptor : public SymbolDescriptor {
           sz(sz) {}
 };
 
+/// 变量定义
 class VariableDescriptor : public SymbolDescriptor {
    public:
     SymbolDescriptor *varType;
-    // TODO: i dont know if it is proper.
+    // FIX: i dont know if it is proper.
     bool isRef;
+    // 现在没有用上
     bool isConst;
 
     VariableDescriptor(std::string name, SymbolDescriptor *varType, bool ifRef,
@@ -108,12 +117,14 @@ class ExprAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+/// 类型定义AST的抽象类
 class TypeDeclAST:public AST{
     public:
     SymbolDescriptor *_descriptor;
     TypeDeclAST(ASTKind kind):AST(kind){}
 };
 
+/// 基本类型。比如 int
 class BasicTypeAST : public TypeDeclAST {
    public:
     std::string varType;
@@ -121,6 +132,7 @@ class BasicTypeAST : public TypeDeclAST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+/// 数组类型。可以继续在它下面挂数组，但是我不知道翻译会不会出问题
 class ArrayTypeDeclAST : public TypeDeclAST {
    public:
    // does not support pointer
@@ -139,8 +151,7 @@ class ArrayTypeDeclAST : public TypeDeclAST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
-
-
+/// 指针类型
 class PointerTypeDeclAST : public TypeDeclAST {
    public:
     // do not support multiple pointer and pointer of array, i'm tired.
@@ -149,6 +160,7 @@ class PointerTypeDeclAST : public TypeDeclAST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+/// 数字常量
 class NumberExprAST : public ExprAST {
    public:
     double val_float;
@@ -162,6 +174,7 @@ class NumberExprAST : public ExprAST {
     void accept(ASTDispatcher &dispacher) override;
 };
 
+/// 字符串常量
 class StringExprAST : public ExprAST {
    public:
     std::string val;
@@ -178,6 +191,7 @@ class VariableExprAST : public ExprAST {
     void accept(ASTDispatcher &dispacher) override;
 };
 
+/// 一元运算符
 class UnaryExprAST : public ExprAST {
    public:
     ExprAST *expr;
@@ -197,6 +211,7 @@ class BinaryExprAST : public ExprAST {
     void accept(ASTDispatcher &dispacher) override;
 };
 
+/// 返回表达式
 class ReturnAST : public AST {
    public:
     ExprAST *expr;
@@ -214,6 +229,7 @@ class CallExprAST : public ExprAST {
     void accept(ASTDispatcher &dispacher) override;
 };
 
+/// 变量生命表达式
 class VariableDeclAST : public AST {
    public:
     VariableExprAST *sig;
@@ -228,6 +244,7 @@ class VariableDeclAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+/// for表达式
 class ForStatementAST : public AST {
    public:
     VariableExprAST *itervar;
@@ -269,6 +286,7 @@ class IfStatementAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+/// 函数的签名，指函数名和函数参数
 class FunctionSignatureAST : public AST {
    public:
     std::string sig;
@@ -301,6 +319,7 @@ class StructDeclAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+/// 代表程序代码全局的AST
 class GlobalAST : public AST {
    public:
     std::vector<VariableDeclAST *> vars;
