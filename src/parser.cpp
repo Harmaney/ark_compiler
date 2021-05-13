@@ -363,6 +363,10 @@ newinput get_newinput(ifstream &inf){
 	return newinput(word,type,now_str,row,column);
 }
 
+vector<int> State;
+vector<string> Symbol;
+vector<AST> Ast_Node;
+
 void do_reduce(Production prod,vector<int> &State,vector<string> &Symbol,vector<AST> &Ast_Node){
 	int pop_num = prod.second.size();
 	vector<AST> Reduced_AST;
@@ -397,9 +401,6 @@ void analyse(string file_name){
 	ifstream inf(file_name);
 	int now_state;
 	string now_str;
-	vector<int> State;
-	vector<string> Symbol;
-	vector<AST> Ast_Node;
 	State.push_back(0);
 	Symbol.push_back("");
 	newinput N = get_newinput(inf);
