@@ -44,14 +44,16 @@ class ArrayTypeDescriptor : public SymbolDescriptor {
 
 class VariableDescriptor : public SymbolDescriptor {
    public:
-    // TODO: replace this with typedescirptor
     SymbolDescriptor *varType;
+    // TODO: i dont know if it is proper.
+    bool isRef;
     bool isConst;
 
-    VariableDescriptor(std::string name, SymbolDescriptor *varType,
+    VariableDescriptor(std::string name, SymbolDescriptor *varType, bool ifRef,
                        bool isConst)
         : SymbolDescriptor(DESCRIPTOR_VARIABLE, name),
           varType(varType),
+          isRef(isRef),
           isConst(isConst) {}
 };
 
@@ -106,33 +108,44 @@ class ExprAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
-class BasicTypeAST : public AST {
+class TypeDeclAST:public AST{
+    public:
+    SymbolDescriptor *_descriptor;
+    TypeDeclAST(ASTKind kind):AST(kind){}
+};
+
+class BasicTypeAST : public TypeDeclAST {
    public:
     std::string varType;
-    SymbolDescriptor *_descriptor;
-    BasicTypeAST(std::string varType) : AST(AST_BASIC_TYPE), varType(varType) {}
+    BasicTypeAST(std::string varType) : TypeDeclAST(AST_BASIC_TYPE), varType(varType) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
-class ArrayTypeDeclAST : public AST {
+class ArrayTypeDeclAST : public TypeDeclAST {
    public:
-    BasicTypeAST *itemAST;
+   // does not support pointer
+    TypeDeclAST *itemAST;
     int rangeL, rangeR;
-    ArrayTypeDescriptor *_descriptor;
     ArrayTypeDeclAST(BasicTypeAST *itemAST, int rangeL, int rangeR)
-        : AST(AST_ARRAY_TYPE),
+        : TypeDeclAST(AST_ARRAY_TYPE),
+          itemAST(itemAST),
+          rangeL(rangeL),
+          rangeR(rangeR) {}
+    ArrayTypeDeclAST(ArrayTypeDeclAST *itemAST, int rangeL, int rangeR)
+        : TypeDeclAST(AST_ARRAY_TYPE),
           itemAST(itemAST),
           rangeL(rangeL),
           rangeR(rangeR) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
-class PointerTypeDeclAST : public AST {
+
+
+class PointerTypeDeclAST : public TypeDeclAST {
    public:
     // do not support multiple pointer and pointer of array, i'm tired.
     BasicTypeAST *ref;
-    SymbolDescriptor *_descriptor;
-    PointerTypeDeclAST(BasicTypeAST *ref) : AST(AST_POINTER_TYPE), ref(ref) {}
+    PointerTypeDeclAST(BasicTypeAST *ref) : TypeDeclAST(AST_POINTER_TYPE), ref(ref) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -313,8 +326,9 @@ class _SymbolTable {
     std::map<SymbolDescriptor *, std::string> hasPointerType;
 
    public:
+    int group;
     _SymbolTable *parent;
-    _SymbolTable();
+    _SymbolTable(int group):group(group),nextSlot(0),parent(NULL){}
     std::string getSlot();
     void insert_variable(std::string sig, VariableDescriptor *var);
     void insert_type(std::string sig, SymbolDescriptor *var);

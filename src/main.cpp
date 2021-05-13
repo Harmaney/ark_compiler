@@ -178,8 +178,8 @@ int main(int argc, char **argv) {
     // TEST_while();
     // TEST_funccall();
     // TEST_struct();
+    // TEST_pointer();
     // TEST_case1();
-    TEST_pointer();
 
     CodeCollector::end_section(PLACE_END);
 

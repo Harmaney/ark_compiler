@@ -27,7 +27,17 @@ void BasicTypeAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
-    this->itemAST->accept(dispatcher);
+    switch (this->itemAST->type) {
+        case AST_BASIC_TYPE:
+            static_cast<BasicTypeAST *>(this->itemAST)->accept(dispatcher);
+            break;
+        case AST_ARRAY_TYPE:
+            static_cast<ArrayTypeDeclAST *>(this->itemAST)->accept(dispatcher);
+            break;
+        default:
+            throw std::invalid_argument("not support type in array");
+            break;
+    }
     dispatcher.genArrayTypeDecl(this);
 }
 
@@ -128,10 +138,11 @@ void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
         std::any_cast<BasicTypeAST *>(this->varType)->accept(dispatcher);
     } else if (this->varType.type() == typeid(ArrayTypeDeclAST *)) {
         std::any_cast<ArrayTypeDeclAST *>(this->varType)->accept(dispatcher);
-    }else if(this->varType.type() == typeid(PointerTypeDeclAST *)){
+    } else if (this->varType.type() == typeid(PointerTypeDeclAST *)) {
         std::any_cast<PointerTypeDeclAST *>(this->varType)->accept(dispatcher);
-    }else{
-        throw std::invalid_argument("unknown method to declar a type for variable");
+    } else {
+        throw std::invalid_argument(
+            "unknown method to declar a type for variable");
     }
     // TODO: spdlog::trace("into variable ast");
     dispatcher.genVariableDecl(this);
@@ -213,12 +224,9 @@ void StructDeclAST::accept(ASTDispatcher &dispatcher) {
 
 ///////////////////////////////////////
 
-_SymbolTable::_SymbolTable() {
-    nextSlot = 0;
-    parent = NULL;
+std::string _SymbolTable::getSlot() {
+    return "t" + std::to_string(group) + "_" + std::to_string(nextSlot++);
 }
-
-std::string _SymbolTable::getSlot() { return "t" + std::to_string(nextSlot++); }
 
 void _SymbolTable::insert_variable(std::string sig, VariableDescriptor *var) {
     refVar[sig] = var;
@@ -270,12 +278,12 @@ _SymbolTable *SymbolTable::current;
 _SymbolTable *SymbolTable::root;
 
 void SymbolTable::init() {
-    root = new _SymbolTable();
+    root = new _SymbolTable(0);
     current = root;
 }
 
 void SymbolTable::enter() {
-    _SymbolTable *t = new _SymbolTable();
+    _SymbolTable *t = new _SymbolTable(current->group + 1);
     t->parent = current;
     current = t;
 }
@@ -288,25 +296,27 @@ void SymbolTable::exit() {
 
 VariableDescriptor *SymbolTable::createVariable(std::string sig,
                                                 SymbolDescriptor *type) {
-    current->insert_variable(sig, new VariableDescriptor(sig, type, false));
+    current->insert_variable(sig,
+                             new VariableDescriptor(sig, type, false, false));
     return current->searchVariable(sig);
 }
 
 VariableDescriptor *SymbolTable::createVariableG(std::string sig,
                                                  SymbolDescriptor *type) {
-    root->insert_variable(sig, new VariableDescriptor(sig, type, false));
+    root->insert_variable(sig, new VariableDescriptor(sig, type, false, false));
     return root->searchVariable(sig);
 }
 
 VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type) {
     std::string sig = current->getSlot();
-    current->insert_variable(sig, new VariableDescriptor(sig, type, false));
+    current->insert_variable(sig,
+                             new VariableDescriptor(sig, type, false, false));
     return current->searchVariable(sig);
 }
 
 VariableDescriptor *SymbolTable::createVariableG(SymbolDescriptor *type) {
     std::string sig = root->getSlot();
-    root->insert_variable(sig, new VariableDescriptor(sig, type, false));
+    root->insert_variable(sig, new VariableDescriptor(sig, type, false, false));
     return root->searchVariable(sig);
 }
 

@@ -77,9 +77,9 @@ class ASTDispatcher {
     void genVariableDecl(VariableDeclAST *ast);
 };
 
-std::string mapVariableType(SymbolDescriptor *type);
+// std::string mapVariableType(SymbolDescriptor *type);
 
-void genVariable(VariableDescriptor *var);
+// void genVariable(VariableDescriptor *var);
 
 enum PlaceHolder{
     PLACE_VOID,PLACE_BEGIN=1,PLACE_END=2
