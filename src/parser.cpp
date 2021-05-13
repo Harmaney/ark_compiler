@@ -249,9 +249,11 @@ void get_items() {
           //					cout<<"================\n";
           //					for(auto x:Goix){
           //						cout<<x.LHS<<"-> ";
-          //						for(auto str:x.previous) cout<<str<<"
-          //"; 						cout<<". "; 						for(auto str:x.next) cout<<str<<" "; 						cout<<", ";
-          //						cout<<x.LookAhead<<endl;
+          //						for(auto str:x.previous)
+          //cout<<str<<"
+          //"; 						cout<<". ";
+          //for(auto str:x.next) cout<<str<<" ";
+          //cout<<", "; 						cout<<x.LookAhead<<endl;
           //					}
           cout << item_num << endl;
         }
@@ -271,8 +273,9 @@ void add_Action(pair<ACTION, int> act, pair<int, string> pos) {
       if (Action[pos].first == Shift) return;
       //			cout << "???" << endl;
       //			cout << Action[pos].first << " " <<
-      //Action[pos].second << endl; 			cout << act.first << " " << act.second <<
-      //endl; 			cout << pos.first << " " << pos.second << endl;
+      // Action[pos].second << endl; 			cout << act.first << "
+      // " << act.second <<
+      // endl; 			cout << pos.first << " " << pos.second << endl;
     }
   }
   Action[pos] = act;
