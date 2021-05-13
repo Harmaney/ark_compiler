@@ -2,7 +2,7 @@ S -> ProgramStruct @
 ProgramStruct -> ProgramHead ; ProgramBody . @
 ProgramHead -> program ID @
 ProgramHead -> program ID ( IDList ) @
-ProgramBody -> ConstDeclarations VarDeclarations SubprogramDeclarations CompoundStatement @
+ProgramBody -> ConstDeclarations TypeDeclarations VarDeclarations SubprogramDeclarations CompoundStatement @
 IDList -> IDList , ID @
 IDList -> ID @                                                                    
 ConstDeclarations -> const ConstDeclaration ; @
@@ -16,6 +16,7 @@ ConstValue -> ' letter ' @
 TypeDeclarations -> type TypeDeclaration ; @
 TypeDeclarations -> @
 TypeDeclaration -> TypeDeclaration ; ID = ActualType @
+TypeDeclaration -> ID = ActualType @
 ActualType -> Type @
 ActualType -> record VarDeclaration ; end @
 VarDeclarations -> var VarDeclaration ; VarDeclarations @
