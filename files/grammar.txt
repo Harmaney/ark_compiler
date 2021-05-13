@@ -87,6 +87,8 @@ Term -> Factor @
 Factor -> num @
 Factor -> Variable @
 Factor -> ID ( ExpressionList ) @
+Factor -> ID ( ) @
+Factor -> ID @
 Factor -> ( Expression ) @
 Factor -> not Factor @
 Factor -> uminus Factor @
