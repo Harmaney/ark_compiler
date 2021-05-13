@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
     // of<<"???"<<endl;
     // std::cerr<<"ffff";
     // of.close();
-    lex_work("../files/1.pas");
+    lex_work("../files/SegmentTree.pas");
     parser_work("../files/lex_out.txt");
 
     // init_code_generator();
