@@ -44,14 +44,16 @@ class ArrayTypeDescriptor : public SymbolDescriptor {
 
 class VariableDescriptor : public SymbolDescriptor {
    public:
-    // TODO: replace this with typedescirptor
     SymbolDescriptor *varType;
+    // TODO: i dont know if it is proper.
+    bool isRef;
     bool isConst;
 
-    VariableDescriptor(std::string name, SymbolDescriptor *varType,
+    VariableDescriptor(std::string name, SymbolDescriptor *varType, bool ifRef,
                        bool isConst)
         : SymbolDescriptor(DESCRIPTOR_VARIABLE, name),
           varType(varType),
+          isRef(isRef),
           isConst(isConst) {}
 };
 
@@ -313,8 +315,9 @@ class _SymbolTable {
     std::map<SymbolDescriptor *, std::string> hasPointerType;
 
    public:
+    int group;
     _SymbolTable *parent;
-    _SymbolTable();
+    _SymbolTable(int group):group(group),nextSlot(0),parent(NULL){}
     std::string getSlot();
     void insert_variable(std::string sig, VariableDescriptor *var);
     void insert_type(std::string sig, SymbolDescriptor *var);
