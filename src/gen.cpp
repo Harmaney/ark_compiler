@@ -170,7 +170,22 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
         if(lhs->varType->type!=DESCRIPTOR_ARRAY){
             throw std::domain_error("try to use operator [] on invalid type");
         }
-        // TODO:
+
+        auto array=static_cast<ArrayTypeDescriptor*>(lhs->varType);
+
+        VariableDescriptor *t=SymbolTable::createVariable(array->itemDescriptor);
+        t->isRef=true;
+        putVariableDecl(t);
+
+        // FIX: too ugly
+        CodeCollector::src()<<t->name;
+        CodeCollector::src()<<"=&";
+        putVariableExpr(lhs);
+        CodeCollector::src()<<"[";
+        putVariableExpr(rhs);
+        CodeCollector::src()<<"];";
+        CodeCollector::push_back();
+        ast->value = t;
     } else {
         VariableDescriptor *t = SymbolTable::createVariable(
             SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
