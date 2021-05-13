@@ -166,6 +166,11 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
         CodeCollector::push_back();
         // TODO: pascal 的 = 是否有返回值？
 
+    } else if(ast->op=="[]"){
+        if(lhs->varType->type!=DESCRIPTOR_ARRAY){
+            throw std::domain_error("try to use operator [] on invalid type");
+        }
+        // TODO:
     } else {
         VariableDescriptor *t = SymbolTable::createVariable(
             SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
