@@ -18,6 +18,16 @@ void ExprAST::accept(ASTDispatcher &dispatcher) {
             break;
     }
 }
+
+void BasicTypeAST::accept(ASTDispatcher &dispatcher) {
+    dispatcher.genBasicType(this);
+}
+
+void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
+    this->itemAST->accept(dispatcher);
+    dispatcher.genArrayTypeDecl(this);
+}
+
 void NumberExprAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("into number ast");
     dispatcher.genNumberExpr(this);
@@ -87,7 +97,7 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
                 static_cast<ForStatementAST *>(expr)->accept(dispatcher);
                 break;
             case AST_WHILE_STATEMENT:
-                static_cast<WhileStatementAST*>(expr)->accept(dispatcher);
+                static_cast<WhileStatementAST *>(expr)->accept(dispatcher);
                 break;
             default:
                 spdlog::error("unknown type of AST in Block: {}", expr->type);
@@ -100,6 +110,11 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
+    if(this->varType.type()==typeid(BasicTypeAST*)){
+        std::any_cast<BasicTypeAST*>(this->varType)->accept(dispatcher);
+    }else if(this->varType.type()==typeid(ArrayTypeDeclAST*)){
+        std::any_cast<ArrayTypeDeclAST*>(this->varType)->accept(dispatcher);
+    }
     spdlog::trace("into variable ast");
     dispatcher.genVariableDecl(this);
     spdlog::trace("out variable ast");
@@ -141,12 +156,13 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     spdlog::trace("into global ast");
     dispatcher.genGlobalBegin(this);
 
-    for(auto var:this->vars){
+    for (auto var : this->vars) {
         var->accept(dispatcher);
     }
 
     // convert mainBlock into main function
-    this->functions.push_back(new FunctionAST(new FunctionSignatureAST("main",{},TYPE_BASIC_INT),this->mainBlock));
+    this->functions.push_back(new FunctionAST(
+        new FunctionSignatureAST("main", {}, SymbolTable::lookforType(TYPE_BASIC_INT)), this->mainBlock));
     // add return 0 to mainBlock
     this->mainBlock->exprs.push_back(new ReturnAST(new NumberExprAST(0)));
 
@@ -165,6 +181,10 @@ void FunctionAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {
+
+    for(auto arg:this->args){
+        arg->accept(dispatcher);
+    }
     dispatcher.genFunctionSignature(this);
 }
 
@@ -181,8 +201,23 @@ _SymbolTable::_SymbolTable() {
 
 std::string _SymbolTable::getSlot() { return "t" + std::to_string(nextSlot++); }
 
-void _SymbolTable::insert_variable(std::string sig, VariableDescriptor *var) { refVar[sig] = var; }
-void _SymbolTable::insert_type(std::string sig, SymbolDescriptor *var) { refType[sig] = var; }
+void _SymbolTable::insert_variable(std::string sig, VariableDescriptor *var) {
+    refVar[sig] = var;
+}
+void _SymbolTable::insert_type(std::string sig, SymbolDescriptor *var) {
+    refType[sig] = var;
+}
+ArrayTypeDescriptor *_SymbolTable::create_array_type(SymbolDescriptor *item,
+                                                     int sz) {
+    if (this->hasArrayType.count(std::make_pair(item, sz))) {
+        return static_cast<ArrayTypeDescriptor *>(
+            this->searchType(this->hasArrayType[std::make_pair(item, sz)]));
+    }
+    auto slot=getSlot();
+    ArrayTypeDescriptor *arrayDescriptor = new ArrayTypeDescriptor(slot,item, sz);
+    this->insert_type(slot, arrayDescriptor);
+    return arrayDescriptor;
+}
 
 VariableDescriptor *_SymbolTable::searchVariable(std::string sig) {
     if (refVar.count(sig)) {
@@ -190,7 +225,6 @@ VariableDescriptor *_SymbolTable::searchVariable(std::string sig) {
     } else
         return NULL;
 }
-
 
 SymbolDescriptor *_SymbolTable::searchType(std::string sig) {
     if (refType.count(sig)) {
@@ -219,23 +253,25 @@ void SymbolTable::exit() {
     delete t;
 }
 
-VariableDescriptor *SymbolTable::createVariable(std::string sig, std::string type) {
+VariableDescriptor *SymbolTable::createVariable(std::string sig,
+                                                SymbolDescriptor *type) {
     current->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return current->searchVariable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariableG(std::string sig, std::string type) {
+VariableDescriptor *SymbolTable::createVariableG(std::string sig,
+                                                 SymbolDescriptor *type) {
     root->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return root->searchVariable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariable(std::string type) {
+VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor * type) {
     std::string sig = current->getSlot();
     current->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return current->searchVariable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariableG(std::string type) {
+VariableDescriptor *SymbolTable::createVariableG(SymbolDescriptor *type) {
     std::string sig = root->getSlot();
     root->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return root->searchVariable(sig);
@@ -250,9 +286,15 @@ VariableDescriptor *SymbolTable::lookforVariable(std::string sig) {
     return NULL;
 }
 
-void SymbolTable::insertType(std::string sig,SymbolDescriptor *descriptor) {
-    spdlog::debug("insert type `{}`",sig);
-    current->insert_type(sig,descriptor);
+void SymbolTable::insertType(std::string sig, SymbolDescriptor *descriptor) {
+    spdlog::debug("insert type `{}`", sig);
+    current->insert_type(sig, descriptor);
+}
+
+ArrayTypeDescriptor *SymbolTable::create_array_type(SymbolDescriptor *item,
+                                                    int sz) {
+    // array type are seen as global type
+    return root->create_array_type(item, sz);
 }
 
 SymbolDescriptor *SymbolTable::lookforType(std::string sig) {
@@ -268,10 +310,8 @@ SymbolDescriptor *SymbolTable::lookforType(std::string sig) {
 
 int TagTable::nextSlot;
 
-void TagTable::init() {
-    TagTable::nextSlot=0;
-}
+void TagTable::init() { TagTable::nextSlot = 0; }
 
-std::string* TagTable::createTagG() {
-    return new std::string("L"+std::to_string(TagTable::nextSlot++));
+std::string *TagTable::createTagG() {
+    return new std::string("L" + std::to_string(TagTable::nextSlot++));
 }

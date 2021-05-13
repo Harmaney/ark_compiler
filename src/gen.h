@@ -7,9 +7,13 @@
 
 #include "data.h"
 
+class SymbolDescriptor;
+
 class BlockAST;
 class NumberExprAST;
 class StringExprAST;
+class ArrayTypeDeclAST;
+class BasicTypeAST;
 class VariableExprAST;
 class ReturnAST;
 class BinaryExprAST;
@@ -36,6 +40,9 @@ class ASTDispatcher {
    public:
     void genGlobalBegin(GlobalAST *ast);
     void genGlobalEnd(GlobalAST *ast);
+
+    void genArrayTypeDecl(ArrayTypeDeclAST *ast);
+    void genBasicType(BasicTypeAST *ast);
 
     void genNumberExpr(NumberExprAST *ast);
     void genStringExpr(StringExprAST *ast);
@@ -64,7 +71,7 @@ class ASTDispatcher {
     void genVariableDecl(VariableDeclAST *ast);
 };
 
-std::string mapVariableType(std::string type);
+std::string mapVariableType(SymbolDescriptor *type);
 
 void genVariable(VariableDescriptor *var);
 

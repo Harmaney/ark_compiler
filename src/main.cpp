@@ -1,6 +1,6 @@
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <fstream>
 
 #include "data.h"
 #include "gen.h"
@@ -15,15 +15,47 @@ void init_code_generator() {
 }
 
 void init_basic_type() {
-    SymbolTable::insertType(TYPE_BASIC_INT,
-                            new SymbolDescriptor(DESCRIPTOR_BASIC));
-    SymbolTable::insertType(TYPE_BASIC_DOUBLE,
-                            new SymbolDescriptor(DESCRIPTOR_BASIC));
+    SymbolTable::insertType(
+        TYPE_BASIC_INT, new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_INT));
+    SymbolTable::insertType(
+        TYPE_BASIC_DOUBLE,
+        new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_DOUBLE));
+    SymbolTable::insertType(
+        TYPE_BASIC_STRING,
+        new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_STRING));
+}
+
+void TEST_vardecl() {
+    auto ast = new VariableDeclAST(new VariableExprAST("a"),
+                                   new BasicTypeAST(TYPE_BASIC_INT));
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
+void TEST_arraydecl() {
+    auto ast = new VariableDeclAST(
+        new VariableExprAST("a"),
+        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2));
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
+void TEST_arrayuse() {
+    auto ast = new BlockAST({new VariableDeclAST(
+        new VariableExprAST("a"),
+        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2)),
+        });
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
 }
 
 void TEST_struct() {
     std::vector<VariableDeclAST *> t;
-    t.push_back(new VariableDeclAST(new VariableExprAST("a"), "int"));
+    t.push_back(new VariableDeclAST(new VariableExprAST("a"),
+                                    new BasicTypeAST(TYPE_BASIC_INT)));
     StructDeclAST *ast = new StructDeclAST("Test", t);
 
     ASTDispatcher dispacher;
@@ -32,13 +64,13 @@ void TEST_struct() {
 
 void TEST_while() {
     BlockAST *env = new BlockAST({});
-    env->exprs.push_back(
-        new VariableDeclAST(new VariableExprAST("i"), TYPE_BASIC_INT));
+    env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),
+                                             new BasicTypeAST(TYPE_BASIC_INT)));
 
     BlockAST *while_block = new BlockAST({});
 
-    while_block->exprs.push_back(
-        new VariableDeclAST(new VariableExprAST("domjudge"), TYPE_BASIC_INT));
+    while_block->exprs.push_back(new VariableDeclAST(
+        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_INT)));
     WhileStatementAST *while_ast = new WhileStatementAST(
         new BinaryExprAST('<', new VariableExprAST("i"), new NumberExprAST(5)),
         while_block);
@@ -51,13 +83,13 @@ void TEST_while() {
 
 void TEST_for() {
     BlockAST *env = new BlockAST({});
-    env->exprs.push_back(
-        new VariableDeclAST(new VariableExprAST("i"), TYPE_BASIC_INT));
+    env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),
+                                             new BasicTypeAST(TYPE_BASIC_INT)));
 
     BlockAST *for_block = new BlockAST({});
 
     for_block->exprs.push_back(new VariableDeclAST(
-        new VariableExprAST("domjudge"), TYPE_BASIC_DOUBLE));
+        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_DOUBLE)));
     ForStatementAST *for_ast =
         new ForStatementAST(new VariableExprAST("i"), new NumberExprAST(1),
                             new NumberExprAST(5), for_block);
@@ -70,12 +102,16 @@ void TEST_for() {
 
 void TEST_case1() {
     GlobalAST *global = new GlobalAST(
-        {new VariableDeclAST(new VariableExprAST("i"), TYPE_BASIC_INT)}, {},
-        new BlockAST(
-            {new ForStatementAST(new VariableExprAST("i"), new NumberExprAST(1),
-                                 new NumberExprAST(5),
-                                 new BlockAST({new CallExprAST(
-                                     "write", {new VariableExprAST("i")})}))}));
+        {new VariableDeclAST(new VariableExprAST("i"),
+                             new BasicTypeAST(TYPE_BASIC_INT))},
+        {},
+        new BlockAST({new ForStatementAST(
+            new VariableExprAST("i"), new NumberExprAST(1),
+            new NumberExprAST(5),
+            new BlockAST(
+                {new CallExprAST("write_int", {new VariableExprAST("i")}),
+                 new CallExprAST("write_str",
+                                 {new StringExprAST("hello, world\\n")})}))}));
 
     ASTDispatcher dispacher;
     global->accept(dispacher);
@@ -84,8 +120,8 @@ void TEST_case1() {
 void TEST_funccall() {
     BlockAST *block = new BlockAST({});
 
-    VariableDeclAST *decl =
-        new VariableDeclAST(new VariableExprAST("a"), TYPE_BASIC_DOUBLE);
+    VariableDeclAST *decl = new VariableDeclAST(
+        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_DOUBLE));
     block->exprs.push_back(decl);
 
     BinaryExprAST *t1 = new BinaryExprAST('=', new VariableExprAST("a"),
@@ -95,16 +131,15 @@ void TEST_funccall() {
     vector<ExprAST *> callargs;
     callargs.push_back(
         new BinaryExprAST('+', new NumberExprAST(1.1), new NumberExprAST(2.2)));
-    callargs.push_back(new NumberExprAST(114.514));
-    callargs.push_back(new VariableExprAST("a"));
-    CallExprAST *call = new CallExprAST("write", callargs);
+    CallExprAST *call = new CallExprAST("write_int", callargs);
     block->exprs.push_back(call);
 
-    FunctionSignatureAST *funcsig = new FunctionSignatureAST(
-        "main", vector<VariableDeclAST *>(), TYPE_BASIC_DOUBLE);
+    FunctionSignatureAST *funcsig =
+        new FunctionSignatureAST("main1", vector<VariableDeclAST *>(),
+                                 SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
     FunctionAST *func = new FunctionAST(funcsig, block);
 
-    GlobalAST *global = new GlobalAST({}, {func}, {});
+    GlobalAST *global = new GlobalAST({}, {func}, new BlockAST({}));
 
     ASTDispatcher dispacher;
     global->accept(dispacher);
@@ -119,26 +154,28 @@ int main(int argc, char **argv) {
     // of<<"???"<<endl;
     // std::cerr<<"ffff";
     // of.close();
-    lex_work("../files/1.pas");
-    parser_work("../files/lex_out.txt");
+    // lex_work("../files/1.pas");
+    // parser_work("../files/lex_out.txt");
 
-    // spdlog::set_level(spdlog::level::debug);
-    // init_code_generator();
-    // init_basic_type();
+    spdlog::set_level(spdlog::level::debug);
+    init_code_generator();
+    init_basic_type();
 
-    // CodeCollector::begin_section();
+    CodeCollector::begin_section();
+    // TEST_vardecl();
+    // TEST_arraydecl();
     // TEST_while();
     // TEST_funccall();
     // TEST_struct();
-    // TEST_case1();
+    TEST_case1();
 
-    // CodeCollector::end_section(PLACE_END);
+    CodeCollector::end_section(PLACE_END);
 
-    // CodeCollector::rearrange_section("global_define", 0);
-    // CodeCollector::rearrange_section("prelude", 0);
+    CodeCollector::rearrange_section("global_define", 0);
+    CodeCollector::rearrange_section("prelude", 0);
 
-    // ofstream codeOut("out.cpp");
-    // CodeCollector::output(codeOut);
+    ofstream codeOut("out.cpp");
+    CodeCollector::output(codeOut);
 
     return 0;
 }

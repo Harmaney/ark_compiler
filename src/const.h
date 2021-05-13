@@ -1,5 +1,7 @@
 #pragma once
 enum ASTKind {
+    AST_BASIC_TYPE,
+    AST_ARRAY_TYPE,
     AST_NUMBER_EXPR,
     AST_STRING_EXPR,
     AST_VARIABLE_EXPR,
@@ -29,6 +31,8 @@ enum ConstantType{
 
 enum DescriptorType{
     DESCRIPTOR_BASIC,
+    DESCRIPTOR_ARRAY,
+
     DESCRIPTOR_VARIABLE,
     DESCRIPTOR_STRUCT,
     DESCRIPTOR_FUNCTION,
