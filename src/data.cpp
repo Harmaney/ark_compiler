@@ -1,6 +1,9 @@
 #include "data.h"
 
-#include "spdlog/spdlog.h"
+#include <iostream>
+#include <stdexcept>
+
+#include "logger.hpp"
 
 void ExprAST::accept(ASTDispatcher &dispatcher) {
     switch (type) {
@@ -14,7 +17,7 @@ void ExprAST::accept(ASTDispatcher &dispatcher) {
             dynamic_cast<VariableExprAST *>(this)->accept(dispatcher);
             break;
         default:
-            spdlog::error("unknown type of expr: {}", type);
+            throw std::invalid_argument("unknown type of expr");
             break;
     }
 }
@@ -29,21 +32,21 @@ void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void NumberExprAST::accept(ASTDispatcher &dispatcher) {
-    spdlog::trace("into number ast");
+    TRACE(std::cerr << "into number ast" << std::endl;)
     dispatcher.genNumberExpr(this);
-    spdlog::trace("out number ast");
+    TRACE(std::cerr << "out number ast" << std::endl;)
 }
 
 void StringExprAST::accept(ASTDispatcher &dispatcher) {
-    spdlog::trace("into string ast");
+    TRACE(std::cerr << "into string ast" << std::endl;)
     dispatcher.genStringExpr(this);
-    spdlog::trace("out string ast");
+    TRACE(std::cerr << "out string ast" << std::endl;)
 }
 
 void VariableExprAST::accept(ASTDispatcher &dispatcher) {
-    spdlog::trace("into variable ast");
+    // TODO: spdlog::trace("into variable ast");
     dispatcher.genVariableExpr(this);
-    spdlog::trace("out variable ast");
+    // TODO: spdlog::trace("out variable ast");
 }
 
 void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
@@ -64,9 +67,9 @@ void CallExprAST::accept(ASTDispatcher &dispatcher) {
         arg->accept(dispatcher);
     }
 
-    spdlog::trace("into call ast");
+    // TODO: spdlog::trace("into call ast");
     dispatcher.genCallExpr(this);
-    spdlog::trace("out call ast");
+    // TODO: spdlog::trace("out call ast");
 }
 
 void BlockAST::accept(ASTDispatcher &dispatcher) {
@@ -100,7 +103,7 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
                 static_cast<WhileStatementAST *>(expr)->accept(dispatcher);
                 break;
             default:
-                spdlog::error("unknown type of AST in Block: {}", expr->type);
+                throw std::invalid_argument("unknown type of AST in Block");
                 break;
         }
     }
@@ -110,14 +113,14 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
-    if(this->varType.type()==typeid(BasicTypeAST*)){
-        std::any_cast<BasicTypeAST*>(this->varType)->accept(dispatcher);
-    }else if(this->varType.type()==typeid(ArrayTypeDeclAST*)){
-        std::any_cast<ArrayTypeDeclAST*>(this->varType)->accept(dispatcher);
+    if (this->varType.type() == typeid(BasicTypeAST *)) {
+        std::any_cast<BasicTypeAST *>(this->varType)->accept(dispatcher);
+    } else if (this->varType.type() == typeid(ArrayTypeDeclAST *)) {
+        std::any_cast<ArrayTypeDeclAST *>(this->varType)->accept(dispatcher);
     }
-    spdlog::trace("into variable ast");
+    // TODO: spdlog::trace("into variable ast");
     dispatcher.genVariableDecl(this);
-    spdlog::trace("out variable ast");
+    // TODO: spdlog::trace("out variable ast");
 }
 
 void ForStatementAST::accept(ASTDispatcher &dispatcher) {
@@ -125,15 +128,15 @@ void ForStatementAST::accept(ASTDispatcher &dispatcher) {
     this->rangeL->accept(dispatcher);
     this->rangeR->accept(dispatcher);
 
-    spdlog::trace("into for ast");
+    // TODO: spdlog::trace("into for ast");
     dispatcher.genForStatementBegin(this);
     this->body->accept(dispatcher);
     dispatcher.genForStatementEnd(this);
-    spdlog::trace("out for ast");
+    // TODO: spdlog::trace("out for ast");
 }
 
 void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
-    spdlog::trace("into variable ast");
+    // TODO: spdlog::trace("into variable ast");
     this->condition->accept(dispatcher);
 
     dispatcher.genWhileStatementBegin(this);
@@ -141,19 +144,19 @@ void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
 
     this->condition->accept(dispatcher);
     dispatcher.genWhileStatementEnd(this);
-    spdlog::trace("out variable ast");
+    // TODO: spdlog::trace("out variable ast");
 }
 
 void IfStatementAST::accept(ASTDispatcher &dispatcher) {
-    spdlog::trace("into variable ast");
+    // TODO: spdlog::trace("into variable ast");
     this->condition->accept(dispatcher);
     dispatcher.genIfStatementBegin(this);
     // TODO: body and else if
-    spdlog::trace("out variable ast");
+    // TODO: spdlog::trace("out variable ast");
 }
 
 void GlobalAST::accept(ASTDispatcher &dispatcher) {
-    spdlog::trace("into global ast");
+    // TODO: spdlog::trace("into global ast");
     dispatcher.genGlobalBegin(this);
 
     for (auto var : this->vars) {
@@ -162,7 +165,9 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
 
     // convert mainBlock into main function
     this->functions.push_back(new FunctionAST(
-        new FunctionSignatureAST("main", {}, SymbolTable::lookforType(TYPE_BASIC_INT)), this->mainBlock));
+        new FunctionSignatureAST("main", {},
+                                 SymbolTable::lookforType(TYPE_BASIC_INT)),
+        this->mainBlock));
     // add return 0 to mainBlock
     this->mainBlock->exprs.push_back(new ReturnAST(new NumberExprAST(0)));
 
@@ -171,7 +176,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     }
 
     dispatcher.genGlobalEnd(this);
-    spdlog::trace("out global ast");
+    // TODO: spdlog::trace("out global ast");
 }
 
 void FunctionAST::accept(ASTDispatcher &dispatcher) {
@@ -181,8 +186,7 @@ void FunctionAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {
-
-    for(auto arg:this->args){
+    for (auto arg : this->args) {
         arg->accept(dispatcher);
     }
     dispatcher.genFunctionSignature(this);
@@ -213,8 +217,9 @@ ArrayTypeDescriptor *_SymbolTable::create_array_type(SymbolDescriptor *item,
         return static_cast<ArrayTypeDescriptor *>(
             this->searchType(this->hasArrayType[std::make_pair(item, sz)]));
     }
-    auto slot=getSlot();
-    ArrayTypeDescriptor *arrayDescriptor = new ArrayTypeDescriptor(slot,item, sz);
+    auto slot = getSlot();
+    ArrayTypeDescriptor *arrayDescriptor =
+        new ArrayTypeDescriptor(slot, item, sz);
     this->insert_type(slot, arrayDescriptor);
     return arrayDescriptor;
 }
@@ -265,7 +270,7 @@ VariableDescriptor *SymbolTable::createVariableG(std::string sig,
     return root->searchVariable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor * type) {
+VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type) {
     std::string sig = current->getSlot();
     current->insert_variable(sig, new VariableDescriptor(sig, type, false));
     return current->searchVariable(sig);
@@ -287,7 +292,7 @@ VariableDescriptor *SymbolTable::lookforVariable(std::string sig) {
 }
 
 void SymbolTable::insertType(std::string sig, SymbolDescriptor *descriptor) {
-    spdlog::debug("insert type `{}`", sig);
+    // TODO: spdlog::debug("insert type `{}`", sig);
     current->insert_type(sig, descriptor);
 }
 

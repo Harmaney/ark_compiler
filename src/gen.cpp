@@ -3,9 +3,9 @@
 
 #include <algorithm>
 #include <iostream>
+#include <cassert>
 
 #include "data.h"
-#include "spdlog/spdlog.h"
 
 void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
     // TODO:
@@ -51,7 +51,7 @@ void ASTDispatcher::genArrayTypeDecl(ArrayTypeDeclAST *ast) {
 void ASTDispatcher::genBasicType(BasicTypeAST *ast) {
     auto descriptor = SymbolTable::lookforType(ast->varType);
     if (descriptor == nullptr) {
-        spdlog::error("undefined type `{}`, you basterd", ast->varType);
+        // TODO: spdlog::error("undefined type `{}`, you basterd", ast->varType);
     }
     ast->_descriptor = descriptor;
 }
@@ -67,7 +67,7 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
             t = SymbolTable::createVariableG(SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
             break;
         default:
-            spdlog::error("unknown constant type: {}", ast->const_type);
+            // TODO: spdlog::error("unknown constant type: {}", ast->const_type);
             break;
     }
 
@@ -96,7 +96,7 @@ void ASTDispatcher::genStringExpr(StringExprAST *ast) {
 void ASTDispatcher::genVariableExpr(VariableExprAST *ast) {
     VariableDescriptor *t = SymbolTable::lookforVariable(ast->name);
     if (!t) {
-        spdlog::error("variable {} not found", ast->name);
+        // TODO: spdlog::error("variable {} not found", ast->name);
         return;
     }
     ast->value = t;
@@ -141,24 +141,24 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     // check whether function exists.
     SymbolDescriptor *raw_descriptor = SymbolTable::lookforType(ast->callee);
     if (!raw_descriptor || raw_descriptor->type != DESCRIPTOR_FUNCTION) {
-        spdlog::error("try to call invalid function `{}`, you basterd.",
-                      ast->callee);
+        // TODO: spdlog::error("try to call invalid function `{}`, you basterd.",
+                    //   ast->callee);
     }
     FunctionDescriptor *descriptor =
         static_cast<FunctionDescriptor *>(raw_descriptor);
 
     if (descriptor->args.size() != ast->args.size()) {
-        spdlog::error("lose args for function `{}`: {}/{}, you basterd.",
-                      ast->callee, ast->args.size(), descriptor->args.size());
+        // TODO: spdlog::error("lose args for function `{}`: {}/{}, you basterd.",
+                    //   ast->callee, ast->args.size(), descriptor->args.size());
     }
 
     CodeCollector::src() << ast->callee << "(";
     for (int i = 0; i < ast->args.size() - 1; i++) {
         if (std::any_cast<VariableDescriptor *>(ast->args[i]->value)->varType !=
             descriptor->args[i]->varType) {
-            spdlog::error(
-                "wrong type of arg for function `{}` at place {}, you basterd.",
-                ast->callee, i);
+            // TODO: spdlog::error(
+                // "wrong type of arg for function `{}` at place {}, you basterd.",
+                // ast->callee, i);
         }
         CodeCollector::src()
             << std::any_cast<VariableDescriptor *>(ast->args[i]->value)->name
@@ -166,9 +166,9 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     }
     if (std::any_cast<VariableDescriptor *>(ast->args.back()->value)->varType !=
         descriptor->args.back()->varType) {
-        spdlog::error(
-            "wrong type of arg for function `{}` at place {}, you basterd.",
-            ast->callee, ast->args.size() - 1);
+        // TODO: spdlog::error(
+            // "wrong type of arg for function `{}` at place {}, you basterd.",
+            // ast->callee, ast->args.size() - 1);
     }
     CodeCollector::src()
         << std::any_cast<VariableDescriptor *>(ast->args.back()->value)->name;
@@ -192,10 +192,10 @@ void ASTDispatcher::genForStatementBegin(ForStatementAST *ast) {
     ast->extraData["begin"] = TagTable::createTagG();
 
     if (ast->rangeL->const_type != CONSTANT_INT) {
-        spdlog::warn("the left range of `for` is not integer");
+        // TODO: spdlog::warn("the left range of `for` is not integer");
     }
     if (ast->rangeR->const_type != CONSTANT_INT) {
-        spdlog::warn("the left range of `for` is not integer");
+        // TODO: spdlog::warn("the left range of `for` is not integer");
     }
 
     CodeCollector::src()
@@ -392,7 +392,7 @@ void CodeCollector::end_section(PlaceHolder place) {
                 break;
             default:
                 // TODO: wrong
-                spdlog::error("unknown inserting place: {}", place);
+                // TODO: spdlog::error("unknown inserting place: {}", place);
                 break;
         }
     }
@@ -404,9 +404,9 @@ void CodeCollector::end_section(PlaceHolder place) {
 
 void CodeCollector::output() {
     for (auto sid : section_order) {
-        spdlog::debug("section[{}]-----", sid);
+        // TODO: spdlog::debug("section[{}]-----", sid);
         for (auto str : *codes[sid]) {
-            spdlog::debug(str);
+            // TODO: spdlog::debug(str);
         }
     }
 }
@@ -430,8 +430,8 @@ void CodeCollector::rearrange_section(std::string section, int newPos) {
             std::find(section_order.begin(), section_order.end(), section));
         section_order.insert(section_order.begin() + newPos, section);
     } else {
-        spdlog::warn("rearranging section[{}] failed: no such section",
-                     section);
+        // TODO: spdlog::warn("rearranging section[{}] failed: no such section",
+                    //  section);
     }
 }
 

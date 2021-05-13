@@ -1,17 +1,15 @@
 add_rules("mode.debug", "mode.release")
-add_requires("spdlog")
 
 set_languages("c++17")
 
 
 target("ark")
     -- add_cxxflags("-fsanitize=undefined")
+    set_rundir("$(projectdir)/files")
+
     set_kind("binary")
     add_headerfiles("src/*.h")
     add_files("src/*.cpp")
-
-    set_rundir("$(projectdir)/files")
-    add_packages("spdlog")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io

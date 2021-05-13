@@ -6,7 +6,6 @@
 #include "gen.h"
 #include "lex.h"
 #include "parser.h"
-#include "spdlog/spdlog.h"
 using namespace std;
 
 void init_code_generator() {
@@ -157,7 +156,7 @@ int main(int argc, char **argv) {
     // lex_work("../files/1.pas");
     // parser_work("../files/lex_out.txt");
 
-    spdlog::set_level(spdlog::level::debug);
+
     init_code_generator();
     init_basic_type();
 

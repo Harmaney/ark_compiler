@@ -6,7 +6,6 @@
 
 #include "const.h"
 #include "gen.h"
-#include "spdlog/spdlog.h"
 
 class ASTDispatcher;
 
