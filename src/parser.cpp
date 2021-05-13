@@ -368,6 +368,7 @@ vector<string> Symbol;
 vector<AST> Ast_Node;
 vector<string> IDlist,Varlist,Paralist;
 vector<AST> Statelist;
+int now_state;
 
 void do_reduce(Production prod,vector<int> &State,vector<string> &Symbol,vector<AST> &Ast_Node){
 	int pop_num = prod.second.size();
@@ -401,7 +402,6 @@ void analyse(string file_name){
 	cout<<"start analyse"<<endl;
 	
 	ifstream inf(file_name);
-	int now_state;
 	string now_str;
 	State.push_back(0);
 	Symbol.push_back("");
