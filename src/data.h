@@ -229,7 +229,7 @@ class CallExprAST : public ExprAST {
     void accept(ASTDispatcher &dispacher) override;
 };
 
-/// 变量生命表达式
+/// 变量声明表达式
 class VariableDeclAST : public AST {
    public:
     VariableExprAST *sig;

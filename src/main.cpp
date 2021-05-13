@@ -5,7 +5,6 @@
 #include "data.h"
 #include "gen.h"
 #include "lex.h"
-#include "parser.h"
 using namespace std;
 
 void init_code_generator() {
@@ -36,6 +35,15 @@ void TEST_arraydecl() {
     auto ast = new VariableDeclAST(
         new VariableExprAST("a"),
         new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2));
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
+void TEST_arrayofarray() {
+    BlockAST *ast = new BlockAST({new VariableDeclAST(
+        new VariableExprAST("a"),
+        new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),1,10), 1, 100))});
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -129,12 +137,15 @@ void TEST_funccall() {
 }
 
 void TEST_pointer() {
-    BlockAST *ast = new BlockAST({new VariableDeclAST(
-        new VariableExprAST("a"),
-        new BasicTypeAST(TYPE_BASIC_INT)),
-        new BinaryExprAST("=",new VariableExprAST("a"),new NumberExprAST(1)),
-        new VariableDeclAST(new VariableExprAST("p"),new PointerTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT))),
-        new BinaryExprAST("=",new VariableExprAST("a"),new UnaryExprAST("*",new VariableExprAST("p")))});
+    BlockAST *ast = new BlockAST(
+        {new VariableDeclAST(new VariableExprAST("a"),
+                             new BasicTypeAST(TYPE_BASIC_INT)),
+         new BinaryExprAST("=", new VariableExprAST("a"), new NumberExprAST(1)),
+         new VariableDeclAST(
+             new VariableExprAST("p"),
+             new PointerTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT))),
+         new BinaryExprAST("=", new VariableExprAST("a"),
+                           new UnaryExprAST("*", new VariableExprAST("p")))});
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -175,6 +186,7 @@ int main(int argc, char **argv) {
     // CodeCollector::begin_section();
     // TEST_vardecl();
     // TEST_arraydecl();
+    TEST_arrayofarray();
     // TEST_while();
     // TEST_funccall();
     // TEST_struct();
