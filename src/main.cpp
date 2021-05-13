@@ -42,10 +42,11 @@ void TEST_arraydecl() {
 }
 
 void TEST_arrayuse() {
-    auto ast = new BlockAST({new VariableDeclAST(
-        new VariableExprAST("a"),
-        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2)),
-        });
+    auto ast = new BlockAST({
+        new VariableDeclAST(
+            new VariableExprAST("a"),
+            new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2)),
+    });
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -71,7 +72,7 @@ void TEST_while() {
     while_block->exprs.push_back(new VariableDeclAST(
         new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_INT)));
     WhileStatementAST *while_ast = new WhileStatementAST(
-        new BinaryExprAST('<', new VariableExprAST("i"), new NumberExprAST(5)),
+        new BinaryExprAST("<", new VariableExprAST("i"), new NumberExprAST(5)),
         while_block);
 
     env->exprs.push_back(while_ast);
@@ -99,6 +100,46 @@ void TEST_for() {
     env->accept(dispacher);
 }
 
+void TEST_funccall() {
+    BlockAST *block = new BlockAST({});
+
+    VariableDeclAST *decl = new VariableDeclAST(
+        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_DOUBLE));
+    block->exprs.push_back(decl);
+
+    BinaryExprAST *t1 = new BinaryExprAST("=", new VariableExprAST("a"),
+                                          new NumberExprAST(123));
+    block->exprs.push_back(t1);
+
+    vector<ExprAST *> callargs;
+    callargs.push_back(
+        new BinaryExprAST("+", new NumberExprAST(1.1), new NumberExprAST(2.2)));
+    CallExprAST *call = new CallExprAST("write_int", callargs);
+    block->exprs.push_back(call);
+
+    FunctionSignatureAST *funcsig =
+        new FunctionSignatureAST("main1", vector<VariableDeclAST *>(),
+                                 SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
+    FunctionAST *func = new FunctionAST(funcsig, block);
+
+    GlobalAST *global = new GlobalAST({}, {func}, new BlockAST({}));
+
+    ASTDispatcher dispacher;
+    global->accept(dispacher);
+}
+
+void TEST_pointer() {
+    BlockAST *ast = new BlockAST({new VariableDeclAST(
+        new VariableExprAST("a"),
+        new BasicTypeAST(TYPE_BASIC_INT)),
+        new BinaryExprAST("=",new VariableExprAST("a"),new NumberExprAST(1)),
+        new VariableDeclAST(new VariableExprAST("p"),new PointerTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT))),
+        new BinaryExprAST("=",new VariableExprAST("a"),new UnaryExprAST("*",new VariableExprAST("p")))});
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
 void TEST_case1() {
     GlobalAST *global = new GlobalAST(
         {new VariableDeclAST(new VariableExprAST("i"),
@@ -116,34 +157,6 @@ void TEST_case1() {
     global->accept(dispacher);
 }
 
-void TEST_funccall() {
-    BlockAST *block = new BlockAST({});
-
-    VariableDeclAST *decl = new VariableDeclAST(
-        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_DOUBLE));
-    block->exprs.push_back(decl);
-
-    BinaryExprAST *t1 = new BinaryExprAST('=', new VariableExprAST("a"),
-                                          new NumberExprAST(123));
-    block->exprs.push_back(t1);
-
-    vector<ExprAST *> callargs;
-    callargs.push_back(
-        new BinaryExprAST('+', new NumberExprAST(1.1), new NumberExprAST(2.2)));
-    CallExprAST *call = new CallExprAST("write_int", callargs);
-    block->exprs.push_back(call);
-
-    FunctionSignatureAST *funcsig =
-        new FunctionSignatureAST("main1", vector<VariableDeclAST *>(),
-                                 SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
-    FunctionAST *func = new FunctionAST(funcsig, block);
-
-    GlobalAST *global = new GlobalAST({}, {func}, new BlockAST({}));
-
-    ASTDispatcher dispacher;
-    global->accept(dispacher);
-}
-
 int main(int argc, char **argv) {
     // std::ifstream ifff("../files/keywords.txt");
     // std::string x;ifff>>x;
@@ -156,7 +169,6 @@ int main(int argc, char **argv) {
     // lex_work("../files/1.pas");
     // parser_work("../files/lex_out.txt");
 
-
     init_code_generator();
     init_basic_type();
 
@@ -166,7 +178,8 @@ int main(int argc, char **argv) {
     // TEST_while();
     // TEST_funccall();
     // TEST_struct();
-    TEST_case1();
+    // TEST_case1();
+    TEST_pointer();
 
     CodeCollector::end_section(PLACE_END);
 
@@ -174,7 +187,7 @@ int main(int argc, char **argv) {
     CodeCollector::rearrange_section("prelude", 0);
 
     ofstream codeOut("out.cpp");
-    CodeCollector::output(codeOut);
+    CodeCollector::output();
 
     return 0;
 }

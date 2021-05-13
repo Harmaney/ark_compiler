@@ -12,10 +12,14 @@ class SymbolDescriptor;
 class BlockAST;
 class NumberExprAST;
 class StringExprAST;
+
 class ArrayTypeDeclAST;
+class PointerTypeDeclAST;
 class BasicTypeAST;
+
 class VariableExprAST;
 class ReturnAST;
+class UnaryExprAST;
 class BinaryExprAST;
 class CallExprAST;
 class VariableDeclAST;
@@ -43,11 +47,13 @@ class ASTDispatcher {
 
     void genArrayTypeDecl(ArrayTypeDeclAST *ast);
     void genBasicType(BasicTypeAST *ast);
+    void genPointerTypeDecl(PointerTypeDeclAST *ast);
 
     void genNumberExpr(NumberExprAST *ast);
     void genStringExpr(StringExprAST *ast);
     void genVariableExpr(VariableExprAST *ast);
     void genReturn(ReturnAST *ast);
+    void genUnaryExpr(UnaryExprAST *ast);
     void genBinaryExpr(BinaryExprAST *ast);
     void genCallExpr(CallExprAST *ast);
 

@@ -31,6 +31,11 @@ void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
     dispatcher.genArrayTypeDecl(this);
 }
 
+void PointerTypeDeclAST::accept(ASTDispatcher &dispatcher) {
+    this->ref->accept(dispatcher);
+    dispatcher.genPointerTypeDecl(this);
+}
+
 void NumberExprAST::accept(ASTDispatcher &dispatcher) {
     TRACE(std::cerr << "into number ast" << std::endl;)
     dispatcher.genNumberExpr(this);
@@ -54,6 +59,12 @@ void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
     RHS->accept(dispatcher);
 
     dispatcher.genBinaryExpr(this);
+}
+
+void UnaryExprAST::accept(ASTDispatcher &dispatcher) {
+    expr->accept(dispatcher);
+
+    dispatcher.genUnaryExpr(this);
 }
 
 void ReturnAST::accept(ASTDispatcher &dispatcher) {
@@ -117,6 +128,10 @@ void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
         std::any_cast<BasicTypeAST *>(this->varType)->accept(dispatcher);
     } else if (this->varType.type() == typeid(ArrayTypeDeclAST *)) {
         std::any_cast<ArrayTypeDeclAST *>(this->varType)->accept(dispatcher);
+    }else if(this->varType.type() == typeid(PointerTypeDeclAST *)){
+        std::any_cast<PointerTypeDeclAST *>(this->varType)->accept(dispatcher);
+    }else{
+        throw std::invalid_argument("unknown method to declar a type for variable");
     }
     // TODO: spdlog::trace("into variable ast");
     dispatcher.genVariableDecl(this);
@@ -224,6 +239,19 @@ ArrayTypeDescriptor *_SymbolTable::create_array_type(SymbolDescriptor *item,
     return arrayDescriptor;
 }
 
+PointerTypeDescriptor *_SymbolTable::create_pointer_type(
+    SymbolDescriptor *item) {
+    if (this->hasPointerType.count(item)) {
+        return static_cast<PointerTypeDescriptor *>(
+            this->searchType(this->hasPointerType[item]));
+    }
+    auto slot = getSlot();
+    PointerTypeDescriptor *pointerDescriptor =
+        new PointerTypeDescriptor(slot, item);
+    this->insert_type(slot, pointerDescriptor);
+    return pointerDescriptor;
+}
+
 VariableDescriptor *_SymbolTable::searchVariable(std::string sig) {
     if (refVar.count(sig)) {
         return refVar[sig];
@@ -300,6 +328,11 @@ ArrayTypeDescriptor *SymbolTable::create_array_type(SymbolDescriptor *item,
                                                     int sz) {
     // array type are seen as global type
     return root->create_array_type(item, sz);
+}
+
+PointerTypeDescriptor *SymbolTable::create_pointer_type(
+    SymbolDescriptor *item) {
+    return root->create_pointer_type(item);
 }
 
 SymbolDescriptor *SymbolTable::lookforType(std::string sig) {

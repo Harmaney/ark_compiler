@@ -1,10 +1,14 @@
 add_rules("mode.debug", "mode.release")
+add_rules("mode.ubsan")
 
 set_languages("c++17")
+set_warnings("all")
 
 
 target("ark")
     -- add_cxxflags("-fsanitize=undefined")
+    set_toolset("cxx","clang")
+    set_toolset("ld", "clang++")
     set_rundir("$(projectdir)/files")
 
     set_kind("binary")

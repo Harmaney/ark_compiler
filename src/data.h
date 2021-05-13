@@ -24,13 +24,22 @@ class TypeDescriptor : public SymbolDescriptor {
         : SymbolDescriptor(DESCRIPTOR_TYPE, name) {}
 };
 
+class PointerTypeDescriptor : public SymbolDescriptor {
+   public:
+    SymbolDescriptor *ref;
+    PointerTypeDescriptor(std::string name, SymbolDescriptor *ref)
+        : SymbolDescriptor(DESCRIPTOR_POINTER_TYPE, name), ref(ref) {}
+};
+
 class ArrayTypeDescriptor : public SymbolDescriptor {
    public:
     int sz;
     SymbolDescriptor *itemDescriptor;
     ArrayTypeDescriptor(std::string name, SymbolDescriptor *itemDescriptor,
                         int sz)
-        : SymbolDescriptor(DESCRIPTOR_ARRAY, name),itemDescriptor(itemDescriptor), sz(sz) {}
+        : SymbolDescriptor(DESCRIPTOR_ARRAY, name),
+          itemDescriptor(itemDescriptor),
+          sz(sz) {}
 };
 
 class VariableDescriptor : public SymbolDescriptor {
@@ -118,6 +127,15 @@ class ArrayTypeDeclAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+class PointerTypeDeclAST : public AST {
+   public:
+    // do not support multiple pointer and pointer of array, i'm tired.
+    BasicTypeAST *ref;
+    SymbolDescriptor *_descriptor;
+    PointerTypeDeclAST(BasicTypeAST *ref) : AST(AST_POINTER_TYPE), ref(ref) {}
+    void accept(ASTDispatcher &dispatcher) override;
+};
+
 class NumberExprAST : public ExprAST {
    public:
     double val_float;
@@ -147,12 +165,21 @@ class VariableExprAST : public ExprAST {
     void accept(ASTDispatcher &dispacher) override;
 };
 
+class UnaryExprAST : public ExprAST {
+   public:
+    ExprAST *expr;
+    std::string op;
+    UnaryExprAST(std::string op, ExprAST *expr)
+        : ExprAST(AST_UNARY_EXPR), expr(expr), op(op) {}
+    void accept(ASTDispatcher &dispacher) override;
+};
+
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
    public:
     ExprAST *LHS, *RHS;
-    char op;
-    BinaryExprAST(char op, ExprAST *lhs, ExprAST *rhs)
+    std::string op;
+    BinaryExprAST(std::string op, ExprAST *lhs, ExprAST *rhs)
         : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {}
     void accept(ASTDispatcher &dispacher) override;
 };
@@ -182,6 +209,8 @@ class VariableDeclAST : public AST {
     VariableDeclAST(VariableExprAST *sig, BasicTypeAST *type)
         : AST(AST_VARIABLE_DECL), sig(sig), varType(type) {}
     VariableDeclAST(VariableExprAST *sig, ArrayTypeDeclAST *type)
+        : AST(AST_VARIABLE_DECL), sig(sig), varType(type) {}
+    VariableDeclAST(VariableExprAST *sig, PointerTypeDeclAST *type)
         : AST(AST_VARIABLE_DECL), sig(sig), varType(type) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
@@ -281,6 +310,7 @@ class _SymbolTable {
     std::map<std::string, VariableDescriptor *> refVar;
 
     std::map<std::pair<SymbolDescriptor *, int>, std::string> hasArrayType;
+    std::map<SymbolDescriptor *, std::string> hasPointerType;
 
    public:
     _SymbolTable *parent;
@@ -289,6 +319,7 @@ class _SymbolTable {
     void insert_variable(std::string sig, VariableDescriptor *var);
     void insert_type(std::string sig, SymbolDescriptor *var);
     ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item, int sz);
+    PointerTypeDescriptor *create_pointer_type(SymbolDescriptor *item);
     VariableDescriptor *searchVariable(std::string sig);
     SymbolDescriptor *searchType(std::string sig);
 };
@@ -314,6 +345,7 @@ class SymbolTable {
     static void insertType(std::string sig, SymbolDescriptor *descriptor);
     static ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item,
                                                   int sz);
+    static PointerTypeDescriptor *create_pointer_type(SymbolDescriptor *item);
     static SymbolDescriptor *lookforType(std::string sig);
 };
 
