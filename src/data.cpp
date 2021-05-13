@@ -170,6 +170,7 @@ void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
     dispatcher.genWhileStatementBegin(this);
     this->body->accept(dispatcher);
 
+    // to get the new result of condition
     this->condition->accept(dispatcher);
     dispatcher.genWhileStatementEnd(this);
 }

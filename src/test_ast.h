@@ -3,6 +3,7 @@
 #include "gen.h"
 #include "codegen.h"
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -153,7 +154,7 @@ void TEST_funccall() {
     BlockAST *block = new BlockAST({});
 
     VariableDeclAST *decl = new VariableDeclAST(
-        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_DOUBLE));
+        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_INT));
     block->exprs.push_back(decl);
 
     BinaryExprAST *t1 = new BinaryExprAST("=", new VariableExprAST("a"),
@@ -162,16 +163,11 @@ void TEST_funccall() {
 
     vector<ExprAST *> callargs;
     callargs.push_back(
-        new BinaryExprAST("+", new NumberExprAST(1.1), new NumberExprAST(2.2)));
+        new VariableExprAST("a"));
     CallExprAST *call = new CallExprAST("write_int", callargs);
     block->exprs.push_back(call);
 
-    FunctionSignatureAST *funcsig =
-        new FunctionSignatureAST("main1", vector<VariableDeclAST *>(),
-                                 SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
-    FunctionAST *func = new FunctionAST(funcsig, block);
-
-    GlobalAST *global = new GlobalAST({}, {func}, new BlockAST({}));
+    GlobalAST *global = new GlobalAST({}, {},block);
 
     ASTDispatcher dispacher;
     global->accept(dispacher);
@@ -193,17 +189,116 @@ void TEST_pointer() {
 }
 
 void TEST_case1() {
-    GlobalAST *global = new GlobalAST(
-        {new VariableDeclAST(new VariableExprAST("i"),
-                             new BasicTypeAST(TYPE_BASIC_INT))},
+    GlobalAST *global = new GlobalAST({
+        new VariableDeclAST(
+            new VariableExprAST("i"),
+            new BasicTypeAST(TYPE_BASIC_INT)
+        )},
         {},
-        new BlockAST({new ForStatementAST(
-            new VariableExprAST("i"), new NumberExprAST(1),
-            new NumberExprAST(5),
-            new BlockAST(
-                {new CallExprAST("write_int", {new VariableExprAST("i")}),
-                 new CallExprAST("write_str",
-                                 {new StringExprAST("hello, world\\n")})}))}));
+        new BlockAST(
+            {
+                new ForStatementAST(
+                    new VariableExprAST("i"),
+                    new NumberExprAST(1),
+                    new NumberExprAST(5),
+                    new BlockAST(
+                        {
+                            new CallExprAST("write_int", {
+                                new VariableExprAST("i")
+                            }
+                            ),
+                            new CallExprAST(
+                                "write_str",
+                                {
+                                    new StringExprAST("hello, world\\n")
+                                }
+                            )
+                        }
+                    )
+                )
+            }
+        )
+    );
+
+    ASTDispatcher dispacher;
+    global->accept(dispacher);
+}
+
+void TEST_fibonacci(){
+    GlobalAST *global = new GlobalAST(
+        {
+            new VariableDeclAST(
+                new VariableExprAST("i"),
+                new BasicTypeAST(TYPE_BASIC_INT)
+            ),
+            new VariableDeclAST(
+                new VariableExprAST("a"),
+                new BasicTypeAST(TYPE_BASIC_INT)
+            ),
+            new VariableDeclAST(
+                new VariableExprAST("b"),
+                new BasicTypeAST(TYPE_BASIC_INT)
+            ),
+            new VariableDeclAST(
+                new VariableExprAST("c"),
+                new BasicTypeAST(TYPE_BASIC_INT)
+            ),
+        },
+        {},
+        new BlockAST(
+            {
+                new BinaryExprAST(
+                    "=",
+                    new VariableExprAST("a"),
+                    new NumberExprAST(0)
+                ),
+                new BinaryExprAST(
+                    "=",
+                    new VariableExprAST("b"),
+                    new NumberExprAST(1)
+                ),
+                new ForStatementAST(
+                    new VariableExprAST("i"),
+                    new NumberExprAST(1),
+                    new NumberExprAST(5),
+                    new BlockAST(
+                        {
+                            new BinaryExprAST(
+                                "=",
+                                new VariableExprAST("c"),
+                                new BinaryExprAST(
+                                    "+",
+                                    new VariableExprAST("a"),
+                                    new VariableExprAST("b")
+                                )
+                            ),
+                            new BinaryExprAST(
+                                "=",
+                                new VariableExprAST("a"),
+                                new VariableExprAST("b")
+                            ),
+                            new BinaryExprAST(
+                                "=",
+                                new VariableExprAST("b"),
+                                new VariableExprAST("c")
+                            ),
+                            new CallExprAST("write_int", 
+                                {
+                                    new VariableExprAST("a")
+                                }
+                            ),
+                            new CallExprAST(
+                                "write_str",
+                                {
+                                    new StringExprAST("\\n")
+                                }
+                            )
+                        }
+                    )
+                )
+            }
+        )
+    );
 
     ASTDispatcher dispacher;
     global->accept(dispacher);
@@ -224,12 +319,13 @@ int RUN_TEST(){
     // TEST_struct();
     // TEST_pointer();
     // TEST_case1();
+    TEST_fibonacci();
 
     CodeCollector::end_section(PLACE_END);
 
     CodeCollector::rearrange_section("global_define", 0);
     CodeCollector::rearrange_section("prelude", 0);
 
-    // ofstream codeOut("out.cpp");
-    CodeCollector::output();
+    ofstream codeOut("out.cpp");
+    CodeCollector::output(codeOut);
 }

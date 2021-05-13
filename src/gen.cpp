@@ -185,8 +185,9 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
         CodeCollector::push_back();
         ast->value = t;
     } else {
+        // FIX: calculate type
         VariableDescriptor *t = SymbolTable::createVariable(
-            SymbolTable::lookforType(TYPE_BASIC_DOUBLE));
+            lhs->varType);
         putVariableDecl(t);
 
         putVariableExpr(t);
