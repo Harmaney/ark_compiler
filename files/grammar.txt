@@ -2,25 +2,24 @@ S -> ProgramStruct @
 ProgramStruct -> ProgramHead ; ProgramBody . @
 ProgramHead -> program ID @
 ProgramHead -> program ID ( IDList ) @
-ProgramBody -> ConstDeclarations TypeDeclarations VarDeclarations SubprogramDeclarations CompoundStatement @
+ProgramBody -> Component CompoundStatement @
+Component -> const ConstDeclaration ; Component @
+Component -> type TypeDeclaration ; Component @
+Component -> var VarDeclaration ; Component @
+Component -> Subprogram ; Component @
+Component -> @
 IDList -> IDList , ID @
-IDList -> ID @                                                                    
-ConstDeclarations -> const ConstDeclaration ; @
-ConstDeclarations -> @
+IDList -> ID @ 
 ConstDeclaration -> ConstDeclaration ; ID = ConstValue @
 ConstDeclaration -> ID = ConstValue @
 ConstValue -> + num @
 ConstValue -> - num @
 ConstValue -> num @
 ConstValue -> ' letter ' @
-TypeDeclarations -> type TypeDeclaration ; @
-TypeDeclarations -> @
 TypeDeclaration -> TypeDeclaration ; ID = ActualType @
 TypeDeclaration -> ID = ActualType @
 ActualType -> Type @
 ActualType -> record VarDeclaration ; end @
-VarDeclarations -> var VarDeclaration ; VarDeclarations @
-VarDeclarations -> @
 VarDeclaration -> VarDeclaration ; IDList : Type @
 VarDeclaration -> IDList : Type @
 Type -> ^ BasicType @
@@ -35,12 +34,11 @@ BasicType -> char @
 BasicType -> recordtype @
 Period -> Period , digits .. digits @
 Period -> digits .. digits @
-SubprogramDeclarations -> SubprogramDeclarations Subprogram ; @
-SubprogramDeclarations -> @
 Subprogram -> SubprogramHead ; SubprogramBody @
 SubprogramHead -> procedure ID FormalParameter @
 SubprogramHead -> function ID FormalParameter : BasicType @
 FormalParameter -> ( ParameterList ) @
+FormalParameter -> ( ) @
 FormalParameter -> @
 ParameterList -> ParameterList ; Parameter @
 ParameterList -> Parameter @
@@ -48,7 +46,10 @@ Parameter -> VarParameter @
 Parameter -> ValueParameter @
 VarParameter -> var ValueParameter @
 ValueParameter -> IDList : BasicType @
-SubprogramBody -> ConstDeclarations VarDeclarations CompoundStatement @
+SubprogramBody -> SubComponent CompoundStatement @
+SubComponent -> const ConstDeclaration ; SubComponent @
+SubComponent -> var VarDeclaration ; SubComponent @
+SubComponent -> @
 CompoundStatement -> begin StatementList end @
 StatementList -> StatementList ; Statement @
 StatementList -> Statement @
@@ -70,6 +71,7 @@ IDVarpart -> [ ExpressionList ] @
 IDVarpart -> @
 ProcedureCall -> ID @
 ProcedureCall -> ID ( ExpressionList ) @
+ProcedureCall -> ID ( ) @
 ElsePart -> else Statement @
 ElsePart -> @
 ExpressionList -> ExpressionList , Expression @
@@ -93,4 +95,5 @@ num -> float @
 digits -> int @
 addOP -> + @
 addOP -> - @
-addOP -> or
+addOP -> or @
+relOP -> = @
