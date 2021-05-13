@@ -206,8 +206,9 @@ class UnaryExprAST : public ExprAST {
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
    public:
-    ExprAST *LHS, *RHS;
     std::string op;
+    ExprAST *LHS, *RHS;
+
     BinaryExprAST(std::string op, ExprAST *lhs, ExprAST *rhs)
         : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {}
     void accept(ASTDispatcher &dispacher) override;
