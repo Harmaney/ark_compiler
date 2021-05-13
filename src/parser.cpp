@@ -490,3 +490,4 @@ void parser_work(string file_name){
 	cout<<"?"<<endl;
 	analyse(file_name);
 	check_grammar_tree(0,0);
+}
