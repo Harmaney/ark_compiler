@@ -1,10 +1,7 @@
-#include "parser.h"
-
-#include <bits/stdc++.h>
-
-#include "cJSON.h"
-#include "data.h"
-#define inset(y, x) x.find(y) != x.end()
+#include<bits/stdc++.h>
+#include"parser.h"
+#include"data.h"
+#define inset(y,x) x.find(y)!=x.end()
 #define table_exist 1
 using namespace std;
 
