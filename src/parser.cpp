@@ -366,6 +366,8 @@ newinput get_newinput(ifstream &inf){
 vector<int> State;
 vector<string> Symbol;
 vector<AST> Ast_Node;
+vector<string> IDlist,Varlist,Paralist;
+vector<AST> Statelist;
 
 void do_reduce(Production prod,vector<int> &State,vector<string> &Symbol,vector<AST> &Ast_Node){
 	int pop_num = prod.second.size();
