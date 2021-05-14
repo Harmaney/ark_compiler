@@ -420,11 +420,11 @@ int RUN_TEST(){
     // TEST_arraydecl();
     // TEST_arrayuse();
     // TEST_arrayofarray();
-    // TEST_arrayofarrayuse();
+    TEST_arrayofarrayuse();
     // TEST_while();
     // TEST_funcdef();
     // TEST_funccall();
-    TEST_struct();
+    // TEST_struct();
     // TEST_pointer();
     // TEST_case1();
     // TEST_fibonacci();
