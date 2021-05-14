@@ -118,24 +118,25 @@ class ExprAST : public AST {
 };
 
 /// 类型定义AST的抽象类
-class TypeDeclAST:public AST{
-    public:
+class TypeDeclAST : public AST {
+   public:
     SymbolDescriptor *_descriptor;
-    TypeDeclAST(ASTKind kind):AST(kind){}
+    TypeDeclAST(ASTKind kind) : AST(kind) {}
 };
 
 /// 基本类型。比如 int
 class BasicTypeAST : public TypeDeclAST {
    public:
     std::string varType;
-    BasicTypeAST(std::string varType) : TypeDeclAST(AST_BASIC_TYPE), varType(varType) {}
+    BasicTypeAST(std::string varType)
+        : TypeDeclAST(AST_BASIC_TYPE), varType(varType) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
 /// 数组类型。可以继续在它下面挂数组，但是我不知道翻译会不会出问题
 class ArrayTypeDeclAST : public TypeDeclAST {
    public:
-   // does not support pointer
+    // does not support pointer
     TypeDeclAST *itemAST;
     int rangeL, rangeR;
     ArrayTypeDeclAST(BasicTypeAST *itemAST, int rangeL, int rangeR)
@@ -156,7 +157,8 @@ class PointerTypeDeclAST : public TypeDeclAST {
    public:
     // do not support multiple pointer and pointer of array, i'm tired.
     BasicTypeAST *ref;
-    PointerTypeDeclAST(BasicTypeAST *ref) : TypeDeclAST(AST_POINTER_TYPE), ref(ref) {}
+    PointerTypeDeclAST(BasicTypeAST *ref)
+        : TypeDeclAST(AST_POINTER_TYPE), ref(ref) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -204,8 +206,9 @@ class UnaryExprAST : public ExprAST {
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
    public:
-    ExprAST *LHS, *RHS;
     std::string op;
+    ExprAST *LHS, *RHS;
+
     BinaryExprAST(std::string op, ExprAST *lhs, ExprAST *rhs)
         : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {}
     void accept(ASTDispatcher &dispacher) override;
@@ -347,7 +350,7 @@ class _SymbolTable {
    public:
     int group;
     _SymbolTable *parent;
-    _SymbolTable(int group):group(group),nextSlot(0),parent(NULL){}
+    _SymbolTable(int group) : group(group), nextSlot(0), parent(NULL) {}
     std::string getSlot();
     void insert_variable(std::string sig, VariableDescriptor *var);
     void insert_type(std::string sig, SymbolDescriptor *var);

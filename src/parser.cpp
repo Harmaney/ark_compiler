@@ -1,180 +1,177 @@
-#include<bits/stdc++.h>
-#include"parser.h"
-#include"data.h"
-#define inset(y,x) x.find(y)!=x.end()
+#include "parser.h"
+
+#include <bits/stdc++.h>
+
+#include "data.h"
+using Json = nlohmann::json;
+
+#define inset(y, x) x.find(y) != x.end()
 #define table_exist 1
 using namespace std;
 
 string S;
 set<string> Terminal, Nonterminal;
-typedef pair<string, vector<string>> Production;
-vector<Production> Productions;
-map<int, Production> Production_content;
-map<Production, int> Production_ID;
+typedef pair<string, vector<string>> Expr;
+vector<Expr> Productions;
+map<int, Expr> Production_content;
+map<Expr, int> Production_ID;
 int Production_num = 0;
 vector<string> empty_vec;
 map<string, set<string>> First;
 map<string, set<vector<string>>> RHS_set;
 set<string> Get_epsilon;
 
-typedef unsigned long long ull;
-ull ran() {
-  static ull x = 2018210789;
-  x ^= (x << 17);
-  x ^= (x >> 13);
-  x ^= (x << 7);
-  return x;
-}
+std::default_random_engine rng(2018210789);
 
 void init() {
-  ifstream input("../files/./grammar.txt");
-  int mode = 0;
-  string LHS;
-  vector<string> RHS;
-  while (!input.eof()) {
-    string str;
-    input >> str;
-    if (str.empty()) continue;
-    if (str == "->")
-      mode = 1;
-    else if (str == "@" || str == "|") {
-      RHS_set[LHS].insert(RHS);
+    ifstream input("../files/./grammar.txt");
+    int mode = 0;
+    string LHS;
+    vector<string> RHS;
+    while (!input.eof()) {
+        string str;
+        input >> str;
+        if (str.empty()) continue;
+        if (str == "->")
+            mode = 1;
+        else if (str == "@" || str == "|") {
+            RHS_set[LHS].insert(RHS);
 
-      Production prod = make_pair(LHS, RHS);
-      Productions.push_back(prod);
-      Production_ID[prod] = ++Production_num;
-      Production_content[Production_num] = prod;
+            Expr prod = make_pair(LHS, RHS);
+            Productions.push_back(prod);
+            Production_ID[prod] = ++Production_num;
+            Production_content[Production_num] = prod;
 
-      if (RHS.empty()) Get_epsilon.insert(LHS);
-      RHS.clear();
-      if (str == "@") mode = 0;
-    } else if (mode == 0) {
-      LHS = str, Nonterminal.insert(str);
-      if (S.empty()) S = LHS;
-    } else
-      RHS.push_back(str), Terminal.insert(str);
-  }
-  for (auto str : Nonterminal) Terminal.erase(str);
+            if (RHS.empty()) Get_epsilon.insert(LHS);
+            RHS.clear();
+            if (str == "@") mode = 0;
+        } else if (mode == 0) {
+            LHS = str, Nonterminal.insert(str);
+            if (S.empty()) S = LHS;
+        } else
+            RHS.push_back(str), Terminal.insert(str);
+    }
+    for (auto str : Nonterminal) Terminal.erase(str);
 
-  //	for(auto str:Nonterminal){
-  //		cout<<str<<"->";
-  //		for(auto RHS:RHS_set[str]){
-  //			for(auto x:RHS) cout<<x<<" ";
-  //			cout<<" | ";
-  //		}
-  //		cout<<endl;
-  //	}
+    //	for(auto str:Nonterminal){
+    //		cout<<str<<"->";
+    //		for(auto RHS:RHS_set[str]){
+    //			for(auto x:RHS) cout<<x<<" ";
+    //			cout<<" | ";
+    //		}
+    //		cout<<endl;
+    //	}
 
-  //	for(auto str:Nonterminal) cout<<str<<endl;
-  //	cout<<"Terminal\n";
-  //	for(auto str:Terminal) cout<<str<<endl;
+    //	for(auto str:Nonterminal) cout<<str<<endl;
+    //	cout<<"Terminal\n";
+    //	for(auto str:Terminal) cout<<str<<endl;
 }
 
 template <typename T>
 bool merge(const set<T> &A, set<T> &B) {
-  bool flg = false;
-  for (auto x : A) {
-    if (B.find(x) == B.end()) {
-      flg = true;
-      B.insert(x);
+    bool flg = false;
+    for (auto x : A) {
+        if (B.find(x) == B.end()) {
+            flg = true;
+            B.insert(x);
+        }
     }
-  }
-  return flg;
+    return flg;
 }
 
 set<string> get_first(vector<string> strlist) {
-  set<string> res;
-  vector<string>::iterator it = strlist.begin();
-  string Head = *it;
-  while (1) {
-    merge(First[Head], res);
-    if (inset(Head, Terminal)) break;
-    if (inset(Head, Get_epsilon)) {
-      it++;
-      if (it == strlist.end()) {
-        merge(First[""], res);
-        break;
-      } else {
-        Head = *it;
-      }
-    } else
-      break;
-  }
-  return res;
+    set<string> res;
+    vector<string>::iterator it = strlist.begin();
+    string Head = *it;
+    while (1) {
+        merge(First[Head], res);
+        if (inset(Head, Terminal)) break;
+        if (inset(Head, Get_epsilon)) {
+            it++;
+            if (it == strlist.end()) {
+                merge(First[""], res);
+                break;
+            } else {
+                Head = *it;
+            }
+        } else
+            break;
+    }
+    return res;
 }
 
 void get_first() {
-  for (auto x : Terminal) First[x].insert(x);
-  First["$"].insert("$");
-  First[""].insert("");
-  bool changed = true;
-  while (changed) {
-    changed = false;
-    for (auto LHS : Nonterminal) {
-      for (auto RHS : RHS_set[LHS]) {
-        if (RHS.empty()) continue;
-        changed |= merge(get_first(RHS), First[LHS]);
-      }
+    for (auto x : Terminal) First[x].insert(x);
+    First["$"].insert("$");
+    First[""].insert("");
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        for (auto LHS : Nonterminal) {
+            for (auto RHS : RHS_set[LHS]) {
+                if (RHS.empty()) continue;
+                changed |= merge(get_first(RHS), First[LHS]);
+            }
+        }
     }
-  }
 
-  //	for(auto str:Terminal){
-  //		cout<<str<<":";
-  //		for(auto x:First[str]) cout<<x<<" ";
-  //		cout<<endl;
-  //	}
-  //
-  //	for(auto str:Nonterminal){
-  //		cout<<str<<":";
-  //		for(auto x:First[str]) cout<<x<<" ";
-  //		cout<<endl;
-  //	}
+    //	for(auto str:Terminal){
+    //		cout<<str<<":";
+    //		for(auto x:First[str]) cout<<x<<" ";
+    //		cout<<endl;
+    //	}
+    //
+    //	for(auto str:Nonterminal){
+    //		cout<<str<<":";
+    //		for(auto x:First[str]) cout<<x<<" ";
+    //		cout<<endl;
+    //	}
 }
 
 // typedef tuple<string,vector<string>,vector<string>,string>
 // Item;//0A->1a.2Bb,3x
 bool operator<(vector<string> A, vector<string> B) {
-  for (int i = 0; i < A.size() && i < B.size(); i++) {
-    if (A[i] != B[i]) return A[i] < B[i];
-  }
-  if (A.size() != B.size()) return A.size() < B.size();
+    for (int i = 0; i < A.size() && i < B.size(); i++) {
+        if (A[i] != B[i]) return A[i] < B[i];
+    }
+    if (A.size() != B.size()) return A.size() < B.size();
 }
 bool operator==(vector<string> A, vector<string> B) {
-  if (A.size() != B.size()) return false;
-  for (int i = 0; i < A.size() && i < B.size(); i++) {
-    if (A[i] != B[i]) return false;
-  }
-  return true;
+    if (A.size() != B.size()) return false;
+    for (int i = 0; i < A.size() && i < B.size(); i++) {
+        if (A[i] != B[i]) return false;
+    }
+    return true;
 }
 struct Item {
-  string LHS;
-  string LookAhead;
-  vector<string> previous, next;
-  Item() {}
-  Item(string LHS, vector<string> previous, vector<string> next,
-       string LookAhead)
-      : LHS(LHS), previous(previous), next(next), LookAhead(LookAhead) {}
-  bool operator<(const Item other) const {
-    if (LHS != other.LHS) {
-      return LHS < other.LHS;
-    } else if (!(previous == other.previous)) {
-      return previous < other.previous;
-    } else if (!(next == other.next)) {
-      return next < other.next;
-    } else
-      return LookAhead < other.LookAhead;
-  }
-  bool operator==(const Item other) const {
-    if (LHS != other.LHS) {
-      return false;
-    } else if (!(previous == other.previous)) {
-      return false;
-    } else if (!(next == other.next)) {
-      return false;
-    } else if (LookAhead != other.LookAhead)
-      return false;
-    return true;
-  }
+    string LHS;
+    string LookAhead;
+    vector<string> previous, next;
+    Item() {}
+    Item(string LHS, vector<string> previous, vector<string> next,
+         string LookAhead)
+        : LHS(LHS), previous(previous), next(next), LookAhead(LookAhead) {}
+    bool operator<(const Item other) const {
+        if (LHS != other.LHS) {
+            return LHS < other.LHS;
+        } else if (!(previous == other.previous)) {
+            return previous < other.previous;
+        } else if (!(next == other.next)) {
+            return next < other.next;
+        } else
+            return LookAhead < other.LookAhead;
+    }
+    bool operator==(const Item other) const {
+        if (LHS != other.LHS) {
+            return false;
+        } else if (!(previous == other.previous)) {
+            return false;
+        } else if (!(next == other.next)) {
+            return false;
+        } else if (LookAhead != other.LookAhead)
+            return false;
+        return true;
+    }
 };
 
 map<set<Item>, int> Item_set;
@@ -182,51 +179,52 @@ map<int, set<Item>> Item_content;
 int item_num = 0;
 
 set<Item> get_closure(Item I) {
-  set<Item> J;
-  J.insert(I);
-  bool changed = true;
-  do {
-    changed = false;
-    set<Item> J_new;
-    set<Item> J_add;
-    merge(J, J_new);
-    for (auto item : J_new) {
-      vector<string> next = item.next;
-      if (next.empty()) continue;
-      string B = *next.begin();  // B
-      vector<string> temp = next;
-      temp.erase(temp.begin());
-      temp.push_back(item.LookAhead);  // temp = bx
+    set<Item> J;
+    J.insert(I);
+    bool changed = true;
+    do {
+        changed = false;
+        set<Item> J_new;
+        set<Item> J_add;
+        merge(J, J_new);
+        for (auto item : J_new) {
+            vector<string> next = item.next;
+            if (next.empty()) continue;
+            string B = *next.begin();  // B
+            vector<string> temp = next;
+            temp.erase(temp.begin());
+            temp.push_back(item.LookAhead);  // temp = bx
 
-      set<string> bx_first = get_first(temp);
+            set<string> bx_first = get_first(temp);
 
-      for (auto RHS : RHS_set[B]) {
-        for (auto str : bx_first) {
-          Item new_item = Item(B, empty_vec, RHS, str);  // B->.y,bx
-          J_add.insert(new_item);
+            for (auto RHS : RHS_set[B]) {
+                for (auto str : bx_first) {
+                    Item new_item = Item(B, empty_vec, RHS, str);  // B->.y,bx
+                    J_add.insert(new_item);
+                }
+            }
         }
-      }
-    }
-    changed |= merge(J_add, J);
-  } while (changed);
-  return J;
+        changed |= merge(J_add, J);
+    } while (changed);
+    return J;
 }
 
 set<Item> GO(set<Item> I, string X) {
-  set<Item> J;
-  for (auto item : I) {
-    // A->a.Bb,x
-    if (item.next.empty()) continue;
-    if (*item.next.begin() == X) {
-      item.previous.push_back(*item.next.begin());
-      item.next.erase(item.next.begin());
-      merge(get_closure(item), J);
+    set<Item> J;
+    for (auto item : I) {
+        // A->a.Bb,x
+        if (item.next.empty()) continue;
+        if (*item.next.begin() == X) {
+            item.previous.push_back(*item.next.begin());
+            item.next.erase(item.next.begin());
+            merge(get_closure(item), J);
+        }
     }
-  }
-  return J;
+    return J;
 }
 
 void get_items() {
+<<<<<<< HEAD
   Item_content[item_num] =
       get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"));
   Item_set[get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"))] =
@@ -256,239 +254,316 @@ void get_items() {
 						itemout<<x.LookAhead<<endl;
 					}
         }
-      }
-    }
-  } while (changed);
-  printf("%d\n", item_num);
+    } while (changed);
+    printf("%d\n", item_num);
 }
 
 enum ACTION { Shift = 1, Reduce, ACC };
-map<pair<int, string>, pair<ACTION, int>> Action;
+map<pair<int, string>, pair<ACTION, int>> actionTable;
 map<pair<int, string>, int> Goto;
 
-void add_Action(pair<ACTION, int> act, pair<int, string> pos) {
-  if (Action.count(pos)) {
-    if (Action[pos] != act) {
-      if (Action[pos].first == Shift) return;
-      //			cout << "???" << endl;
-      //			cout << Action[pos].first << " " <<
-      // Action[pos].second << endl; 			cout << act.first << "
-      // " << act.second <<
-      // endl; 			cout << pos.first << " " << pos.second << endl;
+void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
+    if (actionTable.count(pos)) {
+        if (actionTable[pos] != act) {
+            if (actionTable[pos].first == Shift) return;
+            //			cout << "???" << endl;
+            //			cout << Action[pos].first << " " <<
+            // Action[pos].second << endl; 			cout <<
+            // act.first
+            // << " " << act.second <<
+            // endl; 			cout << pos.first << " " << pos.second
+            // << endl;
+        }
     }
-  }
-  Action[pos] = act;
+    actionTable[pos] = act;
 }
 
-void load_table() {
-  ifstream inf("../files/analyse_table.txt");
-  int I, id, ACT_id;
-  string a;
-  while (!inf.eof()) {
-    inf >> I >> a >> ACT_id >> id;
-    if (id == -1) {
-      Goto[make_pair(I, a)] = ACT_id;
-    } else {
-      enum ACTION ACT;
-      if (ACT_id == 1)
-        ACT = Shift;
-      else if (ACT_id == 2)
-        ACT = Reduce;
-      else if (ACT_id == 3)
-        ACT = ACC;
-      else
-        assert(0);
-      Action[make_pair(I, a)] = make_pair(ACT, id);
+void LoadTable() {
+    ifstream inf("../files/analyse_table.txt");
+    int I, id, ACT_id;
+    string a;
+    while (!inf.eof()) {
+        inf >> I >> a >> ACT_id >> id;
+        if (id == -1) {
+            Goto[make_pair(I, a)] = ACT_id;
+        } else {
+            enum ACTION ACT;
+            if (ACT_id == 1)
+                ACT = Shift;
+            else if (ACT_id == 2)
+                ACT = Reduce;
+            else if (ACT_id == 3)
+                ACT = ACC;
+            else
+                assert(0);
+            actionTable[make_pair(I, a)] = make_pair(ACT, id);
+        }
     }
-  }
 }
 
 void generate_table() {
-  if (table_exist) {
-    load_table();
-    return;
-  }
-  get_items();
-  for (auto I : Item_set) {
-    for (auto it : I.first) {
-      vector<string> next = it.next;
-      if (!next.empty()) {
-        add_Action(make_pair(Shift, Item_set[GO(I.first, *next.begin())]),
-                   make_pair(I.second, *next.begin()));
-      } else if (it.LHS != S) {
-        add_Action(
-            make_pair(Reduce, Production_ID[make_pair(it.LHS, it.previous)]),
-            make_pair(I.second, it.LookAhead));
-      } else {
-        add_Action(make_pair(ACC, 0), make_pair(I.second, it.LookAhead));
-      }
+    if (table_exist) {
+        LoadTable();
+        return;
     }
-    for (auto A : Nonterminal) {
-      set<Item> GoIA = GO(I.first, A);
-      if (GoIA.empty()) continue;
-      Goto[make_pair(I.second, A)] = Item_set[GoIA];
+    get_items();
+    for (auto I : Item_set) {
+        for (auto it : I.first) {
+            vector<string> next = it.next;
+            if (!next.empty()) {
+                AddAction(
+                    make_pair(Shift, Item_set[GO(I.first, *next.begin())]),
+                    make_pair(I.second, *next.begin()));
+            } else if (it.LHS != S) {
+                AddAction(
+                    make_pair(Reduce,
+                              Production_ID[make_pair(it.LHS, it.previous)]),
+                    make_pair(I.second, it.LookAhead));
+            } else {
+                AddAction(make_pair(ACC, 0), make_pair(I.second, it.LookAhead));
+            }
+        }
+        for (auto A : Nonterminal) {
+            set<Item> GoIA = GO(I.first, A);
+            if (GoIA.empty()) continue;
+            Goto[make_pair(I.second, A)] = Item_set[GoIA];
+        }
     }
-  }
-  ofstream of("../files/analyse_table.txt");
-  for (auto I : Item_set) {
-    for (auto a : Terminal) {
-      if (Action.count(make_pair(I.second, a))) {
-        of << I.second << " " << a << " "
-           << Action[make_pair(I.second, a)].first << " "
-           << Action[make_pair(I.second, a)].second << endl;
-      }
+    ofstream of("../files/analyse_table.txt");
+    for (auto I : Item_set) {
+        for (auto a : Terminal) {
+            if (actionTable.count(make_pair(I.second, a))) {
+                of << I.second << " " << a << " "
+                   << actionTable[make_pair(I.second, a)].first << " "
+                   << actionTable[make_pair(I.second, a)].second << endl;
+            }
+        }
+        if (actionTable.count(make_pair(I.second, "$"))) {
+            of << I.second << " "
+               << "$"
+               << " " << actionTable[make_pair(I.second, "$")].first << " "
+               << actionTable[make_pair(I.second, "$")].second << endl;
+        }
+        for (auto A : Nonterminal) {
+            if (Goto.count(make_pair(I.second, A))) {
+                of << I.second << " " << A << " "
+                   << Goto[make_pair(I.second, A)] << " -1" << endl;
+            }
+        }
     }
-    if (Action.count(make_pair(I.second, "$"))) {
-      of << I.second << " "
-         << "$"
-         << " " << Action[make_pair(I.second, "$")].first << " "
-         << Action[make_pair(I.second, "$")].second << endl;
-    }
-    for (auto A : Nonterminal) {
-      if (Goto.count(make_pair(I.second, A))) {
-        of << I.second << " " << A << " " << Goto[make_pair(I.second, A)]
-           << " -1" << endl;
-      }
-    }
-  }
-  cout << "table ready" << endl;
+    cout << "table ready" << endl;
 }
 
-struct newinput {
-  string word, type, now_str;
-  int row, column;
-  newinput(string word, string type, string now_str, int row, int column)
-      : word(word), type(type), now_str(now_str), row(row), column(column) {}
-};
-newinput get_newinput(ifstream &inf) {
-  //	if(inf.eof()) return newinput("","","$",0,0);
-  string word, type, now_str;
-  int row, column;
-  inf >> word >> row >> column >> type;
-  if (word == "") return newinput("", "", "$", 0, 0);
-  if (type == "keyword" || type == "punc") {
-    if (word == ":=")
-      now_str = "assignOP";
-    else if (word == "=" || word == "<>" || word == ">" || word == "<" ||
-             word == ">=" || word == "<=")
-      now_str = "relOP";
-    else if (word == "*" || word == "/" || word == "div" || word == "mod" ||
-             word == "and")
-      now_str = "mulOP";
-    else
-      now_str = word;
-  } else if (type == "identify")
-    now_str = "ID";
-  else if (type == "int" || type == "float" || type == "string")
-    now_str = type;
-  else
-    now_str = word;
-  return newinput(word, type, now_str, row, column);
-}
-
-struct GrammarTreeNode{
-	string word,type;
-	int row,column;
-	ull ID;
-	GrammarTreeNode(string word,string type,int row,int column,ull ID):
-		word(word),type(type),row(row),column(column),ID(ID) {}
+struct TokenItem {
+    string raw, type, parserSymbol;
+    int row, column;
+    TokenItem() {}
+    TokenItem(string raw, string type, string parserSymbol, int row, int column)
+        : raw(raw),
+          type(type),
+          parserSymbol(parserSymbol),
+          row(row),
+          column(column) {}
 };
 
-vector<int> State;
-vector<string> Symbol;
-vector<GrammarTreeNode> GNode;
-vector<AST*> Ast_Node;
-map<ull,vector<GrammarTreeNode> > GrammarTree;
-vector<string> IDlist,Varlist,Paralist;
-vector<AST*> Statelist;
-int now_state;
-
-void do_reduce(Production prod,vector<int> &State,vector<string> &Symbol,vector<AST*> &Ast_Node){
-	//cout<<"?????"<<endl;
-	int pop_num = prod.second.size();
-	vector<AST*> Reduced_AST;
-	vector<GrammarTreeNode> Reduced_Node;
-	for(int i = 0; i < pop_num; i++){
-		State.pop_back();
-		Symbol.pop_back();
-		Reduced_Node.push_back(*GNode.rbegin());
-		GNode.pop_back();
-		//Reduced_AST.push_back(*Ast_Node.rbegin());
-		//Ast_Node.pop_back();
-	}
-	now_state = *State.rbegin();
-	State.push_back(Goto[make_pair(now_state,prod.first)]);
-	Symbol.push_back(prod.first);
-	ull gid=ran();
-	GrammarTreeNode new_Node = GrammarTreeNode(prod.first,prod.first,0,0,gid);
-	reverse(Reduced_Node.begin(),Reduced_Node.end());
-	for(auto node:Reduced_Node) GrammarTree[gid].push_back(node);
-	GNode.push_back(new_Node);
-
+std::ifstream &operator>>(std::ifstream &ifs, TokenItem &item) {
+    std::string raw, type;
+    int row, column;
+    ifs >> raw >> row >> column >> type;
+    if (raw == "")
+        item = {"", "", "$", 0, 0};
+    else {
+        string parserSymbol;
+        if (type == "keyword" || type == "punc") {
+            if (raw == ":=")
+                parserSymbol = "assignOP";
+            else if (raw == "=" || raw == "<>" || raw == ">" || raw == "<" ||
+                     raw == ">=" || raw == "<=")
+                parserSymbol = "relOP";
+            else if (raw == "*" || raw == "/" || raw == "div" || raw == "mod" ||
+                     raw == "and")
+                parserSymbol = "mulOP";
+            else
+                parserSymbol = raw;
+        } else if (type == "identify")
+            parserSymbol = "ID";
+        else if (type == "int" || type == "float" || type == "string")
+            parserSymbol = type;
+        else
+            parserSymbol = raw;
+        item = {raw, type, parserSymbol, row, column};
+    }
+    return ifs;
 }
 
-void analyse(string file_name){
-	
-	/*for(auto I:Item_content){
-		cout<<I.first<<endl;
-		for(auto it:I.second){
-			cout<<it.LHS<<"-> ";
-			for(auto str:it.previous) cout<<str<<" ";
-			cout<<". ";
-			for(auto str:it.next) cout<<str<<" ";
-			cout<<","<<it.LookAhead<<endl;
-		}
-	}*/
-	cout<<"start analyse"<<endl;
-	
-	ifstream inf(file_name);
-	string now_str;
-	State.push_back(0);
-	Symbol.push_back("");
-	newinput N = get_newinput(inf);
-	do{
-		
-		now_state = *State.rbegin();
-//		cout<<"state:"<<now_state<<" str: "<<N.word<<" type: "<<N.now_str<<endl;
-		
-		if(Action.count(make_pair(now_state,N.now_str)) == 0) assert(0);
-		pair<ACTION,int> act = Action[make_pair(now_state,N.now_str)];
-		if(act.first == Shift) {
-			State.push_back(act.second);
-			Symbol.push_back(N.now_str);
-			//cout<<"shift"<<endl;
-			GNode.push_back(GrammarTreeNode(N.now_str,N.type,N.row,N.column,ran()));
-			N = get_newinput(inf);
-		}else if(act.first == Reduce) {
-			Production prod = Production_content[act.second];
-			// cout<<"Reduce by:"<<prod.first<<"->";
-			// for(auto str:prod.second) cout<<" "<<str;
-			// cout<<endl;
+struct GrammarTreeNode {
+    string raw, type, parserSymbol;
+    int row, column;
+    uint64_t ID;
+    std::map<std::string, std::any> prop;
 
-			do_reduce(prod,State,Symbol,Ast_Node);
+    vector<GrammarTreeNode *> son;
+    GrammarTreeNode(string raw, string type, string parserSymbol, int row,
+                    int column, uint64_t ID)
+        : raw(raw),
+          type(type),
+          parserSymbol(parserSymbol),
+          row(row),
+          column(column),
+          ID(ID),
+          son{} {}
+};
 
-			
-		}else if(act.first == ACC) {
-			ull gid = 0;
-			GrammarTreeNode new_Node = GrammarTreeNode("","S",0,0,gid);
-			GrammarTree[gid].push_back(*GNode.rbegin());
-			cout<<"ACCEPT!"<<endl;
-			break;
-		}
-		
-	}while(1);
+vector<string> IDlist, Varlist, Paralist;
+
+void Analyse(string file_name) {
+    vector<GrammarTreeNode *> unlinkedNodes;
+    int curState;
+    vector<int> states;
+    vector<string> symbols;
+
+    auto DoReduce = [&](Expr expr) {
+        auto UpdateProperties = [&](GrammarTreeNode *node) {
+            if (node->type == "IDList") {
+                if (node->son.size() == 1) {  // IDList -> ID
+                    node->prop["IDList"] = {node->son[0]->parserSymbol};
+                } else {
+                    assert(node->son.size() ==
+                           3);  //下面的IDLIST没必要正确维护，可以直接覆盖
+                    std::any_cast<std::vector<std::string> &>(
+                        node->prop["IDList"] = node->son[0]->prop["IDList"])
+                        .push_back(node->son[2]->parserSymbol);
+                }
+            } else if (node->type == "VarDeclaration") {
+                if (node->son.size() == 3) {  // VarDeclaration -> IDList : Type
+                    std::any_cast<
+                        std::vector<std::map<std::string, std::any>> &>(
+                        node->prop["PatchDecls"]) = {
+                        {{"IDList", node->son[0]->prop["IDList"]},
+                         {"Type", node->son[2]->parserSymbol}}};
+                } else {  // VarDeclaration -> VarDeclaration ; IDList :
+                          // Type
+                    assert(node->son.size() == 5);
+                    std::any_cast<
+                        std::vector<std::map<std::string, std::any>> &>(
+                        node->prop["PatchDecls"] =
+                            node->son[0]->prop["PatchDecls"])
+                        .push_back({{"IDList", node->son[2]->prop["IDList"]},
+                                    {"Type", node->son[4]->parserSymbol}});
+                }
+            } else if (node->type == "ExpressionList") {
+                if (node->son.size() == 1) {  // ExpressionList -> Expression
+                    std::any_cast<std::vector<std::any> &>(
+                        node->prop["ExpressionASTList"]) = {
+                        node->son[0]->prop["ExpressionAST"]};
+                } else {  // ExpressionList -> ExpressionList , Expression
+                    std::any_cast<std::vector<std::any> &>(
+                        node->prop["ExpressionASTList"] =
+                            node->son[0]->prop["ExpressionASTList"])
+                        .push_back(node->son[2]->prop["ExpressionAST"]);
+                }
+            } else if (node->type == "Expression") {
+                /*
+                  Expression -> SimpleExpression relOP SimpleExpression @
+                  Expression -> string @
+                  Expression -> SimpleExpression @
+                  Expression -> Expression ^ @
+                */
+                if (node->son.size() == 3) {
+                    node->prop["ExpressionAST"] = new BinaryExprAST(
+                        node->son[1]->raw,
+                        std::any_cast<ExprAST *>(
+                            node->son[0]->prop["ExpressionAST"]),
+                        std::any_cast<ExprAST *>(
+                            node->son[2]->prop["ExpressionAST"]));
+                } else if (node->son.size() == 2) {
+                    node->prop["ExpressionAST"] = new UnaryExprAST(
+                        "^", std::any_cast<ExprAST *>(
+                                 node->son[0]->prop["ExpressionAST"]));
+                } else {
+                    if (node->type == "string") {
+                        node->prop["ExpressionAST"] =
+                            new StringExprAST(node->raw);
+                    } else {
+                        node->prop["ExpressionAST"] =
+                            node->son[0]->prop["ExpressionAST"];
+                    }
+                }
+            } else if (node->type == "SimpleExpression") {
+                /*
+                SimpleExpression -> SimpleExpression addOP Term @
+                SimpleExpression -> Term @
+                */
+                if (node->son.size() == 1) {
+                  
+                }
+            }
+        };
+        int popNum = expr.second.size();
+        vector<GrammarTreeNode *> reducedNode;
+        for (int i = 0; i < popNum; i++) {
+            states.pop_back();
+            symbols.pop_back();
+            reducedNode.push_back(*unlinkedNodes.rbegin());
+            unlinkedNodes.pop_back();
+        }
+        curState = *states.rbegin();
+        states.push_back(Goto[make_pair(curState, expr.first)]);
+        symbols.push_back(expr.first);
+        uint64_t gid = rng();
+        GrammarTreeNode *newNode =
+            new GrammarTreeNode("", expr.first, expr.first, 0, 0, gid);
+        reverse(reducedNode.begin(), reducedNode.end());
+        for (auto node : reducedNode) newNode->son.push_back(node);
+        UpdateProperties(newNode);
+        unlinkedNodes.push_back(newNode);
+    };
+
+    std::cerr << "start analyse" << endl;
+
+    ifstream lexOut(file_name);
+    states.push_back(0);
+    symbols.push_back("");
+    TokenItem N;
+    lexOut >> N;
+    for (;;) {
+        curState = *states.rbegin();
+        if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0)
+            assert(0);
+        pair<ACTION, int> act =
+            actionTable[make_pair(curState, N.parserSymbol)];
+        if (act.first == Shift) {
+            states.push_back(act.second);
+            symbols.push_back(N.parserSymbol);
+            unlinkedNodes.push_back(new GrammarTreeNode(
+                N.raw, N.type, N.parserSymbol, N.row, N.column, rng()));
+            lexOut >> N;
+        } else if (act.first == Reduce) {
+            Expr prod = Production_content[act.second];
+            DoReduce(prod);
+        } else if (act.first == ACC) {
+            uint64_t gid = 0;
+            GrammarTreeNode *newNode =
+                new GrammarTreeNode("", "S", "S", 0, 0, gid);
+            newNode->son = {*unlinkedNodes.rbegin()};
+            cout << "ACCEPT!" << endl;
+            break;
+        }
+    }
 }
-void check_grammar_tree(ull gid,int dep){
-	for(auto x:GrammarTree[gid]){
-		cout<<dep<<" "<<x.word<<" "<<x.type<<endl;
-		check_grammar_tree(x.ID,dep+1);
-	}
+
+void check_grammar_tree(uint64_t gid, int dep) {
+    /*for (auto x : gramTree[gid]) {
+        cout << dep << " " << x.word << " " << x.type << endl;
+        check_grammar_tree(x.ID, dep + 1);
+    }*/
 }
-void parser_work(string file_name){
-	init();
-	get_first();
-	generate_table();
-	cout<<"?"<<endl;
-	analyse(file_name);
-	check_grammar_tree(0,0);
+
+void parser_work(string file_name) {
+    init();
+    get_first();
+    generate_table();
+    cout << "?" << endl;
+    Analyse(file_name);
+    check_grammar_tree(0, 0);
 }
