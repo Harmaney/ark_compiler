@@ -35,7 +35,7 @@ void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
             "write",
             {new VariableDescriptor(
                 "x", SymbolTable::lookforType(TYPE_BASIC_INT), false, false)},
-            SymbolTable::lookforType("int")));
+            SymbolTable::lookforType(TYPE_BASIC_VOID)));
     CodeCollector::push_back("void write_str(string x){cout<<x;}");
     SymbolTable::insertType(
         "write_str", new FunctionDescriptor(
@@ -43,12 +43,12 @@ void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
                          {new VariableDescriptor(
                              "x", SymbolTable::lookforType(TYPE_BASIC_STRING),
                              false, false)},
-                         SymbolTable::lookforType("int")));
+                         SymbolTable::lookforType(TYPE_BASIC_VOID)));
     CodeCollector::push_back("int read_int(){int x;cin>>x;return x;}");
     SymbolTable::insertType(
         "read_int",
-        new FunctionDescriptor("read", {},
-                               SymbolTable::lookforType(TYPE_BASIC_STRING)));
+        new FunctionDescriptor("read_int", {},
+                               SymbolTable::lookforType(TYPE_BASIC_INT)));
     CodeCollector::end_section();
 }
 
@@ -187,6 +187,36 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
         CodeCollector::src() << "];";
         CodeCollector::push_back();
         ast->value = t;
+    } else if (ast->op == ".") {
+        if (lhs->varType->type != DESCRIPTOR_STRUCT) {
+            throw std::invalid_argument(
+                "try to use operator `.` on invalid variable");
+        }
+        if (ast->RHS->type != AST_STRING_EXPR) {
+            throw std::invalid_argument("operator `.` takes a string as arg 2");
+        }
+        auto child_id = static_cast<StringExprAST *>(ast->RHS)->val;
+        auto array = static_cast<StructDescriptor *>(lhs->varType);
+        if (!array->refVar.count(child_id)) {
+            throw std::invalid_argument("no member `" + child_id +
+                                        "` in struct `" + array->name + "`");
+        }
+        VariableDescriptor *t =
+            SymbolTable::createVariable(array->refVar[child_id], true);
+
+        putVariableDecl(t);
+        CodeCollector::src() << ";";
+        CodeCollector::push_back();
+
+        // FIX: too ugly
+        CodeCollector::src() << t->name;
+        CodeCollector::src() << "=&(";
+        putVariableExpr(lhs);
+        CodeCollector::src() << "." << child_id;
+        CodeCollector::src() << ");";
+        CodeCollector::push_back();
+
+        ast->value = t;
     } else {
         // FIX: calculate type
         VariableDescriptor *t =
@@ -249,6 +279,20 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
                                     ast->callee);
     }
 
+    // gen var to catch result val
+    if (descriptor->resultDescriptor !=
+        SymbolTable::lookforType(TYPE_BASIC_VOID)) {
+        auto ret =
+            SymbolTable::createVariable(descriptor->resultDescriptor, false);
+    ast->value = ret;
+        putVariableDecl(ret);
+        CodeCollector::src() << ";";
+        CodeCollector::push_back();
+
+        putVariableExpr(ret);
+    CodeCollector::src() << "=";
+    }
+
     CodeCollector::src() << ast->callee << "(";
     for (int i = 0; i < ast->args.size(); i++) {
         auto d = std::any_cast<VariableDescriptor *>(ast->args[i]->value);
@@ -261,11 +305,12 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
         // we use pointer to simulate this process in c
         CodeCollector::src()
             << (descriptor->args[i]->isRef ? "&" : "") << d->name;
-        if(i!=ast->args.size()-1)CodeCollector::src() << ",";
+        if (i != ast->args.size() - 1) CodeCollector::src() << ",";
     }
 
     CodeCollector::src() << ");";
     CodeCollector::push_back();
+
 }
 
 void ASTDispatcher::genIfStatementBegin(IfStatementAST *ast) {
