@@ -134,16 +134,8 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
-    if (this->varType.type() == typeid(BasicTypeAST *)) {
-        std::any_cast<BasicTypeAST *>(this->varType)->accept(dispatcher);
-    } else if (this->varType.type() == typeid(ArrayTypeDeclAST *)) {
-        std::any_cast<ArrayTypeDeclAST *>(this->varType)->accept(dispatcher);
-    } else if (this->varType.type() == typeid(PointerTypeDeclAST *)) {
-        std::any_cast<PointerTypeDeclAST *>(this->varType)->accept(dispatcher);
-    } else {
-        throw std::invalid_argument(
-            "unknown method to declar a type for variable");
-    }
+    this->varType->accept(dispatcher);
+    
     TRACE(std::cerr<<"into variable ast"<<std::endl;)
     dispatcher.genVariableDecl(this);
     TRACE(std::cerr<<"out variable ast"<<std::endl;)
@@ -194,7 +186,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     // convert mainBlock into main function
     this->functions.push_back(new FunctionAST(
         new FunctionSignatureAST("main", {},
-                                 SymbolTable::lookforType(TYPE_BASIC_INT)),
+                                 new BasicTypeAST(TYPE_BASIC_INT)),
         this->mainBlock));
     // add return 0 to mainBlock
     this->mainBlock->exprs.push_back(new ReturnAST(new NumberExprAST(0)));
@@ -208,16 +200,18 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void FunctionAST::accept(ASTDispatcher &dispatcher) {
-    // TODO: symboltable
-    sig->accept(dispatcher);
-    body->accept(dispatcher);
+    // that's too bad
+    this->sig->resultType->accept(dispatcher);
+    this->sig->_resultType=sig->resultType->_descriptor;
+    // This is for real var
+    // for(auto arg:this->sig->args){
+    //     arg->accept(dispatcher);
+    // }
+
+    dispatcher.genFunction(this);
 }
 
 void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {
-    for (auto arg : this->args) {
-        arg->accept(dispatcher);
-    }
-    dispatcher.genFunctionSignature(this);
 }
 
 void StructDeclAST::accept(ASTDispatcher &dispatcher) {
@@ -297,28 +291,28 @@ void SymbolTable::exit() {
 }
 
 VariableDescriptor *SymbolTable::createVariable(std::string sig,
-                                                SymbolDescriptor *type) {
+                                                SymbolDescriptor *type,bool isRef) {
     current->insert_variable(sig,
-                             new VariableDescriptor(sig, type, false, false));
+                             new VariableDescriptor(sig, type, isRef, false));
     return current->searchVariable(sig);
 }
 
 VariableDescriptor *SymbolTable::createVariableG(std::string sig,
-                                                 SymbolDescriptor *type) {
-    root->insert_variable(sig, new VariableDescriptor(sig, type, false, false));
+                                                 SymbolDescriptor *type,bool isRef) {
+    root->insert_variable(sig, new VariableDescriptor(sig, type, isRef, false));
     return root->searchVariable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type) {
+VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type,bool isRef) {
     std::string sig = current->getSlot();
     current->insert_variable(sig,
-                             new VariableDescriptor(sig, type, false, false));
+                             new VariableDescriptor(sig, type, isRef, false));
     return current->searchVariable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariableG(SymbolDescriptor *type) {
+VariableDescriptor *SymbolTable::createVariableG(SymbolDescriptor *type,bool isRef) {
     std::string sig = root->getSlot();
-    root->insert_variable(sig, new VariableDescriptor(sig, type, false, false));
+    root->insert_variable(sig, new VariableDescriptor(sig, type, isRef, false));
     return root->searchVariable(sig);
 }
 

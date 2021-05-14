@@ -224,37 +224,35 @@ set<Item> GO(set<Item> I, string X) {
 }
 
 void get_items() {
-    Item_content[item_num] =
-        get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"));
-    Item_set[get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"))] =
-        item_num++;
-    set<string> Sign;
-    merge(Terminal, Sign);
-    merge(Nonterminal, Sign);
-    bool changed = true;
-    do {
-        changed = false;
-        for (auto I : Item_set) {
-            for (auto X : Sign) {
-                if (X.empty()) continue;
-                set<Item> Goix = GO(I.first, X);
-                if (!Goix.empty() && Item_set.count(Goix) == 0) {
-                    Item_content[item_num] = Goix;
-                    Item_set[Goix] = item_num++;
-                    changed = true;
-
-                    //					cout<<"================\n";
-                    //					for(auto x:Goix){
-                    //						cout<<x.LHS<<"->
-                    //"; 						for(auto
-                    // str:x.previous) cout<<str<<"
-                    //"; 						cout<<".
-                    //"; for(auto str:x.next) cout<<str<<" "; cout<<", ";
-                    // cout<<x.LookAhead<<endl;
-                    //					}
-                    cout << item_num << endl;
-                }
-            }
+<<<<<<< HEAD
+  Item_content[item_num] =
+      get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"));
+  Item_set[get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"))] =
+      item_num++;
+  set<string> Sign;
+  merge(Terminal, Sign);
+  merge(Nonterminal, Sign);
+  //ofstream itemout("item.txt");
+  bool changed = true;
+  do {
+    changed = false;
+    for (auto I : Item_set) {
+      for (auto X : Sign) {
+        if (X.empty()) continue;
+        set<Item> Goix = GO(I.first, X);
+        if (!Goix.empty() && Item_set.count(Goix) == 0) {
+          Item_content[item_num] = Goix;
+          Item_set[Goix] = item_num++;
+          changed = true;
+          // itemout<<"================\n";
+					// for(auto x:Goix){
+					// 	itemout<<x.LHS<<"-> ";
+					// 	for(auto str:x.previous) itemout<<str<<" ";
+					// 	itemout<<". ";
+					// 	for(auto str:x.next) itemout<<str<<" ";
+					// 	itemout<<", ";
+					// 	itemout<<x.LookAhead<<endl;
+					// }
         }
     } while (changed);
     printf("%d\n", item_num);
