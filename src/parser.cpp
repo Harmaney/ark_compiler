@@ -234,6 +234,7 @@ void get_items() {
   set<string> Sign;
   merge(Terminal, Sign);
   merge(Nonterminal, Sign);
+  ofstream itemout("item.txt");
   bool changed = true;
   do {
     changed = false;
@@ -245,17 +246,15 @@ void get_items() {
           Item_content[item_num] = Goix;
           Item_set[Goix] = item_num++;
           changed = true;
-
-          //					cout<<"================\n";
-          //					for(auto x:Goix){
-          //						cout<<x.LHS<<"-> ";
-          //						for(auto str:x.previous)
-          //cout<<str<<"
-          //"; 						cout<<". ";
-          //for(auto str:x.next) cout<<str<<" ";
-          //cout<<", "; 						cout<<x.LookAhead<<endl;
-          //					}
-          cout << item_num << endl;
+          itemout<<"================\n";
+					for(auto x:Goix){
+						itemout<<x.LHS<<"-> ";
+						for(auto str:x.previous) itemout<<str<<" ";
+						itemout<<". ";
+						for(auto str:x.next) itemout<<str<<" ";
+						itemout<<", ";
+						itemout<<x.LookAhead<<endl;
+					}
         }
       }
     }
