@@ -64,8 +64,6 @@ Statement -> write ( ExpressionList ) @
 Statement -> writeln ( ExpressionList ) @
 Statement -> writeln ( ) @
 Statement -> @
-VariableList -> VariableList , Variable @
-VariableList -> Variable @
 Variable -> ID IDVarpart @
 IDVarpart -> [ ExpressionList ] @
 IDVarpart -> @
@@ -92,9 +90,9 @@ Factor -> ID @
 Factor -> ( Expression ) @
 Factor -> not Factor @
 Factor -> uminus Factor @
-num -> int @
-num -> float @
-digits -> int @
+Num -> int @ 
+Num -> float @
+Digits -> int @
 addOP -> + @
 addOP -> - @
 addOP -> or @

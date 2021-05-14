@@ -398,11 +398,20 @@ std::ifstream &operator>>(std::ifstream &ifs, TokenItem &item) {
     return ifs;
 }
 
+enum NODE_PROP {
+    EXPRESSION_AST,
+    EXPRESSION_AST_LIST,
+    ID_LIST,
+    PATCH_DECLS,
+    VAR_TYPE
+};
+using PropAny = std::map<NODE_PROP, std::any>;
+
 struct GrammarTreeNode {
     string raw, type, parserSymbol;
     int row, column;
     uint64_t ID;
-    std::map<std::string, std::any> prop;
+    PropAny prop;
 
     vector<GrammarTreeNode *> son;
     GrammarTreeNode(string raw, string type, string parserSymbol, int row,
@@ -426,43 +435,49 @@ void Analyse(string file_name) {
 
     auto DoReduce = [&](Expr expr) {
         auto UpdateProperties = [&](GrammarTreeNode *node) {
+            auto CreateBinaryAST = [&]() -> ExprAST * {
+                return new BinaryExprAST(
+                    node->son[1]->raw,
+                    std::any_cast<ExprAST *>(
+                        node->son[0]->prop[EXPRESSION_AST]),
+                    std::any_cast<ExprAST *>(
+                        node->son[1]->prop[EXPRESSION_AST]));
+            };
             if (node->type == "IDList") {
                 if (node->son.size() == 1) {  // IDList -> ID
-                    node->prop["IDList"] = {node->son[0]->parserSymbol};
+                    node->prop[ID_LIST] = {node->son[0]->parserSymbol};
                 } else {
                     assert(node->son.size() ==
                            3);  //下面的IDLIST没必要正确维护，可以直接覆盖
                     std::any_cast<std::vector<std::string> &>(
-                        node->prop["IDList"] = node->son[0]->prop["IDList"])
+                        node->prop[ID_LIST] = node->son[0]->prop[ID_LIST])
                         .push_back(node->son[2]->parserSymbol);
                 }
             } else if (node->type == "VarDeclaration") {
                 if (node->son.size() == 3) {  // VarDeclaration -> IDList : Type
-                    std::any_cast<
-                        std::vector<std::map<std::string, std::any>> &>(
-                        node->prop["PatchDecls"]) = {
-                        {{"IDList", node->son[0]->prop["IDList"]},
-                         {"Type", node->son[2]->parserSymbol}}};
+                    std::any_cast<std::vector<PropAny> &>(
+                        node->prop[PATCH_DECLS]) = {
+                        {{ID_LIST, node->son[0]->prop[ID_LIST]},
+                         {VAR_TYPE, node->son[2]->parserSymbol}}};
                 } else {  // VarDeclaration -> VarDeclaration ; IDList :
                           // Type
                     assert(node->son.size() == 5);
-                    std::any_cast<
-                        std::vector<std::map<std::string, std::any>> &>(
-                        node->prop["PatchDecls"] =
-                            node->son[0]->prop["PatchDecls"])
-                        .push_back({{"IDList", node->son[2]->prop["IDList"]},
-                                    {"Type", node->son[4]->parserSymbol}});
+                    std::any_cast<std::vector<PropAny> &>(
+                        node->prop[PATCH_DECLS] =
+                            node->son[0]->prop[PATCH_DECLS])
+                        .push_back({{ID_LIST, node->son[2]->prop[ID_LIST]},
+                                    {VAR_TYPE, node->son[4]->parserSymbol}});
                 }
             } else if (node->type == "ExpressionList") {
                 if (node->son.size() == 1) {  // ExpressionList -> Expression
                     std::any_cast<std::vector<std::any> &>(
-                        node->prop["ExpressionASTList"]) = {
-                        node->son[0]->prop["ExpressionAST"]};
+                        node->prop[EXPRESSION_AST_LIST]) = {
+                        node->son[0]->prop[EXPRESSION_AST]};
                 } else {  // ExpressionList -> ExpressionList , Expression
                     std::any_cast<std::vector<std::any> &>(
-                        node->prop["ExpressionASTList"] =
-                            node->son[0]->prop["ExpressionASTList"])
-                        .push_back(node->son[2]->prop["ExpressionAST"]);
+                        node->prop[EXPRESSION_AST_LIST] =
+                            node->son[0]->prop[EXPRESSION_AST_LIST])
+                        .push_back(node->son[2]->prop[EXPRESSION_AST]);
                 }
             } else if (node->type == "Expression") {
                 /*
@@ -472,23 +487,18 @@ void Analyse(string file_name) {
                   Expression -> Expression ^ @
                 */
                 if (node->son.size() == 3) {
-                    node->prop["ExpressionAST"] = new BinaryExprAST(
-                        node->son[1]->raw,
-                        std::any_cast<ExprAST *>(
-                            node->son[0]->prop["ExpressionAST"]),
-                        std::any_cast<ExprAST *>(
-                            node->son[2]->prop["ExpressionAST"]));
+                    node->prop[EXPRESSION_AST] = CreateBinaryAST();
                 } else if (node->son.size() == 2) {
-                    node->prop["ExpressionAST"] = new UnaryExprAST(
+                    node->prop[EXPRESSION_AST] = new UnaryExprAST(
                         "^", std::any_cast<ExprAST *>(
-                                 node->son[0]->prop["ExpressionAST"]));
+                                 node->son[0]->prop[EXPRESSION_AST]));
                 } else {
                     if (node->type == "string") {
-                        node->prop["ExpressionAST"] =
+                        node->prop[EXPRESSION_AST] =
                             new StringExprAST(node->raw);
                     } else {
-                        node->prop["ExpressionAST"] =
-                            node->son[0]->prop["ExpressionAST"];
+                        node->prop[EXPRESSION_AST] =
+                            node->son[0]->prop[EXPRESSION_AST];
                     }
                 }
             } else if (node->type == "SimpleExpression") {
@@ -496,8 +506,39 @@ void Analyse(string file_name) {
                 SimpleExpression -> SimpleExpression addOP Term @
                 SimpleExpression -> Term @
                 */
-                if (node->son.size() == 1) {
-                  
+                node->prop[EXPRESSION_AST] =
+                    node->son.size() == 1 ? node->son[0]->prop[EXPRESSION_AST]
+                                          : CreateBinaryAST();
+            } else if (node->type == "Term") {
+                node->prop[EXPRESSION_AST] =
+                    node->son.size() == 1 ? node->son[0]->prop[EXPRESSION_AST]
+                                          : CreateBinaryAST();
+            } else if (node->type == "Factor") {
+                if (node->type == "Num") {
+                    node->prop[EXPRESSION_AST] =
+                        node->son[0]->prop[EXPRESSION_AST];
+                } else if (node->son[0]->type == "Variable") {  // FIXME
+                    node->prop[EXPRESSION_AST] =
+                        new VariableExprAST(node->son[0]->raw);
+                } else if (node->son[0]->type == "ID") {
+                } else if (node->son[1]->type ==
+                           "Expression") {  // ( Expression )
+                    node->prop[EXPRESSION_AST] =
+                        node->son[1]->prop[EXPRESSION_AST];
+                } else {
+                    assert(node->son[1]->type == "Factor");
+                    node->prop[EXPRESSION_AST] = new UnaryExprAST(
+                        node->son[0]->raw,
+                        std::any_cast<ExprAST *>(
+                            node->son[1]->prop[EXPRESSION_AST]));
+                }
+            } else if (node->type == "Num") {
+                if (node->son[0]->type == "int") {
+                    node->prop[EXPRESSION_AST] =
+                        new NumberExprAST(std::stoi(node->son[0]->raw));
+                } else if (node->son[0]->type == "float") {
+                    node->prop[EXPRESSION_AST] =
+                        new NumberExprAST(std::stod(node->son[0]->raw));
                 }
             }
         };
