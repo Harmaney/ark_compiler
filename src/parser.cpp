@@ -266,15 +266,12 @@ map<pair<int, string>, int> Goto;
 void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
     if (actionTable.count(pos)) {
         if (actionTable[pos] != act) {
-            if (actionTable[pos].first == Shift) return;
-            //			cout << "???" << endl;
-            //			cout << Action[pos].first << " " <<
-            // Action[pos].second << endl; 			cout <<
-            // act.first
-            // << " " << act.second <<
-            // endl; 			cout << pos.first << " " <<
-            // pos.second
-            // << endl;
+            // if (actionTable[pos].first == Shift) return;
+            std::cerr << "???" << endl;
+            cerr << actionTable[pos].first << " " << actionTable[pos].second
+                 << endl;
+            cerr << act.first << " " << act.second << endl;
+            cerr << pos.first << " " << pos.second << endl;
         }
     }
     actionTable[pos] = act;
@@ -308,6 +305,7 @@ void generate_table() {
         LoadTable();
         return;
     }
+    std::cerr << "generating table\n";
     get_items();
     for (auto I : Item_set) {
         for (auto it : I.first) {
@@ -443,9 +441,11 @@ void Analyse(string file_name) {
                     std::any_cast<ExprAST *>(
                         node->son[1]->prop[EXPRESSION_AST]));
             };
+            std::cerr << node->type << '\n';
             if (node->type == "IDList") {
                 if (node->son.size() == 1) {  // IDList -> ID
-                    node->prop[ID_LIST] = {node->son[0]->parserSymbol};
+                    node->prop[ID_LIST] =
+                        std::vector<std::string>({node->son[0]->parserSymbol});
                 } else {
                     assert(node->son.size() ==
                            3);  //下面的IDLIST没必要正确维护，可以直接覆盖
@@ -470,8 +470,7 @@ void Analyse(string file_name) {
                 }
             } else if (node->type == "ExpressionList") {
                 if (node->son.size() == 1) {  // ExpressionList -> Expression
-                    std::any_cast<std::vector<std::any> &>(
-                        node->prop[EXPRESSION_AST_LIST]) = {
+                    node->prop[EXPRESSION_AST_LIST] = std::vector<std::any>{
                         node->son[0]->prop[EXPRESSION_AST]};
                 } else {  // ExpressionList -> ExpressionList ,
                           // Expression

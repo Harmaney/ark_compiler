@@ -54,7 +54,7 @@ CompoundStatement -> begin StatementList end @
 StatementList -> StatementList ; Statement @
 StatementList -> Statement @
 Statement -> Variable assignOP Expression @
-Statement -> ProcedureCall @
+Statement -> ProcedureCall(ARG) @
 Statement -> CompoundStatement @
 Statement -> if Expression then Statement ElsePart @
 Statement -> for ID assignOP Expression to Expression do Statement @
@@ -67,9 +67,8 @@ Statement -> @
 Variable -> ID IDVarpart @
 IDVarpart -> [ ExpressionList ] @
 IDVarpart -> @
-ProcedureCall -> ID @
-ProcedureCall -> ID ( ExpressionList ) @
-ProcedureCall -> ID ( ) @
+ProcedureCall(ARG) -> ID ( ExpressionList ) @
+ProcedureCall(ARG) -> ID ( ) @
 ElsePart -> else Statement @
 ElsePart -> @
 ExpressionList -> ExpressionList , Expression @
@@ -84,9 +83,7 @@ Term -> Term mulOP Factor @
 Term -> Factor @
 Factor -> num @
 Factor -> Variable @
-Factor -> ID ( ExpressionList ) @
-Factor -> ID ( ) @
-Factor -> ID @
+Factor -> ProcedureCall(ARG) @
 Factor -> ( Expression ) @
 Factor -> not Factor @
 Factor -> uminus Factor @
