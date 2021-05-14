@@ -88,9 +88,9 @@ void CallExprAST::accept(ASTDispatcher &dispatcher) {
         arg->accept(dispatcher);
     }
 
-    TRACE(std::cerr<<"into cell ast"<<std::endl;)
+    TRACE(std::cerr << "into cell ast" << std::endl;)
     dispatcher.genCallExpr(this);
-    TRACE(std::cerr<<"out cell ast"<<std::endl;)
+    TRACE(std::cerr << "out cell ast" << std::endl;)
 }
 
 void BlockAST::accept(ASTDispatcher &dispatcher) {
@@ -135,10 +135,10 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
 
 void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
     this->varType->accept(dispatcher);
-    
-    TRACE(std::cerr<<"into variable ast"<<std::endl;)
+
+    TRACE(std::cerr << "into variable ast" << std::endl;)
     dispatcher.genVariableDecl(this);
-    TRACE(std::cerr<<"out variable ast"<<std::endl;)
+    TRACE(std::cerr << "out variable ast" << std::endl;)
 }
 
 void ForStatementAST::accept(ASTDispatcher &dispatcher) {
@@ -146,18 +146,17 @@ void ForStatementAST::accept(ASTDispatcher &dispatcher) {
     this->rangeL->accept(dispatcher);
     this->rangeR->accept(dispatcher);
 
-    TRACE(std::cerr<<"into for ast"<<std::endl;)
+    TRACE(std::cerr << "into for ast" << std::endl;)
     dispatcher.genForStatementBegin(this);
     this->body->accept(dispatcher);
     dispatcher.genForStatementEnd(this);
-    TRACE(std::cerr<<"into for ast"<<std::endl;)
+    TRACE(std::cerr << "into for ast" << std::endl;)
 }
 
 void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
-    TRACE(std::cerr<<"into condition of while"<<std::endl;)
+    TRACE(std::cerr << "into condition of while" << std::endl;)
     this->condition->accept(dispatcher);
-    TRACE(std::cerr<<"out condition of while"<<std::endl;)
-
+    TRACE(std::cerr << "out condition of while" << std::endl;)
 
     dispatcher.genWhileStatementBegin(this);
     this->body->accept(dispatcher);
@@ -168,15 +167,15 @@ void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void IfStatementAST::accept(ASTDispatcher &dispatcher) {
-    TRACE(std::cerr<<"into if ast"<<std::endl;)
+    TRACE(std::cerr << "into if ast" << std::endl;)
     this->condition->accept(dispatcher);
     dispatcher.genIfStatementBegin(this);
     // TODO: body and else if
-    TRACE(std::cerr<<"out if ast"<<std::endl;)
+    TRACE(std::cerr << "out if ast" << std::endl;)
 }
 
 void GlobalAST::accept(ASTDispatcher &dispatcher) {
-    TRACE(std::cerr<<"into global ast"<<std::endl;)
+    TRACE(std::cerr << "into global ast" << std::endl;)
     dispatcher.genGlobalBegin(this);
 
     for (auto var : this->vars) {
@@ -185,8 +184,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
 
     // convert mainBlock into main function
     this->functions.push_back(new FunctionAST(
-        new FunctionSignatureAST("main", {},
-                                 new BasicTypeAST(TYPE_BASIC_INT)),
+        new FunctionSignatureAST("main", {}, new BasicTypeAST(TYPE_BASIC_INT)),new BlockAST({}),
         this->mainBlock));
     // add return 0 to mainBlock
     this->mainBlock->exprs.push_back(new ReturnAST(new NumberExprAST(0)));
@@ -196,23 +194,27 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     }
 
     dispatcher.genGlobalEnd(this);
-    TRACE(std::cerr<<"out global ast"<<std::endl;)
+    TRACE(std::cerr << "out global ast" << std::endl;)
 }
 
 void FunctionAST::accept(ASTDispatcher &dispatcher) {
     // that's too bad
     this->sig->resultType->accept(dispatcher);
-    this->sig->_resultType=sig->resultType->_descriptor;
+    this->sig->_resultType = sig->resultType->_descriptor;
     // This is for real var
     // for(auto arg:this->sig->args){
     //     arg->accept(dispatcher);
     // }
 
+    // put all variable declaration into block
+    this->body->exprs.insert(this->body->exprs.begin(),
+                             this->varDecls->exprs.begin(),
+                             this->varDecls->exprs.end());
+
     dispatcher.genFunction(this);
 }
 
-void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {
-}
+void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {}
 
 void StructDeclAST::accept(ASTDispatcher &dispatcher) {
     dispatcher.genStruct(this);
@@ -291,26 +293,30 @@ void SymbolTable::exit() {
 }
 
 VariableDescriptor *SymbolTable::createVariable(std::string sig,
-                                                SymbolDescriptor *type,bool isRef) {
+                                                SymbolDescriptor *type,
+                                                bool isRef) {
     current->insert_variable(sig,
                              new VariableDescriptor(sig, type, isRef, false));
     return current->searchVariable(sig);
 }
 
 VariableDescriptor *SymbolTable::createVariableG(std::string sig,
-                                                 SymbolDescriptor *type,bool isRef) {
+                                                 SymbolDescriptor *type,
+                                                 bool isRef) {
     root->insert_variable(sig, new VariableDescriptor(sig, type, isRef, false));
     return root->searchVariable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type,bool isRef) {
+VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type,
+                                                bool isRef) {
     std::string sig = current->getSlot();
     current->insert_variable(sig,
                              new VariableDescriptor(sig, type, isRef, false));
     return current->searchVariable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariableG(SymbolDescriptor *type,bool isRef) {
+VariableDescriptor *SymbolTable::createVariableG(SymbolDescriptor *type,
+                                                 bool isRef) {
     std::string sig = root->getSlot();
     root->insert_variable(sig, new VariableDescriptor(sig, type, isRef, false));
     return root->searchVariable(sig);
@@ -326,7 +332,7 @@ VariableDescriptor *SymbolTable::lookforVariable(std::string sig) {
 }
 
 void SymbolTable::insertType(std::string sig, SymbolDescriptor *descriptor) {
-    DEBUG(std::cerr<<"insert type "<<sig<<std::endl;)
+    DEBUG(std::cerr << "insert type " << sig << std::endl;)
     current->insert_type(sig, descriptor);
 }
 

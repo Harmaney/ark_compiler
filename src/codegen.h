@@ -10,6 +10,8 @@ void init_code_generator() {
 
 void init_basic_type() {
     SymbolTable::insertType(
+        TYPE_BASIC_VOID, new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_VOID));
+    SymbolTable::insertType(
         TYPE_BASIC_INT, new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_INT));
     SymbolTable::insertType(
         TYPE_BASIC_DOUBLE,
