@@ -9,7 +9,7 @@ using namespace std;
 
 void TEST_vardecl() {
     auto ast = new VariableDeclAST(new VariableExprAST("a"),
-                                   new BasicTypeAST(TYPE_BASIC_INT));
+                                   new BasicTypeAST(TYPE_BASIC_INT),false);
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -18,7 +18,7 @@ void TEST_vardecl() {
 void TEST_arraydecl() {
     auto ast = new VariableDeclAST(
         new VariableExprAST("a"),
-        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2));
+        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2),false);
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -27,7 +27,7 @@ void TEST_arraydecl() {
 void TEST_arrayofarray() {
     BlockAST *ast = new BlockAST({new VariableDeclAST(
         new VariableExprAST("a"),
-        new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),1,10), 1, 100))});
+        new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),1,10), 1, 100),false)});
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -37,11 +37,13 @@ void TEST_arrayuse() {
     auto ast = new BlockAST({
         new VariableDeclAST(
             new VariableExprAST("a"),
-            new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2)
+            new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2),
+            false
         ),
         new VariableDeclAST(
             new VariableExprAST("i"),
-            new BasicTypeAST(TYPE_BASIC_INT)
+            new BasicTypeAST(TYPE_BASIC_INT),
+            false
         ),
         new BinaryExprAST(
             "=",
@@ -64,11 +66,13 @@ void TEST_arrayofarrayuse() {
             new VariableExprAST("a"),
             new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),1,10), 
             1,
-            100)
+            100),
+            false
         ),
         new VariableDeclAST(
             new VariableExprAST("i"),
-            new BasicTypeAST(TYPE_BASIC_INT)
+            new BasicTypeAST(TYPE_BASIC_INT),
+            false
         ),
         new BinaryExprAST(
             "=",
@@ -105,7 +109,7 @@ void TEST_arrayofarrayuse() {
 void TEST_struct() {
     std::vector<VariableDeclAST *> t;
     t.push_back(new VariableDeclAST(new VariableExprAST("a"),
-                                    new BasicTypeAST(TYPE_BASIC_INT)));
+                                    new BasicTypeAST(TYPE_BASIC_INT),false));
     StructDeclAST *ast = new StructDeclAST("Test", t);
 
     ASTDispatcher dispacher;
@@ -115,12 +119,12 @@ void TEST_struct() {
 void TEST_while() {
     BlockAST *env = new BlockAST({});
     env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),
-                                             new BasicTypeAST(TYPE_BASIC_INT)));
+                                             new BasicTypeAST(TYPE_BASIC_INT),false));
 
     BlockAST *while_block = new BlockAST({});
 
     while_block->exprs.push_back(new VariableDeclAST(
-        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_INT)));
+        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_INT),false));
     WhileStatementAST *while_ast = new WhileStatementAST(
         new BinaryExprAST("<", new VariableExprAST("i"), new NumberExprAST(5)),
         while_block);
@@ -134,12 +138,12 @@ void TEST_while() {
 void TEST_for() {
     BlockAST *env = new BlockAST({});
     env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),
-                                             new BasicTypeAST(TYPE_BASIC_INT)));
+                                             new BasicTypeAST(TYPE_BASIC_INT),false));
 
     BlockAST *for_block = new BlockAST({});
 
     for_block->exprs.push_back(new VariableDeclAST(
-        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_DOUBLE)));
+        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_DOUBLE),false));
     ForStatementAST *for_ast =
         new ForStatementAST(new VariableExprAST("i"), new NumberExprAST(1),
                             new NumberExprAST(5), for_block);
@@ -156,8 +160,9 @@ void TEST_funcdef(){
             "tryy",
             {
                 new VariableDeclAST(
-                    new VariableExprAST("a",true),
-                    new BasicTypeAST(TYPE_BASIC_INT)
+                    new VariableExprAST("a"),
+                    new BasicTypeAST(TYPE_BASIC_INT),
+                    true
                 ),
             },
             new BasicTypeAST(TYPE_BASIC_INT)
@@ -165,7 +170,7 @@ void TEST_funcdef(){
         new BlockAST({
             new BinaryExprAST(
                 "=",
-                new VariableExprAST("a",true),
+                new VariableExprAST("a"),
                 new NumberExprAST(1)
             )
         })
@@ -179,7 +184,7 @@ void TEST_funccall() {
     BlockAST *block = new BlockAST({});
 
     VariableDeclAST *decl = new VariableDeclAST(
-        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_INT));
+        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_INT),false);
     block->exprs.push_back(decl);
 
     BinaryExprAST *t1 = new BinaryExprAST("=", new VariableExprAST("a"),
@@ -201,11 +206,11 @@ void TEST_funccall() {
 void TEST_pointer() {
     BlockAST *ast = new BlockAST(
         {new VariableDeclAST(new VariableExprAST("a"),
-                             new BasicTypeAST(TYPE_BASIC_INT)),
+                             new BasicTypeAST(TYPE_BASIC_INT),false),
          new BinaryExprAST("=", new VariableExprAST("a"), new NumberExprAST(1)),
          new VariableDeclAST(
              new VariableExprAST("p"),
-             new PointerTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT))),
+             new PointerTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT)),false),
          new BinaryExprAST("=", new VariableExprAST("a"),
                            new UnaryExprAST("*", new VariableExprAST("p")))});
 
@@ -217,7 +222,8 @@ void TEST_case1() {
     GlobalAST *global = new GlobalAST({
         new VariableDeclAST(
             new VariableExprAST("i"),
-            new BasicTypeAST(TYPE_BASIC_INT)
+            new BasicTypeAST(TYPE_BASIC_INT),
+            false
         )},
         {},
         new BlockAST(
@@ -254,19 +260,23 @@ void TEST_fibonacci(){
         {
             new VariableDeclAST(
                 new VariableExprAST("i"),
-                new BasicTypeAST(TYPE_BASIC_INT)
+                new BasicTypeAST(TYPE_BASIC_INT),
+                false
             ),
             new VariableDeclAST(
                 new VariableExprAST("a"),
-                new BasicTypeAST(TYPE_BASIC_INT)
+                new BasicTypeAST(TYPE_BASIC_INT),
+                false
             ),
             new VariableDeclAST(
                 new VariableExprAST("b"),
-                new BasicTypeAST(TYPE_BASIC_INT)
+                new BasicTypeAST(TYPE_BASIC_INT),
+                false
             ),
             new VariableDeclAST(
                 new VariableExprAST("c"),
-                new BasicTypeAST(TYPE_BASIC_INT)
+                new BasicTypeAST(TYPE_BASIC_INT),
+                false
             ),
         },
         {},
@@ -338,9 +348,9 @@ int RUN_TEST(){
     // TEST_arraydecl();
     // TEST_arrayuse();
     // TEST_arrayofarray();
-    // TEST_arrayofarrayuse();
+    TEST_arrayofarrayuse();
     // TEST_while();
-    TEST_funcdef();
+    // TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
     // TEST_pointer();
