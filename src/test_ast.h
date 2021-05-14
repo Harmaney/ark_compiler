@@ -162,6 +162,46 @@ void TEST_struct() {
     ast->accept(dispacher);
 }
 
+void TEST_arrinstruct(){
+    BlockAST *ast=new BlockAST({
+        new StructDeclAST(
+            "SP",
+            {
+                new VariableDeclAST(
+                    new VariableExprAST("arr1"),
+                    new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),0,10),
+                    false
+                ),
+            }
+        ),
+        new VariableDeclAST(
+            new VariableExprAST("sp"),
+            new ArrayTypeDeclAST(new BasicTypeAST("SP"),0,10),
+            false
+        ),
+        new BinaryExprAST(
+            "=",
+            new BinaryExprAST(
+                "[]",
+                new BinaryExprAST(
+                    ".",
+                    new BinaryExprAST(
+                        "[]",
+                        new VariableExprAST("sp"),
+                        new NumberExprAST(0)
+                    ),
+                    new StringExprAST("arr1")
+                ),
+                new NumberExprAST(2)
+            ),
+            new NumberExprAST(2)
+        )
+    });
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
 void TEST_while() {
     BlockAST *env = new BlockAST({});
     env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),
@@ -420,17 +460,21 @@ int RUN_TEST(){
     // TEST_arraydecl();
     // TEST_arrayuse();
     // TEST_arrayofarray();
-    TEST_arrayofarrayuse();
+    // TEST_arrayofarrayuse();
     // TEST_while();
     // TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
+    TEST_arrinstruct();
     // TEST_pointer();
     // TEST_case1();
     // TEST_fibonacci();
 
     CodeCollector::end_section(PLACE_END);
-
+    
+    CodeCollector::rearrange_section("struct", 0);
+    CodeCollector::rearrange_section("pre_array", 0);
+    CodeCollector::rearrange_section("pre_struct", 0);
     CodeCollector::rearrange_section("global_define", 0);
     CodeCollector::rearrange_section("prelude", 0);
 

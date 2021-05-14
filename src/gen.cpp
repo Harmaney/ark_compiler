@@ -18,8 +18,9 @@ void putVariableDecl(VariableDescriptor *var) {
 }
 
 void putVariableExpr(VariableDescriptor *var) {
+    CodeCollector::src()<<"(";
     if (var->isRef) CodeCollector::src() << "*";
-    CodeCollector::src() << var->name;
+    CodeCollector::src() << var->name<<")";
 }
 
 void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
@@ -60,7 +61,10 @@ void ASTDispatcher::genArrayTypeDecl(ArrayTypeDeclAST *ast) {
     auto descriptor = SymbolTable::create_array_type(ast->itemAST->_descriptor,
                                                      ast->rangeR - ast->rangeL);
 
-    CodeCollector::begin_section("prelude");
+    // this is wrong when using custom type
+    // to fix this, you should think about how to resolve typedef in struct too
+    DEBUG(std::cerr<<"generate typedef"<<std::endl;)
+    CodeCollector::begin_section("pre_array");
     CodeCollector::src() << "typedef " << descriptor->itemDescriptor->name
                          << " " << descriptor->name << "[" << descriptor->sz
                          << "];";
@@ -472,6 +476,15 @@ void ASTDispatcher::genBlockEnd(BlockAST *ast) {
 void ASTDispatcher::genStruct(StructDeclAST *ast) {
     StructDescriptor *structD = new StructDescriptor(ast->sig, {});
 
+    // 解决循环嵌套
+    CodeCollector::begin_section("pre_struct");
+    CodeCollector::src() << "struct " << ast->sig << ";";
+    CodeCollector::push_back();
+    CodeCollector::end_section();
+
+    // 为了解决结构中有数组定义时，数组类型被限制在其内部，无法被外界使用的问题
+    CodeCollector::begin_section("struct");
+    SymbolTable::enter();
     CodeCollector::src() << "struct " << ast->sig << "{";
     CodeCollector::push_back();
 
@@ -482,8 +495,10 @@ void ASTDispatcher::genStruct(StructDeclAST *ast) {
         structD->push(var->sig->name, typeDescriptor);
     }
 
-    SymbolTable::insertType(ast->sig, structD);
     CodeCollector::push_back("};");
+    SymbolTable::exit();
+    CodeCollector::end_section();
+    SymbolTable::insertType(ast->sig, structD);
 }
 
 void ASTDispatcher::genVariableDecl(VariableDeclAST *ast) {

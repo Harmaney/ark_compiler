@@ -342,12 +342,12 @@ void SymbolTable::insertType(std::string sig, SymbolDescriptor *descriptor) {
 ArrayTypeDescriptor *SymbolTable::create_array_type(SymbolDescriptor *item,
                                                     int sz) {
     // array type are seen as global type
-    return root->create_array_type(item, sz);
+    return current->create_array_type(item, sz);
 }
 
 PointerTypeDescriptor *SymbolTable::create_pointer_type(
     SymbolDescriptor *item) {
-    return root->create_pointer_type(item);
+    return current->create_pointer_type(item);
 }
 
 SymbolDescriptor *SymbolTable::lookforType(std::string sig) {
