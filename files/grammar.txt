@@ -82,16 +82,13 @@ SimpleExpression -> Term @
 Term -> Term mulOP Factor @
 Term -> Factor @
 Factor -> Num @
-Factor -> Variable @
-Factor -> ProcedureCall(ARG) @
-Factor -> ( Expression ) @
 Factor -> not Factor @
 Factor -> uminus Factor @
-Factor -> RecordVariable @
-RecordVariable -> RecordVariable . ID @
-RecordVariable -> Variable @
-RecordVariable -> ProcedureCall(ARG) @
-RecordVariable -> ( Expression ) @
+Factor -> ComposedVariable @
+ComposedVariable -> ComposedVariable . ID @
+ComposedVariable -> Variable @
+ComposedVariable -> ProcedureCall(ARG) @
+ComposedVariable -> ( Expression ) @
 Num -> int @ 
 Num -> float @
 Digits -> int @
