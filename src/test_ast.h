@@ -167,6 +167,7 @@ void TEST_funcdef(){
             },
             new BasicTypeAST(TYPE_BASIC_INT)
         ),
+        new BlockAST({}),
         new BlockAST({
             new BinaryExprAST(
                 "=",
@@ -279,7 +280,33 @@ void TEST_fibonacci(){
                 false
             ),
         },
-        {},
+        {
+            new FunctionAST(
+                new FunctionSignatureAST(
+                    "add",
+                    {
+                        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+                        new VariableDeclAST(new VariableExprAST("b"),new BasicTypeAST(TYPE_BASIC_INT),false),
+                        new VariableDeclAST(new VariableExprAST("c"),new BasicTypeAST(TYPE_BASIC_INT),true),
+                    },
+                    new BasicTypeAST(TYPE_BASIC_VOID)
+                ),
+                new BlockAST({}),
+                new BlockAST(
+                    {
+                        new BinaryExprAST(
+                            "=",
+                            new VariableExprAST("c"),
+                            new BinaryExprAST(
+                                "+",
+                                new VariableExprAST("a"),
+                                new VariableExprAST("b")
+                            )
+                        ),
+                    }
+                )
+            )
+        },
         new BlockAST(
             {
                 new BinaryExprAST(
@@ -298,14 +325,13 @@ void TEST_fibonacci(){
                     new NumberExprAST(5),
                     new BlockAST(
                         {
-                            new BinaryExprAST(
-                                "=",
-                                new VariableExprAST("c"),
-                                new BinaryExprAST(
-                                    "+",
+                            new CallExprAST(
+                                "add",
+                                {
                                     new VariableExprAST("a"),
-                                    new VariableExprAST("b")
-                                )
+                                    new VariableExprAST("b"),
+                                    new VariableExprAST("c"),
+                                }
                             ),
                             new BinaryExprAST(
                                 "=",
@@ -348,14 +374,14 @@ int RUN_TEST(){
     // TEST_arraydecl();
     // TEST_arrayuse();
     // TEST_arrayofarray();
-    TEST_arrayofarrayuse();
+    // TEST_arrayofarrayuse();
     // TEST_while();
     // TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
     // TEST_pointer();
     // TEST_case1();
-    // TEST_fibonacci();
+    TEST_fibonacci();
 
     CodeCollector::end_section(PLACE_END);
 
