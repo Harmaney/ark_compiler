@@ -107,10 +107,56 @@ void TEST_arrayofarrayuse() {
 }
 
 void TEST_struct() {
-    std::vector<VariableDeclAST *> t;
-    t.push_back(new VariableDeclAST(new VariableExprAST("a"),
-                                    new BasicTypeAST(TYPE_BASIC_INT),false));
-    StructDeclAST *ast = new StructDeclAST("Test", t);
+    BlockAST *block_ast=new BlockAST(
+        {
+            new StructDeclAST(
+                "Test",
+                {
+                    new VariableDeclAST(
+                        new VariableExprAST("a"),
+                        new BasicTypeAST(TYPE_BASIC_INT),
+                        false
+                    )
+                }
+            ),
+            new VariableDeclAST(
+                new VariableExprAST("test"),
+                new BasicTypeAST("Test"),
+                false
+            ),
+            new VariableDeclAST(
+                new VariableExprAST("p"),
+                new BasicTypeAST(TYPE_BASIC_INT),
+                false
+            ),
+            new BinaryExprAST(
+                "=",
+                new BinaryExprAST(
+                    ".",
+                    new VariableExprAST("test"),
+                    new StringExprAST("a")
+                ),
+                new CallExprAST("read_int",{})
+            ),
+            new BinaryExprAST(
+                "=",
+                new VariableExprAST("p"),
+                new BinaryExprAST(
+                    ".",
+                    new VariableExprAST("test"),
+                    new StringExprAST("a")
+                )
+            ),
+            new CallExprAST(
+                "write_int",
+                {
+                    new VariableExprAST("p")
+                }
+            )
+        }
+    );
+
+    GlobalAST *ast=new GlobalAST({},{},block_ast);
 
     ASTDispatcher dispacher;
     ast->accept(dispacher);
@@ -378,10 +424,10 @@ int RUN_TEST(){
     // TEST_while();
     // TEST_funcdef();
     // TEST_funccall();
-    // TEST_struct();
+    TEST_struct();
     // TEST_pointer();
     // TEST_case1();
-    TEST_fibonacci();
+    // TEST_fibonacci();
 
     CodeCollector::end_section(PLACE_END);
 

@@ -108,6 +108,9 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
             case AST_VARIABLE_EXPR:
                 static_cast<VariableExprAST *>(expr)->accept(dispatcher);
                 break;
+            case AST_STRUCT_DECL:
+                static_cast<StructDeclAST *>(expr)->accept(dispatcher);
+                break;
             case AST_RETURN:
                 static_cast<ReturnAST *>(expr)->accept(dispatcher);
                 break;
