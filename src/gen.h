@@ -67,6 +67,7 @@ class ASTDispatcher {
     void genForStatementBegin(ForStatementAST *ast);
     void genForStatementEnd(ForStatementAST *ast);
 
+    void genFunction(FunctionAST *ast);
     void genFunctionSignature(FunctionSignatureAST *ast);
 
     void genStruct(StructDeclAST *ast);

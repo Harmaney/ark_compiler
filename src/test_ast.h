@@ -150,6 +150,31 @@ void TEST_for() {
     env->accept(dispacher);
 }
 
+void TEST_funcdef(){
+    auto ast=new FunctionAST(
+        new FunctionSignatureAST(
+            "tryy",
+            {
+                new VariableDeclAST(
+                    new VariableExprAST("a",true),
+                    new BasicTypeAST(TYPE_BASIC_INT)
+                ),
+            },
+            new BasicTypeAST(TYPE_BASIC_INT)
+        ),
+        new BlockAST({
+            new BinaryExprAST(
+                "=",
+                new VariableExprAST("a",true),
+                new NumberExprAST(1)
+            )
+        })
+    );
+
+    ASTDispatcher dispacher;
+    ast->accept(dispacher);
+}
+
 void TEST_funccall() {
     BlockAST *block = new BlockAST({});
 
@@ -315,11 +340,12 @@ int RUN_TEST(){
     // TEST_arrayofarray();
     // TEST_arrayofarrayuse();
     // TEST_while();
+    TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
     // TEST_pointer();
     // TEST_case1();
-    TEST_fibonacci();
+    // TEST_fibonacci();
 
     CodeCollector::end_section(PLACE_END);
 

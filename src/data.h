@@ -58,7 +58,7 @@ class VariableDescriptor : public SymbolDescriptor {
     // 现在没有用上
     bool isConst;
 
-    VariableDescriptor(std::string name, SymbolDescriptor *varType, bool ifRef,
+    VariableDescriptor(std::string name, SymbolDescriptor *varType, bool isRef,
                        bool isConst)
         : SymbolDescriptor(DESCRIPTOR_VARIABLE, name),
           varType(varType),
@@ -188,8 +188,9 @@ class StringExprAST : public ExprAST {
 class VariableExprAST : public ExprAST {
    public:
     std::string name;
-    VariableExprAST(const std::string &name)
-        : ExprAST(AST_VARIABLE_EXPR), name(name) {}
+    bool isRef;
+    VariableExprAST(const std::string &name,bool isRef=false)
+        : ExprAST(AST_VARIABLE_EXPR), name(name),isRef(isRef) {}
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -236,7 +237,7 @@ class CallExprAST : public ExprAST {
 class VariableDeclAST : public AST {
    public:
     VariableExprAST *sig;
-    std::any varType;
+    TypeDeclAST *varType;
     SymbolDescriptor *_varType;
     VariableDeclAST(VariableExprAST *sig, BasicTypeAST *type)
         : AST(AST_VARIABLE_DECL), sig(sig), varType(type) {}
@@ -294,9 +295,10 @@ class FunctionSignatureAST : public AST {
    public:
     std::string sig;
     std::vector<VariableDeclAST *> args;
-    SymbolDescriptor *resultType;
+    SymbolDescriptor *_resultType;
+    TypeDeclAST *resultType;
     FunctionSignatureAST(std::string sig, std::vector<VariableDeclAST *> args,
-                         SymbolDescriptor *result)
+                         TypeDeclAST *result)
         : AST(AST_FUNCTION_SIGNATURE),
           sig(sig),
           args(args),
@@ -370,11 +372,11 @@ class SymbolTable {
     static void enter();
     static void exit();
     static VariableDescriptor *createVariable(std::string sig,
-                                              SymbolDescriptor *type);
+                                              SymbolDescriptor *type,bool isRef);
     static VariableDescriptor *createVariableG(std::string sig,
-                                               SymbolDescriptor *type);
-    static VariableDescriptor *createVariable(SymbolDescriptor *type);
-    static VariableDescriptor *createVariableG(SymbolDescriptor *type);
+                                               SymbolDescriptor *type,bool isRef);
+    static VariableDescriptor *createVariable(SymbolDescriptor *type,bool isRef);
+    static VariableDescriptor *createVariableG(SymbolDescriptor *type,bool isRef);
 
     static VariableDescriptor *lookforVariable(std::string sig);
 
