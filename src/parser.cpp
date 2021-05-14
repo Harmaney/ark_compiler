@@ -6,7 +6,7 @@
 using Json = nlohmann::json;
 
 #define inset(y, x) x.find(y) != x.end()
-#define table_exist 1
+#define table_exist 0
 using namespace std;
 
 string S;
