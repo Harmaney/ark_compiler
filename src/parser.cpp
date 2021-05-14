@@ -224,35 +224,36 @@ set<Item> GO(set<Item> I, string X) {
 }
 
 void get_items() {
-<<<<<<< HEAD
-  Item_content[item_num] =
-      get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"));
-  Item_set[get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"))] =
-      item_num++;
-  set<string> Sign;
-  merge(Terminal, Sign);
-  merge(Nonterminal, Sign);
-  //ofstream itemout("item.txt");
-  bool changed = true;
-  do {
-    changed = false;
-    for (auto I : Item_set) {
-      for (auto X : Sign) {
-        if (X.empty()) continue;
-        set<Item> Goix = GO(I.first, X);
-        if (!Goix.empty() && Item_set.count(Goix) == 0) {
-          Item_content[item_num] = Goix;
-          Item_set[Goix] = item_num++;
-          changed = true;
-          // itemout<<"================\n";
-					// for(auto x:Goix){
-					// 	itemout<<x.LHS<<"-> ";
-					// 	for(auto str:x.previous) itemout<<str<<" ";
-					// 	itemout<<". ";
-					// 	for(auto str:x.next) itemout<<str<<" ";
-					// 	itemout<<", ";
-					// 	itemout<<x.LookAhead<<endl;
-					// }
+    Item_content[item_num] =
+        get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"));
+    Item_set[get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"))] =
+        item_num++;
+    set<string> Sign;
+    merge(Terminal, Sign);
+    merge(Nonterminal, Sign);
+    // ofstream itemout("item.txt");
+    bool changed = true;
+    do {
+        changed = false;
+        for (auto I : Item_set) {
+            for (auto X : Sign) {
+                if (X.empty()) continue;
+                set<Item> Goix = GO(I.first, X);
+                if (!Goix.empty() && Item_set.count(Goix) == 0) {
+                    Item_content[item_num] = Goix;
+                    Item_set[Goix] = item_num++;
+                    changed = true;
+                    // itemout<<"================\n";
+                    // for(auto x:Goix){
+                    // 	itemout<<x.LHS<<"-> ";
+                    // 	for(auto str:x.previous) itemout<<str<<" ";
+                    // 	itemout<<". ";
+                    // 	for(auto str:x.next) itemout<<str<<" ";
+                    // 	itemout<<", ";
+                    // 	itemout<<x.LookAhead<<endl;
+                    // }
+                }
+            }
         }
     } while (changed);
     printf("%d\n", item_num);
@@ -271,7 +272,8 @@ void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
             // Action[pos].second << endl; 			cout <<
             // act.first
             // << " " << act.second <<
-            // endl; 			cout << pos.first << " " << pos.second
+            // endl; 			cout << pos.first << " " <<
+            // pos.second
             // << endl;
         }
     }
@@ -471,7 +473,8 @@ void Analyse(string file_name) {
                     std::any_cast<std::vector<std::any> &>(
                         node->prop[EXPRESSION_AST_LIST]) = {
                         node->son[0]->prop[EXPRESSION_AST]};
-                } else {  // ExpressionList -> ExpressionList , Expression
+                } else {  // ExpressionList -> ExpressionList ,
+                          // Expression
                     std::any_cast<std::vector<std::any> &>(
                         node->prop[EXPRESSION_AST_LIST] =
                             node->son[0]->prop[EXPRESSION_AST_LIST])
@@ -479,10 +482,9 @@ void Analyse(string file_name) {
                 }
             } else if (node->type == "Expression") {
                 /*
-                  Expression -> SimpleExpression relOP SimpleExpression @
-                  Expression -> string @
-                  Expression -> SimpleExpression @
-                  Expression -> Expression ^ @
+                  Expression -> SimpleExpression relOP SimpleExpression
+                  @ Expression -> string @ Expression ->
+                  SimpleExpression @ Expression -> Expression ^ @
                 */
                 if (node->son.size() == 3) {
                     node->prop[EXPRESSION_AST] = CreateBinaryAST();
