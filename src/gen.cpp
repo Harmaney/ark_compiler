@@ -250,25 +250,20 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     }
 
     CodeCollector::src() << ast->callee << "(";
-    for (int i = 0; i < ast->args.size() - 1; i++) {
-        if (std::any_cast<VariableDescriptor *>(ast->args[i]->value)->varType !=
-            descriptor->args[i]->varType) {
+    for (int i = 0; i < ast->args.size(); i++) {
+        auto d = std::any_cast<VariableDescriptor *>(ast->args[i]->value);
+        if (d->varType != descriptor->args[i]->varType) {
             throw std::invalid_argument("wrong type of arg of function " +
                                         ast->callee + " at pos " +
                                         std::to_string(i));
         }
+        // check whether the function wants ref or not
+        // we use pointer to simulate this process in c
         CodeCollector::src()
-            << std::any_cast<VariableDescriptor *>(ast->args[i]->value)->name
-            << ",";
+            << (descriptor->args[i]->isRef ? "&" : "") << d->name;
+        if(i!=ast->args.size()-1)CodeCollector::src() << ",";
     }
-    if (std::any_cast<VariableDescriptor *>(ast->args.back()->value)->varType !=
-        descriptor->args.back()->varType) {
-        throw std::invalid_argument("wrong type of arg of function " +
-                                    ast->callee + " at pos " +
-                                    std::to_string(ast->args.size() - 1));
-    }
-    CodeCollector::src()
-        << std::any_cast<VariableDescriptor *>(ast->args.back()->value)->name;
+
     CodeCollector::src() << ");";
     CodeCollector::push_back();
 }
@@ -383,27 +378,38 @@ void ASTDispatcher::genFunction(FunctionAST *ast) {
     // and also there is need to create new node for processing 形参
     for (auto arg : ast->sig->args) {
         arg->varType->accept(*this);
-        arg->_varType=arg->varType->_descriptor;
+        arg->_varType = arg->varType->_descriptor;
     }
+    std::vector<VariableDescriptor *> argsDescriptors;
     for (int i = 0; i < (int)ast->sig->args.size() - 1; i++) {
         // FIX: too ugly
-        auto tempDescriptor=new VariableDescriptor(ast->sig->args[i]->sig->name,ast->sig->args[i]->_varType,ast->sig->args[i]->isRef,false);
-        putVariableDecl(tempDescriptor);
+        auto tempDescriptor = new VariableDescriptor(
+            ast->sig->args[i]->sig->name, ast->sig->args[i]->_varType,
+            ast->sig->args[i]->isRef, false);
+        argsDescriptors.push_back(tempDescriptor);
 
+        putVariableDecl(tempDescriptor);
         CodeCollector::src() << ", ";
     }
     if (!ast->sig->args.empty()) {
-        auto tempDescriptor=new VariableDescriptor(ast->sig->args.back()->sig->name,ast->sig->args.back()->_varType,ast->sig->args.back()->isRef,false);
+        auto tempDescriptor = new VariableDescriptor(
+            ast->sig->args.back()->sig->name, ast->sig->args.back()->_varType,
+            ast->sig->args.back()->isRef, false);
+        argsDescriptors.push_back(tempDescriptor);
 
         putVariableDecl(tempDescriptor);
     }
     CodeCollector::src() << ")";
     CodeCollector::push_back();
 
+    // add symbol for function
+    SymbolTable::insertType(
+        ast->sig->sig, new FunctionDescriptor(ast->sig->sig, argsDescriptors,
+                                              ast->sig->_resultType));
+
     SymbolTable::enter();
     for (auto arg : ast->sig->args) {
-        SymbolTable::createVariable(arg->sig->name, arg->_varType,
-                                    arg->isRef);
+        SymbolTable::createVariable(arg->sig->name, arg->_varType, arg->isRef);
     }
     // I am nearly throwing up
     ast->body->accept(*this);
@@ -436,9 +442,9 @@ void ASTDispatcher::genStruct(StructDeclAST *ast) {
 }
 
 void ASTDispatcher::genVariableDecl(VariableDeclAST *ast) {
-    ast->_varType=ast->varType->_descriptor;
-    auto var = SymbolTable::createVariable(ast->sig->name, ast->_varType,
-                                           ast->isRef);
+    ast->_varType = ast->varType->_descriptor;
+    auto var =
+        SymbolTable::createVariable(ast->sig->name, ast->_varType, ast->isRef);
     putVariableDecl(var);
     CodeCollector::src() << ";";
     CodeCollector::push_back();
