@@ -87,6 +87,11 @@ Factor -> ProcedureCall(ARG) @
 Factor -> ( Expression ) @
 Factor -> not Factor @
 Factor -> uminus Factor @
+Factor -> RecordVariable @
+RecordVariable -> RecordVariable . ID @
+RecordVariable -> Variable @
+RecordVariable -> ProcedureCall(ARG) @
+RecordVariable -> ( Expression ) @
 Num -> int @ 
 Num -> float @
 Digits -> int @

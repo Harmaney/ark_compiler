@@ -8,7 +8,7 @@ int t0_4=233;
 int t0_5=2;
 int t0_6=1;
 //0
-int main(){
+{
 t0_1 a;
 int i;
 t0_0* t1_0;
