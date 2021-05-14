@@ -232,7 +232,7 @@ void get_items() {
   set<string> Sign;
   merge(Terminal, Sign);
   merge(Nonterminal, Sign);
-  ofstream itemout("item.txt");
+  //ofstream itemout("item.txt");
   bool changed = true;
   do {
     changed = false;
@@ -244,15 +244,15 @@ void get_items() {
           Item_content[item_num] = Goix;
           Item_set[Goix] = item_num++;
           changed = true;
-          itemout<<"================\n";
-					for(auto x:Goix){
-						itemout<<x.LHS<<"-> ";
-						for(auto str:x.previous) itemout<<str<<" ";
-						itemout<<". ";
-						for(auto str:x.next) itemout<<str<<" ";
-						itemout<<", ";
-						itemout<<x.LookAhead<<endl;
-					}
+          // itemout<<"================\n";
+					// for(auto x:Goix){
+					// 	itemout<<x.LHS<<"-> ";
+					// 	for(auto str:x.previous) itemout<<str<<" ";
+					// 	itemout<<". ";
+					// 	for(auto str:x.next) itemout<<str<<" ";
+					// 	itemout<<", ";
+					// 	itemout<<x.LookAhead<<endl;
+					// }
         }
     } while (changed);
     printf("%d\n", item_num);
