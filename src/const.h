@@ -25,6 +25,7 @@ enum ASTKind {
 #define TYPE_BASIC_INT "int"
 // in fact this is somehow not basic
 #define TYPE_BASIC_STRING "string"
+#define TYPE_BASIC_VOID "void"
 
 enum ConstantType{
     CONSTANT_REAL,
