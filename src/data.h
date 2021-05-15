@@ -307,9 +307,9 @@ class FunctionSignatureAST : public AST {
 class FunctionAST : public AST {
    public:
     FunctionSignatureAST *sig;
-    BlockAST *varDecls;
+    std::vector<VariableDeclAST*> varDecls;
     BlockAST *body;
-    FunctionAST(FunctionSignatureAST *sig,BlockAST *varDecls, BlockAST *body)
+    FunctionAST(FunctionSignatureAST *sig,std::vector<VariableDeclAST*> varDecls, BlockAST *body)
         : AST(AST_FUNCTION), sig(sig),varDecls(varDecls), body(body) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
