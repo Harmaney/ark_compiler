@@ -82,6 +82,8 @@ SimpleExpression -> Term @
 Term -> Term mulOP Factor @
 Term -> Factor @
 Factor -> Num @
+Factor -> + Num @
+Factor -> - Num @
 Factor -> not Factor @
 Factor -> uminus Factor @
 Factor -> ComposedVariable @
