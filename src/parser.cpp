@@ -1,14 +1,20 @@
+#include <cstdio>
+#include <cstdlib>
+#include <set>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <random>
+#include <any>
+#include <vector>
 #include "parser.h"
-
-#include <bits/stdc++.h>
-
+#include "data.h"
+#include "parser.h"
 #include "data.h"
 using Json = nlohmann::json;
-
 #define inset(y, x) x.find(y) != x.end()
 #define table_exist 1
 using namespace std;
-
 string S;
 set<string> Terminal, Nonterminal;
 typedef pair<string, vector<string>> Expr;
@@ -20,9 +26,7 @@ vector<string> empty_vec;
 map<string, set<string>> First;
 map<string, set<vector<string>>> RHS_set;
 set<string> Get_epsilon;
-
 std::default_random_engine rng(2018210789);
-
 void init() {
     ifstream input("../files/./grammar.txt");
     int mode = 0;
@@ -45,10 +49,12 @@ void init() {
             if (RHS.empty()) Get_epsilon.insert(LHS);
             RHS.clear();
             if (str == "@") mode = 0;
-        } else if (mode == 0) {
+        }
+        else if (mode == 0) {
             LHS = str, Nonterminal.insert(str);
             if (S.empty()) S = LHS;
-        } else
+        }
+        else
             RHS.push_back(str), Terminal.insert(str);
     }
     for (auto str : Nonterminal) Terminal.erase(str);
@@ -66,9 +72,7 @@ void init() {
     //	cout<<"Terminal\n";
     //	for(auto str:Terminal) cout<<str<<endl;
 }
-
-template <typename T>
-bool merge(const set<T> &A, set<T> &B) {
+template <typename T> bool merge(const set<T>& A, set<T>& B) {
     bool flg = false;
     for (auto x : A) {
         if (B.find(x) == B.end()) {
@@ -78,7 +82,6 @@ bool merge(const set<T> &A, set<T> &B) {
     }
     return flg;
 }
-
 set<string> get_first(vector<string> strlist) {
     set<string> res;
     vector<string>::iterator it = strlist.begin();
@@ -91,15 +94,16 @@ set<string> get_first(vector<string> strlist) {
             if (it == strlist.end()) {
                 merge(First[""], res);
                 break;
-            } else {
+            }
+            else {
                 Head = *it;
             }
-        } else
+        }
+        else
             break;
     }
     return res;
 }
-
 void get_first() {
     for (auto x : Terminal) First[x].insert(x);
     First["$"].insert("$");
@@ -127,7 +131,6 @@ void get_first() {
     //		cout<<endl;
     //	}
 }
-
 // typedef tuple<string,vector<string>,vector<string>,string>
 // Item;//0A->1a.2Bb,3x
 bool operator<(vector<string> A, vector<string> B) {
@@ -149,35 +152,39 @@ struct Item {
     vector<string> previous, next;
     Item() {}
     Item(string LHS, vector<string> previous, vector<string> next,
-         string LookAhead)
+        string LookAhead)
         : LHS(LHS), previous(previous), next(next), LookAhead(LookAhead) {}
     bool operator<(const Item other) const {
         if (LHS != other.LHS) {
             return LHS < other.LHS;
-        } else if (!(previous == other.previous)) {
+        }
+        else if (!(previous == other.previous)) {
             return previous < other.previous;
-        } else if (!(next == other.next)) {
+        }
+        else if (!(next == other.next)) {
             return next < other.next;
-        } else
+        }
+        else
             return LookAhead < other.LookAhead;
     }
     bool operator==(const Item other) const {
         if (LHS != other.LHS) {
             return false;
-        } else if (!(previous == other.previous)) {
+        }
+        else if (!(previous == other.previous)) {
             return false;
-        } else if (!(next == other.next)) {
+        }
+        else if (!(next == other.next)) {
             return false;
-        } else if (LookAhead != other.LookAhead)
+        }
+        else if (LookAhead != other.LookAhead)
             return false;
         return true;
     }
 };
-
 map<set<Item>, int> Item_set;
 map<int, set<Item>> Item_content;
 int item_num = 0;
-
 set<Item> get_closure(Item I) {
     set<Item> J;
     J.insert(I);
@@ -208,7 +215,6 @@ set<Item> get_closure(Item I) {
     } while (changed);
     return J;
 }
-
 set<Item> GO(set<Item> I, string X) {
     set<Item> J;
     for (auto item : I) {
@@ -222,7 +228,6 @@ set<Item> GO(set<Item> I, string X) {
     }
     return J;
 }
-
 void get_items() {
     Item_content[item_num] =
         get_closure(Item(S, empty_vec, *RHS_set[S].begin(), "$"));
@@ -258,25 +263,22 @@ void get_items() {
     } while (changed);
     printf("%d\n", item_num);
 }
-
 enum ACTION { Shift = 1, Reduce, ACC };
 map<pair<int, string>, pair<ACTION, int>> actionTable;
 map<pair<int, string>, int> Goto;
-
 void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
     if (actionTable.count(pos)) {
         if (actionTable[pos] != act) {
             // if (actionTable[pos].first == Shift) return;
             std::cerr << "???" << endl;
             cerr << actionTable[pos].first << " " << actionTable[pos].second
-                 << endl;
+                << endl;
             cerr << act.first << " " << act.second << endl;
             cerr << pos.first << " " << pos.second << endl;
         }
     }
     actionTable[pos] = act;
 }
-
 void LoadTable() {
     ifstream inf("../files/analyse_table.txt");
     int I, id, ACT_id;
@@ -285,7 +287,8 @@ void LoadTable() {
         inf >> I >> a >> ACT_id >> id;
         if (id == -1) {
             Goto[make_pair(I, a)] = ACT_id;
-        } else {
+        }
+        else {
             enum ACTION ACT;
             if (ACT_id == 1)
                 ACT = Shift;
@@ -299,7 +302,6 @@ void LoadTable() {
         }
     }
 }
-
 void generate_table() {
     if (table_exist) {
         LoadTable();
@@ -314,12 +316,14 @@ void generate_table() {
                 AddAction(
                     make_pair(Shift, Item_set[GO(I.first, *next.begin())]),
                     make_pair(I.second, *next.begin()));
-            } else if (it.LHS != S) {
+            }
+            else if (it.LHS != S) {
                 AddAction(
                     make_pair(Reduce,
-                              Production_ID[make_pair(it.LHS, it.previous)]),
+                        Production_ID[make_pair(it.LHS, it.previous)]),
                     make_pair(I.second, it.LookAhead));
-            } else {
+            }
+            else {
                 AddAction(make_pair(ACC, 0), make_pair(I.second, it.LookAhead));
             }
         }
@@ -334,215 +338,568 @@ void generate_table() {
         for (auto a : Terminal) {
             if (actionTable.count(make_pair(I.second, a))) {
                 of << I.second << " " << a << " "
-                   << actionTable[make_pair(I.second, a)].first << " "
-                   << actionTable[make_pair(I.second, a)].second << endl;
+                    << actionTable[make_pair(I.second, a)].first << " "
+                    << actionTable[make_pair(I.second, a)].second << endl;
             }
         }
         if (actionTable.count(make_pair(I.second, "$"))) {
             of << I.second << " "
-               << "$"
-               << " " << actionTable[make_pair(I.second, "$")].first << " "
-               << actionTable[make_pair(I.second, "$")].second << endl;
+                << "$"
+                << " " << actionTable[make_pair(I.second, "$")].first << " "
+                << actionTable[make_pair(I.second, "$")].second << endl;
         }
         for (auto A : Nonterminal) {
             if (Goto.count(make_pair(I.second, A))) {
                 of << I.second << " " << A << " "
-                   << Goto[make_pair(I.second, A)] << " -1" << endl;
+                    << Goto[make_pair(I.second, A)] << " -1" << endl;
             }
         }
     }
     cout << "table ready" << endl;
 }
-
 struct TokenItem {
     string raw, type, parserSymbol;
     int row, column;
     TokenItem() {}
     TokenItem(string raw, string type, string parserSymbol, int row, int column)
         : raw(raw),
-          type(type),
-          parserSymbol(parserSymbol),
-          row(row),
-          column(column) {}
+        type(type),
+        parserSymbol(parserSymbol),
+        row(row),
+        column(column) {}
 };
-
-std::ifstream &operator>>(std::ifstream &ifs, TokenItem &item) {
+std::ifstream& operator>>(std::ifstream& ifs, TokenItem& item) {
     std::string raw, type;
     int row, column;
     ifs >> raw >> row >> column >> type;
     if (raw == "")
-        item = {"", "", "$", 0, 0};
+        item = { "", "", "$", 0, 0 };
     else {
         string parserSymbol;
         if (type == "keyword" || type == "punc") {
             if (raw == ":=")
                 parserSymbol = "assignOP";
             else if (raw == "=" || raw == "<>" || raw == ">" || raw == "<" ||
-                     raw == ">=" || raw == "<=")
+                raw == ">=" || raw == "<=")
                 parserSymbol = "relOP";
             else if (raw == "*" || raw == "/" || raw == "div" || raw == "mod" ||
-                     raw == "and")
+                raw == "and")
                 parserSymbol = "mulOP";
             else
                 parserSymbol = raw;
-        } else if (type == "identify")
+        }
+        else if (type == "identify")
             parserSymbol = "ID";
         else if (type == "int" || type == "float" || type == "string")
             parserSymbol = type;
         else
             parserSymbol = raw;
-        item = {raw, type, parserSymbol, row, column};
+        item = { raw, type, parserSymbol, row, column };
     }
     return ifs;
 }
-
-enum NODE_PROP {
-    EXPRESSION_AST,
-    EXPRESSION_AST_LIST,
-    ID_LIST,
-    PATCH_DECLS,
-    VAR_TYPE
-};
-using PropAny = std::map<NODE_PROP, std::any>;
-
 struct GrammarTreeNode {
     string raw, type, parserSymbol;
     int row, column;
     uint64_t ID;
-    PropAny prop;
+    std::any prop;
 
-    vector<GrammarTreeNode *> son;
+    vector<GrammarTreeNode*> son;
     GrammarTreeNode(string raw, string type, string parserSymbol, int row,
-                    int column, uint64_t ID)
+        int column, uint64_t ID)
         : raw(raw),
-          type(type),
-          parserSymbol(parserSymbol),
-          row(row),
-          column(column),
-          ID(ID),
-          son{} {}
+        type(type),
+        parserSymbol(parserSymbol),
+        row(row),
+        column(column),
+        ID(ID),
+        son{} {}
 };
-
 vector<string> IDlist, Varlist, Paralist;
-
 void Analyse(string file_name) {
-    vector<GrammarTreeNode *> unlinkedNodes;
+    //记录下来每个node->prop的类型
+    vector<GrammarTreeNode*> unlinkedNodes;
     int curState;
     vector<int> states;
     vector<string> symbols;
-
     auto DoReduce = [&](Expr expr) {
-        auto UpdateProperties = [&](GrammarTreeNode *node) {
-            auto CreateBinaryAST = [&]() -> ExprAST * {
+        auto UpdateProperties = [&](GrammarTreeNode* node) {
+            auto CreateBinaryAST = [&]() -> ExprAST* {
                 return new BinaryExprAST(
                     node->son[1]->raw,
-                    std::any_cast<ExprAST *>(
-                        node->son[0]->prop[EXPRESSION_AST]),
-                    std::any_cast<ExprAST *>(
-                        node->son[1]->prop[EXPRESSION_AST]));
+                    std::any_cast<ExprAST*>(
+                        node->son[0]->prop),
+                    std::any_cast<ExprAST*>(
+                        node->son[2]->prop));
             };
-            std::cerr << node->type << '\n';
-            if (node->type == "IDList") {
-                if (node->son.size() == 1) {  // IDList -> ID
-                    node->prop[ID_LIST] =
-                        std::vector<std::string>({node->son[0]->parserSymbol});
-                } else {
-                    assert(node->son.size() ==
-                           3);  //下面的IDLIST没必要正确维护，可以直接覆盖
-                    std::any_cast<std::vector<std::string> &>(
-                        node->prop[ID_LIST] = node->son[0]->prop[ID_LIST])
-                        .push_back(node->son[2]->parserSymbol);
+            auto GetArgList = [&]() {
+                std::vector<ExprAST*> arg_list;
+                for (auto expr : std::any_cast<std::vector<std::any>&>(node->son[2]->prop)) {
+                    arg_list.push_back(std::any_cast<ExprAST*>(expr));
                 }
-            } else if (node->type == "VarDeclaration") {
-                if (node->son.size() == 3) {  // VarDeclaration -> IDList : Type
-                    std::any_cast<std::vector<PropAny> &>(
-                        node->prop[PATCH_DECLS]) = {
-                        {{ID_LIST, node->son[0]->prop[ID_LIST]},
-                         {VAR_TYPE, node->son[2]->parserSymbol}}};
-                } else {  // VarDeclaration -> VarDeclaration ; IDList :
-                          // Type
-                    assert(node->son.size() == 5);
-                    std::any_cast<std::vector<PropAny> &>(
-                        node->prop[PATCH_DECLS] =
-                            node->son[0]->prop[PATCH_DECLS])
-                        .push_back({{ID_LIST, node->son[2]->prop[ID_LIST]},
-                                    {VAR_TYPE, node->son[4]->parserSymbol}});
+                return arg_list;
+            };
+            using ProgramStruct = GlobalAST*;
+            using Component = map<std::string, std::vector<std::any>>;
+            using ProgramBody = map<std::string, std::vector<std::any>>;
+            using CompoundStatement = std::vector<AST*>;
+            if (node->type == "S") {
+                node->prop = node->son[0]->prop;
+            }
+            else if (node->type == "ProgramStruct") {
+                auto M = std::any_cast<ProgramBody>(node->son[2]);
+                std::vector<VariableDeclAST*> vars;
+                for (auto i : std::any_cast<std::vector<std::any>>(M["var"]))
+                    vars.push_back(std::any_cast<VariableDeclAST*>(i));
+                std::vector<FunctionAST*> functions;
+                for (auto i : std::any_cast<std::vector<std::any>>(M["function"]))
+                    functions.push_back(std::any_cast<FunctionAST*>(i));
+                node->prop = new GlobalAST(
+                    vars,
+                    functions,
+                    std::any_cast<BlockAST*>(
+                        std::any_cast<std::vector<std::any>>(M["body"]).front()
+                    )
+                );
+                assert(node->prop.type() == typeid(ProgramStruct));
+            }
+            else if (node->type == "ProgramHead") {
+                //Do nothing!
+            }
+            else if (node->type == "ProgramBody") { //ProgramBody -> Component CompoundStatement @
+                ProgramBody M = std::any_cast<Component>(node->son[0]->prop);
+                M["body"].push_back(std::any_cast<CompoundStatement>(node->son[1]->prop));
+                node->prop = M;
+            }
+            else if (node->type == "Component") {
+                if (node->son[0]->raw == "const") {
+                    auto M = std::any_cast<Component>(node->son[3]->prop);
+                    M["const"].push_back(node->son[1]->prop);
+                    node->prop = M;
                 }
-            } else if (node->type == "ExpressionList") {
-                if (node->son.size() == 1) {  // ExpressionList -> Expression
-                    node->prop[EXPRESSION_AST_LIST] = std::vector<std::any>{
-                        node->son[0]->prop[EXPRESSION_AST]};
-                } else {  // ExpressionList -> ExpressionList ,
-                          // Expression
-                    std::any_cast<std::vector<std::any> &>(
-                        node->prop[EXPRESSION_AST_LIST] =
-                            node->son[0]->prop[EXPRESSION_AST_LIST])
-                        .push_back(node->son[2]->prop[EXPRESSION_AST]);
+                else if (node->son[0]->raw == "type") {
+                    auto M = std::any_cast<Component>(node->son[3]->prop);
+                    M["type"].push_back(node->son[1]->prop);
+                    node->prop = M;
                 }
-            } else if (node->type == "Expression") {
-                /*
-                  Expression -> SimpleExpression relOP SimpleExpression
-                  @ Expression -> string @ Expression ->
-                  SimpleExpression @ Expression -> Expression ^ @
-                */
-                if (node->son.size() == 3) {
-                    node->prop[EXPRESSION_AST] = CreateBinaryAST();
-                } else if (node->son.size() == 2) {
-                    node->prop[EXPRESSION_AST] = new UnaryExprAST(
-                        "^", std::any_cast<ExprAST *>(
-                                 node->son[0]->prop[EXPRESSION_AST]));
-                } else {
-                    if (node->type == "string") {
-                        node->prop[EXPRESSION_AST] =
-                            new StringExprAST(node->raw);
-                    } else {
-                        node->prop[EXPRESSION_AST] =
-                            node->son[0]->prop[EXPRESSION_AST];
-                    }
+                else if (node->son[0]->raw == "var") { //Component -> var VarDeclaration ; Component
+                    auto M = std::any_cast<Component>(node->son[3]->prop);
+                    M["var"].push_back(node->son[1]->prop);
+                    node->prop = M;
                 }
-            } else if (node->type == "SimpleExpression") {
-                /*
-                SimpleExpression -> SimpleExpression addOP Term @
-                SimpleExpression -> Term @
-                */
-                node->prop[EXPRESSION_AST] =
-                    node->son.size() == 1 ? node->son[0]->prop[EXPRESSION_AST]
-                                          : CreateBinaryAST();
-            } else if (node->type == "Term") {
-                node->prop[EXPRESSION_AST] =
-                    node->son.size() == 1 ? node->son[0]->prop[EXPRESSION_AST]
-                                          : CreateBinaryAST();
-            } else if (node->type == "Factor") {
-                if (node->type == "Num") {
-                    node->prop[EXPRESSION_AST] =
-                        node->son[0]->prop[EXPRESSION_AST];
-                } else if (node->son[0]->type == "Variable") {  // FIXME
-                    node->prop[EXPRESSION_AST] =
-                        new VariableExprAST(node->son[0]->raw);
-                } else if (node->son[0]->type == "ID") {
-                } else if (node->son[1]->type ==
-                           "Expression") {  // ( Expression )
-                    node->prop[EXPRESSION_AST] =
-                        node->son[1]->prop[EXPRESSION_AST];
-                } else {
-                    assert(node->son[1]->type == "Factor");
-                    node->prop[EXPRESSION_AST] = new UnaryExprAST(
-                        node->son[0]->raw,
-                        std::any_cast<ExprAST *>(
-                            node->son[1]->prop[EXPRESSION_AST]));
+                else if (node->son[0]->type == "Subprogram") {
+                    auto M = std::any_cast<Component>(node->son[2]->prop);
+                    M["function"].push_back(node->son[0]->prop);
+                    node->prop = M;
                 }
-            } else if (node->type == "Num") {
-                if (node->son[0]->type == "int") {
-                    node->prop[EXPRESSION_AST] =
-                        new NumberExprAST(std::stoi(node->son[0]->raw));
-                } else if (node->son[0]->type == "float") {
-                    node->prop[EXPRESSION_AST] =
-                        new NumberExprAST(std::stod(node->son[0]->raw));
+                else {
+                    node->prop = Component();
                 }
             }
+            else if (node->type == "IDList") {
+                if (node->son.size() == 1) {  // IDList -> ID
+                    node->prop = std::vector<std::string>(1, node->son[0]->raw);
+                }
+                else {
+                    auto list = std::any_cast<std::vector<std::string>>(node->son[0]->prop);
+                    list.push_back(node->son[2]->raw);
+                    node->prop = list;
+                }
+            }
+            else if (node->type == "ConstDeclaration") {
+
+            }
+            else if (node->type == "ConstValue") {
+                if (node->son[0]->raw == "+") { //ConstValue -> + Num
+                    node->prop = new UnaryExprAST("+",
+                        std::any_cast<ExprAST*>(node->son[1]->prop)
+                    );
+                }
+                else if (node->son[0]->raw == "-") { //ConstValue -> - Num
+                    node->prop = new UnaryExprAST("-",
+                        std::any_cast<ExprAST*>(node->son[1]->prop)
+                    );
+                }
+                else if (node->son.size() == 1) { //ConstValue -> Num
+                    node->prop = node->son[0]->prop;
+                }
+            }
+            else if (node->type == "TypeDeclaration") {
+
+            }
+            //TypeDeclAST*
+            else if (node->type == "ActualType") {
+                if (node->son.size() == 1)
+                    node->prop = node->son[0]->prop;
+                else
+                    abort();
+            }
+            //std::vector<VariableDeclAST*>
+            else if (node->type == "VarDeclaration") {
+                if (node->son.size() == 3) { //VarDeclaration -> IDList : Type
+                    auto list = std::any_cast<std::vector<std::string>>(node->son[0]->prop);
+                    std::vector<VariableDeclAST*> now;
+                    for (auto id : list) {
+                        now.push_back(new VariableDeclAST(
+                            new VariableExprAST(id),
+                            std::any_cast<TypeDeclAST*>(node->son[2]->prop),
+                            true
+                        ));
+                    }
+                    node->prop = now;
+                }
+                else {
+                    auto now = std::any_cast<std::vector<VariableDeclAST*>>(node->son[0]->prop);
+                    auto list = std::any_cast<std::vector<std::string>>(node->son[2]->prop);
+                    for (auto id : list) {
+                        now.push_back(new VariableDeclAST(
+                            new VariableExprAST(id),
+                            std::any_cast<TypeDeclAST*>(node->son[4]->prop),
+                            true
+                        ));
+                    }
+                    node->prop = now;
+                }
+            }
+            //TypeDeclAST*
+            else if (node->type == "Type") {
+                if (node->son[0]->type == "array") {
+                    auto pr = std::any_cast<std::pair<NumberExprAST*, NumberExprAST*>>(node->son[2]->prop);
+                    node->prop = new ArrayTypeDeclAST(
+                        std::any_cast<BasicTypeAST*>(node->son[5]->prop),
+                        pr.first,
+                        pr.second
+                    );
+                }
+                else if (node->type == "BasicType") {
+                    node->prop = node->son[0]->prop;
+                }
+                else {
+                    node->prop = new PointerTypeDeclAST(
+                        std::any_cast<BasicTypeAST*>(node->son[1]->prop)
+                    );
+                }
+            }
+            else if (node->type == "BasicType") {
+                node->prop = new BasicTypeAST(node->son[0]->raw);
+            }
+            else if (node->type == "Period") {
+                if (node->son.size() == 3) {
+                    node->prop = make_pair(
+                        std::any_cast<NumberExprAST*>(node->son[0]->prop),
+                        std::any_cast<NumberExprAST*>(node->son[2]->prop)
+                    );
+                }
+                else
+                    abort();
+            }
+            else if (node->type == "Subprogram") {
+                auto pr = std::any_cast<std::pair<std::any, std::any>>(node->son[2]);
+                node->prop = new FunctionAST(
+                    std::any_cast<FunctionSignatureAST*>(node->son[0]->prop),
+                    std::any_cast<std::vector<VariableDeclAST*>>(pr.first),
+                    std::any_cast<BlockAST*>(pr.second)
+                );
+            }
+            else if (node->type == "SubprogramHead") {
+                if (node->son.size() == 3) {
+                    node->prop = new FunctionSignatureAST(
+                        node->son[1]->raw,
+                        std::any_cast<std::vector<VariableDeclAST*>>(node->son[2]->prop),
+                        new BasicTypeAST("void")
+                    );
+                }
+                else {
+                    node->prop = new FunctionSignatureAST(
+                        node->son[1]->raw,
+                        std::any_cast<std::vector<VariableDeclAST*>>(node->son[2]->prop),
+                        new BasicTypeAST(node->son[4]->raw)
+                    );
+                }
+            }
+            else if (node->type == "FormalParameter") {
+                if (node->son.size() <= 2)
+                    node->prop = std::vector<VariableDeclAST*>();
+                else {
+                    node->prop = node->son[1]->prop;
+                }
+            }
+            else if (node->type == "ParameterList") {
+                if (node->son.size() == 1)
+                    node->prop = node->son[0]->prop;
+                else {
+                    auto list1 = std::any_cast<std::vector<VariableDeclAST*>>(node->son[0]);
+                    auto list2 = std::any_cast<std::vector<VariableDeclAST*>>(node->son[2]);
+                    for (auto i : list2)
+                        list1.push_back(i);
+                    node->prop = list1;
+                }
+            }
+            else if (node->type == "Parameter") {
+                node->prop = node->son[0]->prop;
+            }
+            else if (node->type == "VarParameter") {
+                auto list = std::any_cast<std::vector<VariableDeclAST*>>(node->son[1]->prop);
+                for (auto& ptr : list)
+                    ptr->isRef = true;
+                node->prop = list;
+            }
+            else if (node->type == "ValueParameter") {
+                std::vector<VariableDeclAST*> list;
+                for (auto i : std::any_cast<std::vector<std::string>>(node->son[0]->prop)) {
+                    list.push_back(new VariableDeclAST(std::any_cast<VariableExprAST*>(i),
+                        std::any_cast<BasicTypeAST*>(node->son[2]->prop),
+                        false
+                    ));
+                }
+                node->prop = list;
+            }
+            else if (node->type == "SubprogramBody") {
+                node->prop = std::make_pair(node->son[0]->prop, node->son[1]->prop);
+            }
+            else if (node->type == "SubComponent") {
+                if (node->son.size() == 0)
+                    node->prop = nullptr;
+                else {
+                    auto list = std::any_cast<BlockAST*>(node->son[3]->prop);
+                    if (node->son[0]->type == "var") {
+                        list->exprs.insert(list->exprs.begin(), 
+                            std::any_cast<AST*>(node->son[1]->prop));
+                    }
+                    else {
+                        list->exprs.insert(list->exprs.begin(),
+                            std::any_cast<AST*>(node->son[1]->prop));
+                    }
+                    node->prop = std::move(list);
+                }
+            }
+            else if (node->type == "CompoundStatement") {
+                node->prop = node->son[1]->prop;
+            }
+            else if (node->type == "StatementList") {
+                if (node->son.size() == 1) {
+                    node->prop = new BlockAST(
+                        std::vector<AST*>(1, std::any_cast<AST*>(node->son[0]->prop))
+                    );
+                }
+                else {
+                    auto list = std::any_cast<BlockAST*>(node->son[0]->prop);
+                    list->exprs.push_back(std::any_cast<AST* >(node->son[1]->prop));
+                    node->prop = std::move(list);
+                }
+            }
+            else if (node->type == "Statement") {
+                if (node->son.empty()) {
+                    node->prop = new BlockAST({});
+                }
+                else if (node->son[0]->type == "CompoundStatement") {
+                    node->prop = node->son[0]->prop;
+                }
+                else if (node->son[0]->type == "ProcedureCall(ARG)") {
+                    node->prop = node->son[0]->prop;
+                }
+                else if (node->son[0]->type == "Variable") {
+                    node->prop = new BinaryExprAST(
+                        node->son[1]->raw,
+                        std::any_cast<ExprAST* >(node->son[0]->prop),
+                        std::any_cast<ExprAST* >(node->son[2]->prop)
+                    );
+                }
+                else if (node->son[0]->type == "if") {
+                    BlockAST* body_true = nullptr;
+                    BlockAST* body_false = nullptr;
+                    if (node->son[3]->prop.type() != typeid(BlockAST*))
+                        body_true = new BlockAST(std::vector<AST*>(1, 
+                            std::any_cast<AST*>(node->son[3]->prop)));
+                    else
+                        body_true = std::any_cast<BlockAST*>(node->son[3]->prop);
+                    if (node->son[4]->prop.type() != typeid(BlockAST*))
+                        body_true = new BlockAST(std::vector<AST*>(1,
+                            std::any_cast<AST*>(node->son[4]->prop)));
+                    else
+                        body_true = std::any_cast<BlockAST*>(node->son[4]->prop);
+                    node->prop = new IfStatementAST(
+                        std::any_cast<ExprAST*>(node->son[1]->prop),
+                        body_true,
+                        body_false
+                    );
+                }
+                else if (node->son[0]->type == "for") {
+                    
+                }
+                else if (node->son[0]->type == "while") {
+                    BlockAST* body;
+                    if (node->son[3]->prop.type() != typeid(BlockAST*))
+                        body = new BlockAST(std::vector<AST*>(1,
+                            std::any_cast<AST*>(node->son[3]->prop)));
+                    else
+                        body = std::any_cast<BlockAST*>(node->son[3]->prop);
+                    node->prop = new WhileStatementAST(
+                        std::any_cast<ExprAST*>(node->son[1]->prop),
+                        body
+                    );
+                }
+                else if (node->son[0]->type == "read") {
+                    node->prop = new CallExprAST(
+                        "read",
+                        GetArgList()
+                    );
+                }
+                else if (node->son[0]->type == "write") {
+                    node->prop = new CallExprAST(
+                        "write",
+                        GetArgList()
+                    );
+                }
+                else if (node->son[0]->type == "writeln") {
+                    if (node->son.size() == 4) {
+                        node->prop = new CallExprAST(
+                            "writeln",
+                            GetArgList()
+                        );
+                    }
+                    else {
+                        node->prop = new CallExprAST(
+                            "writeln",
+                            { }
+                        );
+                    }
+                }
+            }
+            else if (node->type == "Variable") {
+            auto var = new VariableExprAST(node->son[0]->raw);
+                if (!std::any_cast<nullptr_t>(node->son[1]->prop))
+                    node->prop = var;
+                else
+                    node->prop = new BinaryExprAST("[]",
+                        std::any_cast<ExprAST*>(var),
+                        std::any_cast<ExprAST*>(node->son[1]->prop));
+            }
+            else if (node->type == "IDVarpart") {
+                if (node->son.size() == 0)
+                    node->prop = nullptr;
+                else
+                    node->prop = node->son[1]->prop;
+            }
+            else if (node->type == "ProcedureCall(ARG)") {
+                if (node->son.size() == 4) { //ProcedureCall(ARG) -> ID ( ExpressionList )
+                    node->prop = new CallExprAST(
+                        node->son[0]->raw,
+                        GetArgList()
+                    );
+                }
+                else { //ProcedureCall(ARG) -> ID ( )
+                    node->prop = new CallExprAST(
+                        node->son[0]->raw,
+                        { }
+                    );
+                }
+            }
+            else if (node->type == "ElsePart") {
+                if (node->son.size() > 0) {
+                    node->prop = node->son[1]->prop;
+                }
+                else {
+                    node->prop = nullptr;
+                }
+            }
+            else if (node->type == "ExpressionList") {
+                if (node->son.size() == 1) {  // ExpressionList -> Expression
+                    node->prop = std::vector<std::any>{
+                        node->son[0]->prop };
+                }
+                else {  // ExpressionList -> ExpressionList , Expression
+                    std::any_cast<std::vector<std::any>&>(
+                        node->prop =
+                        node->son[0]->prop)
+                        .push_back(node->son[2]->prop);
+                }
+            }
+            else if (node->type == "Expression") {
+                /*
+                    Expression -> SimpleExpression relOP SimpleExpression @
+                    Expression -> string @
+                    Expression -> SimpleExpression @
+                    Expression -> Expression ^ @
+                */
+                if (node->son.size() == 3) {
+                    node->prop = CreateBinaryAST();
+                }
+                else if (node->son.size() == 2) {
+                    node->prop = new UnaryExprAST(
+                        "^", std::any_cast<ExprAST*>(
+                            node->son[0]->prop));
+                }
+                else {
+                    if (node->son[0]->type == "string") {
+                        node->prop =
+                            new StringExprAST(node->raw);
+                    }
+                    else {
+                        node->prop =
+                            node->son[0]->prop;
+                    }
+                }
+            }
+            else if (node->type == "SimpleExpression") {
+                if (node->son.size() == 1) //SimpleExpression -> Term
+                    node->prop = node->son[0]->prop;
+                else //SimpleExpression -> SimpleExpression addOP Term
+                    node->prop = CreateBinaryAST();
+            }
+            else if (node->type == "Term") {
+                if (node->son.size() == 1) //Term -> Factor
+                    node->prop = node->son[0]->prop;
+                else //Term -> Term mulOP Factor
+                    node->prop = CreateBinaryAST();
+            }
+            else if (node->type == "Factor") {
+                if (node->son[0]->type == "Num") {
+                    node->prop = node->son[0]->prop;
+                }
+                else if (node->son[0]->type == "Variable") {  // FIXME
+                    node->prop =
+                        new VariableExprAST(node->son[0]->raw);
+                }
+                else if (node->son[0]->type == "ProcedureCall(ARG)") {
+                    node->prop = node->son[0]->prop;
+                }
+                else if (node->son[1]->type == "Expression") {  // ( Expression )
+                    node->prop =
+                        node->son[1]->prop;
+                }
+                else { //Factor -> not Factor, Factor -> uminus Factor
+                    assert(node->son[1]->type == "Factor");
+                    node->prop = new UnaryExprAST(
+                        node->son[0]->raw,
+                        std::any_cast<ExprAST*>(
+                            node->son[1]->prop));
+                }
+            }
+            //NumberExprAST*
+            else if (node->type == "Num") {
+                if (node->son[0]->type == "int") {
+                    node->prop = new NumberExprAST(std::stoi(node->son[0]->raw));
+                }
+                else if (node->son[0]->type == "float") {
+                    node->prop = new NumberExprAST(std::stod(node->son[0]->raw));
+                }
+            }
+            else if (node->type == "Digits") {
+                node->prop =
+                    new NumberExprAST(std::stoi(node->son[0]->raw));
+            }
+            else if (node->type == "addOP") {
+            
+            }
+            else if (node->type == "relOP") {
+
+            }
+            else
+                abort();
         };
         int popNum = expr.second.size();
-        vector<GrammarTreeNode *> reducedNode;
+        vector<GrammarTreeNode*> reducedNode;
         for (int i = 0; i < popNum; i++) {
             states.pop_back();
             symbols.pop_back();
@@ -553,7 +910,7 @@ void Analyse(string file_name) {
         states.push_back(Goto[make_pair(curState, expr.first)]);
         symbols.push_back(expr.first);
         uint64_t gid = rng();
-        GrammarTreeNode *newNode =
+        GrammarTreeNode* newNode =
             new GrammarTreeNode("", expr.first, expr.first, 0, 0, gid);
         reverse(reducedNode.begin(), reducedNode.end());
         for (auto node : reducedNode) newNode->son.push_back(node);
@@ -580,27 +937,27 @@ void Analyse(string file_name) {
             unlinkedNodes.push_back(new GrammarTreeNode(
                 N.raw, N.type, N.parserSymbol, N.row, N.column, rng()));
             lexOut >> N;
-        } else if (act.first == Reduce) {
+        }
+        else if (act.first == Reduce) {
             Expr prod = Production_content[act.second];
             DoReduce(prod);
-        } else if (act.first == ACC) {
+        }
+        else if (act.first == ACC) {
             uint64_t gid = 0;
-            GrammarTreeNode *newNode =
+            GrammarTreeNode* newNode =
                 new GrammarTreeNode("", "S", "S", 0, 0, gid);
-            newNode->son = {*unlinkedNodes.rbegin()};
+            newNode->son = { *unlinkedNodes.rbegin() };
             cout << "ACCEPT!" << endl;
             break;
         }
     }
 }
-
 void check_grammar_tree(uint64_t gid, int dep) {
     /*for (auto x : gramTree[gid]) {
         cout << dep << " " << x.word << " " << x.type << endl;
         check_grammar_tree(x.ID, dep + 1);
     }*/
 }
-
 void parser_work(string file_name) {
     init();
     get_first();
