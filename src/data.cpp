@@ -187,7 +187,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
 
     // convert mainBlock into main function
     this->functions.push_back(new FunctionAST(
-        new FunctionSignatureAST("main", {}, new BasicTypeAST(TYPE_BASIC_INT)),new BlockAST({}),
+        new FunctionSignatureAST("main", {}, new BasicTypeAST(TYPE_BASIC_INT)),{},
         this->mainBlock));
     // add return 0 to mainBlock
     this->mainBlock->exprs.push_back(new ReturnAST(new NumberExprAST(0)));
@@ -211,8 +211,8 @@ void FunctionAST::accept(ASTDispatcher &dispatcher) {
 
     // put all variable declaration into block
     this->body->exprs.insert(this->body->exprs.begin(),
-                             this->varDecls->exprs.begin(),
-                             this->varDecls->exprs.end());
+                             this->varDecls.begin(),
+                             this->varDecls.end());
 
     dispatcher.genFunction(this);
 }

@@ -253,7 +253,7 @@ void TEST_funcdef(){
             },
             new BasicTypeAST(TYPE_BASIC_INT)
         ),
-        new BlockAST({}),
+        {},
         new BlockAST({
             new BinaryExprAST(
                 "=",
@@ -377,7 +377,7 @@ void TEST_fibonacci(){
                     },
                     new BasicTypeAST(TYPE_BASIC_VOID)
                 ),
-                new BlockAST({}),
+                {},
                 new BlockAST(
                     {
                         new BinaryExprAST(
