@@ -15,13 +15,12 @@ ConstDeclaration -> ID = ConstValue @
 ConstValue -> + Num @
 ConstValue -> - Num @
 ConstValue -> Num @
-ConstValue -> ' letter ' @
 TypeDeclaration -> TypeDeclaration ; ID = ActualType @
 TypeDeclaration -> ID = ActualType @
 ActualType -> Type @
 ActualType -> record VarDeclaration ; end @
-VarDeclaration -> VarDeclaration ; IDList : Type @
-VarDeclaration -> IDList : Type @
+VarDeclaration -> VarDeclaration ; IDList : ActualType @
+VarDeclaration -> IDList : ActualType @
 Type -> ^ BasicType @
 Type -> BasicType @
 Type -> array [ Period ] of BasicType @
@@ -31,7 +30,7 @@ BasicType -> int64 @
 BasicType -> real @
 BasicType -> boolean @
 BasicType -> char @
-BasicType -> recordtype @
+BasicType -> string @
 Period -> Period , Digits .. Digits @
 Period -> Digits .. Digits @
 Subprogram -> SubprogramHead ; SubprogramBody @
@@ -53,7 +52,7 @@ SubComponent -> @
 CompoundStatement -> begin StatementList end @
 StatementList -> StatementList ; Statement @
 StatementList -> Statement @
-Statement -> Variable assignOP Expression @
+Statement -> ComposedVariable assignOP Expression @
 Statement -> ProcedureCall(ARG) @
 Statement -> CompoundStatement @
 Statement -> if Expression then Statement ElsePart @
