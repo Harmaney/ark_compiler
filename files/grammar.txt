@@ -73,6 +73,7 @@ ElsePart -> @
 ExpressionList -> ExpressionList , Expression @
 ExpressionList -> Expression @
 Expression -> SimpleExpression relOP SimpleExpression @
+Expression -> SimpleExpression = SimpleExpression @
 Expression -> string @
 Expression -> SimpleExpression @
 Expression -> Expression ^ @
@@ -94,4 +95,3 @@ Digits -> int @
 addOP -> + @
 addOP -> - @
 addOP -> or @
-relOP -> = @
