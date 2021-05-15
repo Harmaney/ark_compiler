@@ -133,24 +133,7 @@ class BasicTypeAST : public TypeDeclAST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
-/// 数组类型。可以继续在它下面挂数组，但是我不知道翻译会不会出问题
-class ArrayTypeDeclAST : public TypeDeclAST {
-   public:
-    // does not support pointer
-    TypeDeclAST *itemAST;
-    int rangeL, rangeR;
-    ArrayTypeDeclAST(BasicTypeAST *itemAST, int rangeL, int rangeR)
-        : TypeDeclAST(AST_ARRAY_TYPE),
-          itemAST(itemAST),
-          rangeL(rangeL),
-          rangeR(rangeR) {}
-    ArrayTypeDeclAST(ArrayTypeDeclAST *itemAST, int rangeL, int rangeR)
-        : TypeDeclAST(AST_ARRAY_TYPE),
-          itemAST(itemAST),
-          rangeL(rangeL),
-          rangeR(rangeR) {}
-    void accept(ASTDispatcher &dispatcher) override;
-};
+
 
 /// 指针类型
 class PointerTypeDeclAST : public TypeDeclAST {
@@ -174,6 +157,20 @@ class NumberExprAST : public ExprAST {
         : ExprAST(AST_NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {}
 
     void accept(ASTDispatcher &dispacher) override;
+};
+
+/// 数组类型。可以继续在它下面挂数组，但是我不知道翻译会不会出问题
+class ArrayTypeDeclAST : public TypeDeclAST {
+   public:
+    // does not support pointer
+    TypeDeclAST *itemAST;
+    NumberExprAST *rangeL, *rangeR;
+    ArrayTypeDeclAST(TypeDeclAST *itemAST, NumberExprAST* rangeL, NumberExprAST* rangeR)
+        : TypeDeclAST(AST_ARRAY_TYPE),
+          itemAST(itemAST),
+          rangeL(rangeL),
+          rangeR(rangeR) {}
+    void accept(ASTDispatcher &dispatcher) override;
 };
 
 /// 字符串常量

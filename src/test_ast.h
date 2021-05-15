@@ -18,7 +18,7 @@ void TEST_vardecl() {
 void TEST_arraydecl() {
     auto ast = new VariableDeclAST(
         new VariableExprAST("a"),
-        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2),false);
+        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), new NumberExprAST(1), new NumberExprAST(2)),false);
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -27,7 +27,7 @@ void TEST_arraydecl() {
 void TEST_arrayofarray() {
     BlockAST *ast = new BlockAST({new VariableDeclAST(
         new VariableExprAST("a"),
-        new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),1,10), 1, 100),false)});
+        new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(1),new NumberExprAST(10)), new NumberExprAST(1), new NumberExprAST(100)),false)});
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -37,7 +37,7 @@ void TEST_arrayuse() {
     auto ast = new BlockAST({
         new VariableDeclAST(
             new VariableExprAST("a"),
-            new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), 1, 2),
+            new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), new NumberExprAST(1), new NumberExprAST(2)),
             false
         ),
         new VariableDeclAST(
@@ -64,9 +64,9 @@ void TEST_arrayofarrayuse() {
     auto ast = new BlockAST({
         new VariableDeclAST(
             new VariableExprAST("a"),
-            new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),1,10), 
-            1,
-            100),
+            new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(1),new NumberExprAST(10)), 
+            new NumberExprAST(1),
+            new NumberExprAST(100)),
             false
         ),
         new VariableDeclAST(
@@ -169,14 +169,14 @@ void TEST_arrinstruct(){
             {
                 new VariableDeclAST(
                     new VariableExprAST("arr1"),
-                    new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),0,10),
+                    new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(0),new NumberExprAST(10)),
                     false
                 ),
             }
         ),
         new VariableDeclAST(
             new VariableExprAST("sp"),
-            new ArrayTypeDeclAST(new BasicTypeAST("SP"),0,10),
+            new ArrayTypeDeclAST(new BasicTypeAST("SP"),new NumberExprAST(0),new NumberExprAST(10)),
             false
         ),
         new BinaryExprAST(
