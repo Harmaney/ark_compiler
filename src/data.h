@@ -241,11 +241,7 @@ class VariableDeclAST : public AST {
     // 这个东西的意义并不和指针等价！
     // 它只是在C中使用指针模拟，用于处理pascal里的引用类型
     bool isRef;
-    VariableDeclAST(VariableExprAST *sig, BasicTypeAST *type, bool isRef)
-        : AST(AST_VARIABLE_DECL), sig(sig), varType(type),isRef(isRef) {}
-    VariableDeclAST(VariableExprAST *sig, ArrayTypeDeclAST *type, bool isRef)
-        : AST(AST_VARIABLE_DECL), sig(sig), varType(type),isRef(isRef) {}
-    VariableDeclAST(VariableExprAST *sig, PointerTypeDeclAST *type, bool isRef)
+    VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef)
         : AST(AST_VARIABLE_DECL), sig(sig), varType(type),isRef(isRef) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
