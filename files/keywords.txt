@@ -1,6 +1,7 @@
 and
 array
 begin
+boolean
 case
 const
 div
@@ -24,6 +25,7 @@ packed
 procedure
 program
 record
+real
 repeat
 set
 string
