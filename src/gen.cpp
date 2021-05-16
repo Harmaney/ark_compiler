@@ -352,11 +352,11 @@ void ASTDispatcher::genForStatementBegin(ForStatementAST *ast) {
     ast->extraData["end"] = TagTable::createTagG();
     ast->extraData["begin"] = TagTable::createTagG();
 
-    if (ast->rangeL->const_type != CONSTANT_INT) {
-        throw TypeErrorException("left range of `for` is not an integer",std::to_string(ast->rangeL->const_type),"a integer",0,0);
+    if (std::any_cast<VariableDescriptor*>(ast->rangeL->value)->varType != SymbolTable::lookforType(TYPE_BASIC_INT)) {
+        throw TypeErrorException("left range of `for` is not an integer",std::any_cast<VariableDescriptor*>(ast->rangeL->value)->varType->name,"a integer",0,0);
     }
-    if (ast->rangeR->const_type != CONSTANT_INT) {
-        throw TypeErrorException("right range of `for` is not an integer",std::to_string(ast->rangeR->const_type),"a integer",0,0);
+    if (std::any_cast<VariableDescriptor*>(ast->rangeR->value)->varType != SymbolTable::lookforType(TYPE_BASIC_INT)) {
+        throw TypeErrorException("right range of `for` is not an integer",std::any_cast<VariableDescriptor*>(ast->rangeL->value)->varType->name,"a integer",0,0);
     }
 
     CodeCollector::src()

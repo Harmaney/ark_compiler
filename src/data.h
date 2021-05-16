@@ -249,11 +249,11 @@ class VariableDeclAST : public AST {
 class ForStatementAST : public AST {
    public:
     VariableExprAST *itervar;
-    NumberExprAST *rangeL, *rangeR;
+    ExprAST *rangeL, *rangeR;
     BlockAST *body;
 
-    ForStatementAST(VariableExprAST *itervar, NumberExprAST *rangeL,
-                    NumberExprAST *rangeR, BlockAST *body)
+    ForStatementAST(VariableExprAST *itervar, ExprAST *rangeL,
+                    ExprAST *rangeR, BlockAST *body)
         : AST(AST_FOR_STATEMENT),
           itervar(itervar),
           rangeL(rangeL),
