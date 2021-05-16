@@ -245,8 +245,9 @@ class VariableDeclAST : public AST {
     // 这个东西的意义并不和指针等价！
     // 它只是在C中使用指针模拟，用于处理pascal里的引用类型
     bool isRef;
-    VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef)
-        : AST(AST_VARIABLE_DECL), sig(sig), varType(type),isRef(isRef) {}
+    bool isConst;
+    VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef,bool isConst)
+        : AST(AST_VARIABLE_DECL), sig(sig), varType(type),isRef(isRef),isConst(isConst) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -320,12 +321,12 @@ class FunctionAST : public AST {
 };
 
 
-class StructDeclAST : public AST {
+class StructDeclAST : public TypeDeclAST {
    public:
     std::string sig;
     std::vector<VariableDeclAST *> varDecl;
     StructDeclAST(std::string sig, std::vector<VariableDeclAST *> varDecl)
-        : AST(AST_STRUCT_DECL), sig(sig), varDecl(varDecl) {}
+        : TypeDeclAST(AST_STRUCT_DECL), sig(sig), varDecl(varDecl) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -378,12 +379,12 @@ class SymbolTable {
     static void exit();
     static VariableDescriptor *createVariable(std::string sig,
                                               SymbolDescriptor *type,
-                                              bool isRef);
+                                              bool isRef,bool isConst);
     static VariableDescriptor *createVariableG(std::string sig,
                                                SymbolDescriptor *type,
                                                bool isRef);
     static VariableDescriptor *createVariable(SymbolDescriptor *type,
-                                              bool isRef);
+                                              bool isRef,bool isConst);
     static VariableDescriptor *createVariableG(SymbolDescriptor *type,
                                                bool isRef);
 

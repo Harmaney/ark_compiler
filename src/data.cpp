@@ -331,9 +331,9 @@ void SymbolTable::exit() {
 
 VariableDescriptor *SymbolTable::createVariable(std::string sig,
                                                 SymbolDescriptor *type,
-                                                bool isRef) {
+                                                bool isRef,bool isConst) {
     current->insert_variable(sig,
-                             new VariableDescriptor(sig, type, isRef, false));
+                             new VariableDescriptor(sig, type, isRef, isConst));
     return current->searchVariable(sig);
 }
 
@@ -345,10 +345,10 @@ VariableDescriptor *SymbolTable::createVariableG(std::string sig,
 }
 
 VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type,
-                                                bool isRef) {
+                                                bool isRef,bool isConst) {
     std::string sig = current->getSlot();
     current->insert_variable(sig,
-                             new VariableDescriptor(sig, type, isRef, false));
+                             new VariableDescriptor(sig, type, isRef, isConst));
     return current->searchVariable(sig);
 }
 
