@@ -47,15 +47,22 @@ struct ParserOutputer {
     */
     ParserOutputer() : j(Json::array()) {}
     void AddNode(GrammarTreeNode* node) {
+        using namespace NodeProperties;
         Json nj;
-        std::map<std::string, std::function<void()>> deal = {
-            {"S", [&]() -> void { nj['ast'] = (uint64_t)cast<S>(node->prop); }},
-        };
-        nj["address"] = (uint64_t)node;
+        std::map<std::string, std::function<void()>>  //
+            deal = {                                  //
+                    {"S",                             //
+                     [&]() {
+                         nj['ast'] = {{"name", "GlobalAST"}, {"addr", (uint64_t)cast<S>(node->prop)}};
+                     }},               //
+                    {"ProgramStruct",  //
+                     [&]() { ; }}};
+        nj["addr"] = (uint64_t)node;
         if (deal.count(node->type)) deal[node->type]();
         j.push_back(nj);
     }
 };
 
 extern ParserOutputer parserOutputer;
+
 #endif
