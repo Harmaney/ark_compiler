@@ -587,6 +587,7 @@ GrammarTreeNode* Analyse(string file_name) {
                 std::vector<FunctionAST*> functions;
                 for (auto i : M["function"])
                     functions.push_back(cast<FunctionAST*>(i));
+                reverse(functions.begin(), functions.end());
                 assert(M["body"].size() == 1);
                 node->prop = new std::remove_pointer<ProgramStruct>::type (
                     vars,
