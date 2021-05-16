@@ -376,7 +376,6 @@ std::ifstream& operator>>(std::ifstream& ifs, TokenItem& item) {
     }
     return ifs;
 }
-
 template <typename A>
 inline A cast(std::any arg) {
     if (typeid(A) == typeid(AST*)) {
@@ -477,6 +476,12 @@ template <>
 inline std::vector<std::pair<NumberExprAST*, NumberExprAST*>> cast(std::any arg) {
     return std::any_cast<std::vector<std::pair<NumberExprAST*, NumberExprAST*>>>(arg);
 }
+std::string rand_name() {
+    static int index = 0;
+    std::string ret = "anonymous_" + std::to_string(index);
+    index += 1;
+    return ret;
+}
 GrammarTreeNode* Analyse(string file_name) {
     //记录下来每个node->prop的类型
     vector<GrammarTreeNode*> unlinkedNodes;
@@ -485,7 +490,6 @@ GrammarTreeNode* Analyse(string file_name) {
     vector<string> symbols;
     auto DoReduce = [&](Expr expr) {
         auto UpdateProperties = [&](GrammarTreeNode* node) {
-            auto CreateBinaryAST = [&]() -> ExprAST* { return new BinaryExprAST(node->son[1]->raw, cast<ExprAST*>(node->son[0]->prop), cast<ExprAST*>(node->son[2]->prop)); };
             using S = GlobalAST*;
             using ProgramStruct = GlobalAST*;
             using ProgramBody = map<std::string, std::vector<std::any>>;
@@ -553,7 +557,7 @@ GrammarTreeNode* Analyse(string file_name) {
                     for (auto i : cast<VarDeclaration>(node->son[1]->prop)) prop["var"].push_back(i);
                 } else if (node->son[0]->type == "Subprogram") {  // Component -> Subprogram ; Component
                     prop = cast<Component>(node->son[2]->prop);
-                    prop["function"].push_back(node->son[0]->prop);
+                    prop["function"].insert(prop["function"].begin(), node->son[0]->prop);
                 }
                 node->prop = prop;
             } else if (node->type == "IDList") {
@@ -583,8 +587,12 @@ GrammarTreeNode* Analyse(string file_name) {
                 ActualType prop;
                 if (node->son.size() == 1) {  // ActualType -> Type
                     prop = cast<Type>(node->son[0]->prop);
-                } else
-                    abort();
+                } else {  // ActualType -> record VarDeclaration ; end
+                    /*prop = new StructDeclAST(
+                        rand_name(),
+                        cast<VarDeclaration>(node->son[1]->prop)
+                    );*/
+                }
                 node->prop = prop;
             } else if (node->type == "VarDeclaration") {
                 VarDeclaration prop;
@@ -635,7 +643,7 @@ GrammarTreeNode* Analyse(string file_name) {
                 if (node->son.size() == 3) {  // SubprogramHead -> procedure ID FormalParameter
                     prop = new FunctionSignatureAST(node->son[1]->raw, cast<FormalParameter>(node->son[2]->prop), new BasicTypeAST("void"));
                 } else {  // SubprogramHead -> function ID FormalParameter : BasicType
-                    prop = new FunctionSignatureAST(node->son[1]->raw, cast<FormalParameter>(node->son[2]->prop), new BasicTypeAST(node->son[4]->raw));
+                    prop = new FunctionSignatureAST(node->son[1]->raw, cast<FormalParameter>(node->son[2]->prop), cast<BasicType>(node->son[4]->prop));
                 }
                 node->prop = prop;
             } else if (node->type == "FormalParameter") {
@@ -776,7 +784,7 @@ GrammarTreeNode* Analyse(string file_name) {
                 */
                 Expression prop = nullptr;
                 if (node->son.size() == 3) {
-                    prop = CreateBinaryAST();
+                    prop = new BinaryExprAST(node->son[1]->raw, cast<ExprAST*>(node->son[0]->prop), cast<ExprAST*>(node->son[2]->prop));
                 } else if (node->son.size() == 2) {
                     prop = new UnaryExprAST("^", cast<ExprAST*>(node->son[0]->prop));
                 } else {
@@ -791,15 +799,17 @@ GrammarTreeNode* Analyse(string file_name) {
                 SimpleExpression prop;
                 if (node->son.size() == 1)  // SimpleExpression -> Term
                     prop = cast<SimpleExpression>(node->son[0]->prop);
-                else  // SimpleExpression -> SimpleExpression addOP Term
-                    prop = CreateBinaryAST();
+                else {  // SimpleExpression -> SimpleExpression addOP Term
+                    prop = new BinaryExprAST(cast<std::string>(node->son[1]->prop), cast<ExprAST*>(node->son[0]->prop), cast<ExprAST*>(node->son[2]->prop));
+                }
                 node->prop = prop;
             } else if (node->type == "Term") {
                 Term prop = nullptr;
                 if (node->son.size() == 1)  // Term -> Factor
                     prop = cast<Term>(node->son[0]->prop);
-                else  // Term -> Term mulOP Factor
-                    prop = CreateBinaryAST();
+                else {  // Term -> Term mulOP Factor
+                    prop = new BinaryExprAST(node->son[1]->raw, cast<ExprAST*>(node->son[0]->prop), cast<ExprAST*>(node->son[2]->prop));
+                }
                 node->prop = prop;
             } else if (node->type == "Factor") {
                 Factor prop = nullptr;
@@ -847,7 +857,7 @@ GrammarTreeNode* Analyse(string file_name) {
                 assert(node->son[0]->raw == "+" || node->son[0]->raw == "-" || node->son[0]->raw == "or");
                 assert(node->prop.type() == typeid(addOP));
             }
-            cerr << node->type << endl;
+            // cerr << node->type << endl;
             assert(node->prop.has_value());  //每个结点都必有一个属性
         };
         int popNum = expr.second.size();
@@ -906,7 +916,6 @@ GlobalAST* parser_work(string file_name) {
     init();
     get_first();
     generate_table();
-    Analyse(file_name);
     auto root = Analyse(file_name);
     check_grammar_tree(0, 0);
     return cast<GlobalAST*>(root->prop);
