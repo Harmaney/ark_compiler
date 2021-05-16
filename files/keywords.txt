@@ -37,6 +37,3 @@ with
 int64
 longint
 integer
-read
-write
-writeln

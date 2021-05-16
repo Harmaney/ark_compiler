@@ -54,21 +54,16 @@ StatementList -> StatementList ; Statement @
 StatementList -> Statement @
 Statement -> ComposedVariable assignOP Expression @
 Statement -> ProcedureCall(ARG) @
-Statement -> CompoundStatement @
-Statement -> if Expression then Statement ElsePart @
-Statement -> for ID assignOP Expression to Expression do Statement @
-Statement -> while Expression do Statement @
-Statement -> read ( VariableList ) @
-Statement -> write ( ExpressionList ) @
-Statement -> writeln ( ExpressionList ) @
-Statement -> writeln ( ) @
+Statement -> if Expression then CompoundStatement ElsePart @
+Statement -> for ID assignOP Expression to Expression do CompoundStatement @
+Statement -> while Expression do CompoundStatement @
 Statement -> @
 Variable -> ID IDVarpart @
 IDVarpart -> [ ExpressionList ] @
 IDVarpart -> @
 ProcedureCall(ARG) -> ID ( ExpressionList ) @
 ProcedureCall(ARG) -> ID ( ) @
-ElsePart -> else Statement @
+ElsePart -> else CompoundStatement @
 ElsePart -> @
 ExpressionList -> ExpressionList , Expression @
 ExpressionList -> Expression @
