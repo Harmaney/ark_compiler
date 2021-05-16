@@ -3,9 +3,16 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "logger.hpp"
+#include "logger.h"
+
+void LOG_WALK(AST *ast){
+    WALK_AST<<"ARRIVE "<<ast<<std::endl;
+}
+
 
 void ExprAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
+
     switch (type) {
         case AST_BINARY_EXPR:
             dynamic_cast<BinaryExprAST *>(this)->accept(dispatcher);
@@ -23,10 +30,12 @@ void ExprAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void BasicTypeAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     dispatcher.genBasicType(this);
 }
 
 void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     switch (this->itemAST->type) {
         case AST_BASIC_TYPE:
             static_cast<BasicTypeAST *>(this->itemAST)->accept(dispatcher);
@@ -42,29 +51,34 @@ void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void PointerTypeDeclAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     this->ref->accept(dispatcher);
     dispatcher.genPointerTypeDecl(this);
 }
 
 void NumberExprAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     TRACE(std::cerr << "into number ast" << std::endl;)
     dispatcher.genNumberExpr(this);
     TRACE(std::cerr << "out number ast" << std::endl;)
 }
 
 void StringExprAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     TRACE(std::cerr << "into string ast" << std::endl;)
     dispatcher.genStringExpr(this);
     TRACE(std::cerr << "out string ast" << std::endl;)
 }
 
 void VariableExprAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     TRACE(std::cerr << "into variable ast" << std::endl;)
     dispatcher.genVariableExpr(this);
     TRACE(std::cerr << "out variable ast" << std::endl;)
 }
 
 void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     LHS->accept(dispatcher);
     RHS->accept(dispatcher);
 
@@ -72,18 +86,21 @@ void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void UnaryExprAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     expr->accept(dispatcher);
 
     dispatcher.genUnaryExpr(this);
 }
 
 void ReturnAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     this->expr->accept(dispatcher);
 
     dispatcher.genReturn(this);
 }
 
 void CallExprAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     for (auto arg : args) {
         arg->accept(dispatcher);
     }
@@ -94,6 +111,7 @@ void CallExprAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void BlockAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     dispatcher.genBlockBegin(this);
     SymbolTable::enter();
 
@@ -137,6 +155,7 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     this->varType->accept(dispatcher);
 
     TRACE(std::cerr << "into variable ast" << std::endl;)
@@ -145,6 +164,7 @@ void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void ForStatementAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     this->itervar->accept(dispatcher);
     this->rangeL->accept(dispatcher);
     this->rangeR->accept(dispatcher);
@@ -157,6 +177,7 @@ void ForStatementAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     TRACE(std::cerr << "into condition of while" << std::endl;)
     this->condition->accept(dispatcher);
     TRACE(std::cerr << "out condition of while" << std::endl;)
@@ -170,6 +191,7 @@ void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void IfStatementAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     TRACE(std::cerr << "into if ast" << std::endl;)
     this->condition->accept(dispatcher);
     dispatcher.genIfStatementBegin(this);
@@ -178,6 +200,7 @@ void IfStatementAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void GlobalAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     TRACE(std::cerr << "into global ast" << std::endl;)
     dispatcher.genGlobalBegin(this);
 
@@ -201,6 +224,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
 }
 
 void FunctionAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     // that's too bad
     this->sig->resultType->accept(dispatcher);
     this->sig->_resultType = sig->resultType->_descriptor;
@@ -220,6 +244,7 @@ void FunctionAST::accept(ASTDispatcher &dispatcher) {
 void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {}
 
 void StructDeclAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
     dispatcher.genStruct(this);
 }
 

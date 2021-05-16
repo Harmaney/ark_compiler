@@ -524,8 +524,8 @@ int RUN_TEST(){
     init_code_generator();
     init_basic_type();
 
-    CodeCollector::begin_section();
-    // TEST_vardecl();
+    CodeCollector::begin_section("main");
+    TEST_vardecl();
     // TEST_arraydecl();
     // TEST_arrayuse();
     // TEST_arrayofarray();
@@ -534,7 +534,7 @@ int RUN_TEST(){
     // TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
-    // TEST_arrinstruct();
+    TEST_arrinstruct();
     // TEST_pointer();
     // TEST_case1();
     // TEST_fibonacci();
@@ -544,7 +544,7 @@ int RUN_TEST(){
     // TEST_leftvarassignerror();
     // TEST_undefinedval();
     // TEST_nomember();
-    TEST_opbetweendiffobj();
+    // TEST_opbetweendiffobj();
 
     CodeCollector::end_section(PLACE_END);
     
@@ -556,4 +556,6 @@ int RUN_TEST(){
 
     ofstream codeOut("out.cpp");
     CodeCollector::output(codeOut);
+
+    return 0;
 }

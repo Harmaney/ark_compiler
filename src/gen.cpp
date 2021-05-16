@@ -7,7 +7,7 @@
 
 #include "data.h"
 #include "err.h"
-#include "logger.hpp"
+#include "logger.h"
 
 std::string mapVariableType(SymbolDescriptor *type) { return type->name; }
 
@@ -70,7 +70,7 @@ void ASTDispatcher::genArrayTypeDecl(ArrayTypeDeclAST *ast) {
         ast->rangeR->const_type != CONSTANT_INT) {
         throw TypeErrorException("wrong type in range of array",
                                  std::to_string(ast->rangeL->const_type),
-                                 TYPE_BASIC_INT,0,0);
+                                 TYPE_BASIC_INT, 0, 0);
     }
 
     auto descriptor = SymbolTable::create_array_type(
@@ -115,16 +115,16 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
         case CONSTANT_INT:
             t = SymbolTable::createVariableG(
                 SymbolTable::lookforType(TYPE_BASIC_INT), false);
-            t->isLeftVar=false;
+            t->isLeftVar = false;
             break;
         case CONSTANT_REAL:
             t = SymbolTable::createVariableG(
                 SymbolTable::lookforType(TYPE_BASIC_DOUBLE), false);
-            t->isLeftVar=false;
+            t->isLeftVar = false;
             break;
         default:
-            throw InternalErrorException("unknown constant type: " +
-                                         ast->const_type,0,0);
+            throw InternalErrorException(
+                "unknown constant type: " + ast->const_type, 0, 0);
             break;
     }
 
@@ -135,9 +135,9 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
         CodeCollector::src() << ast->val_float << ";";
     else if (ast->const_type == CONSTANT_INT)
         CodeCollector::src() << ast->val_int << ";";
-    else{
-        throw InternalErrorException("unknown constant type: " +
-                                         ast->const_type,0,0);
+    else {
+        throw InternalErrorException(
+            "unknown constant type: " + ast->const_type, 0, 0);
     }
     CodeCollector::push_back();
     CodeCollector::end_section();
@@ -147,7 +147,7 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
 void ASTDispatcher::genStringExpr(StringExprAST *ast) {
     VariableDescriptor *t = SymbolTable::createVariableG(
         SymbolTable::lookforType(TYPE_BASIC_STRING), false);
-    t->isLeftVar=false;
+    t->isLeftVar = false;
 
     CodeCollector::begin_section("global_define");
     CodeCollector::src() << mapVariableType(t->varType) << " " << t->name
@@ -160,7 +160,7 @@ void ASTDispatcher::genStringExpr(StringExprAST *ast) {
 void ASTDispatcher::genVariableExpr(VariableExprAST *ast) {
     VariableDescriptor *t = SymbolTable::lookforVariable(ast->name);
     if (!t) {
-        throw SymbolUndefinedException("undefined variable",ast->name,0,0);
+        throw SymbolUndefinedException("undefined variable", ast->name, 0, 0);
     }
 
     ast->value = t;
@@ -181,10 +181,13 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
 
     if (ast->op == "=") {
         if (lhs->varType != rhs->varType) {
-            throw TypeErrorException("type does not match between `=`",rhs->varType->name,lhs->varType->name,0,0);
+            throw TypeErrorException("type does not match between `=`",
+                                     rhs->varType->name, lhs->varType->name, 0,
+                                     0);
         }
-        if(lhs->isLeftVar==false){
-            throw TypeErrorException("try using `=` on right value","right val","left val",0,0);
+        if (lhs->isLeftVar == false) {
+            throw TypeErrorException("try using `=` on right value",
+                                     "right val", "left val", 0, 0);
         }
         putVariableExpr(lhs);
         CodeCollector::src() << "=";
@@ -195,7 +198,9 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
 
     } else if (ast->op == "[]") {
         if (lhs->varType->type != DESCRIPTOR_ARRAY) {
-            throw TypeErrorException("try to use operator [] on invalid type",std::to_string(lhs->varType->type),std::to_string(DESCRIPTOR_ARRAY),0,0);
+            throw TypeErrorException("try to use operator [] on invalid type",
+                                     std::to_string(lhs->varType->type),
+                                     std::to_string(DESCRIPTOR_ARRAY), 0, 0);
         }
 
         auto array = static_cast<ArrayTypeDescriptor *>(lhs->varType);
@@ -217,15 +222,20 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
         ast->value = t;
     } else if (ast->op == ".") {
         if (lhs->varType->type != DESCRIPTOR_STRUCT) {
-            throw TypeErrorException("try to use operator `.` on invalid variable",lhs->varType->name,"a record",0,0);
+            throw TypeErrorException(
+                "try to use operator `.` on invalid variable",
+                lhs->varType->name, "a record", 0, 0);
         }
         if (ast->RHS->type != AST_STRING_EXPR) {
-            throw TypeErrorException("operator `.` takes a string as arg 2",std::to_string(ast->RHS->type),"a string",0,0);
+            throw TypeErrorException("operator `.` takes a string as arg 2",
+                                     std::to_string(ast->RHS->type), "a string",
+                                     0, 0);
         }
         auto child_id = static_cast<StringExprAST *>(ast->RHS)->val;
         auto array = static_cast<StructDescriptor *>(lhs->varType);
         if (!array->refVar.count(child_id)) {
-            throw SymbolUndefinedException("no member in record",child_id,0,0);
+            throw SymbolUndefinedException("no member in record", child_id, 0,
+                                           0);
         }
         VariableDescriptor *t =
             SymbolTable::createVariable(array->refVar[child_id], true);
@@ -245,8 +255,10 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
         ast->value = t;
     } else {
         // FIX: calculate type
-        if(lhs->varType!=rhs->varType){
-            throw TypeErrorException("type of objects does not match",rhs->varType->name,lhs->varType->name,0,0);
+        if (lhs->varType != rhs->varType) {
+            throw TypeErrorException("type of objects does not match",
+                                     rhs->varType->name, lhs->varType->name, 0,
+                                     0);
         }
         VariableDescriptor *t =
             SymbolTable::createVariable(lhs->varType, false);
@@ -271,7 +283,9 @@ void ASTDispatcher::genUnaryExpr(UnaryExprAST *ast) {
 
     if (ast->op == "*") {
         if (var->varType->type != DESCRIPTOR_POINTER_TYPE) {
-            throw TypeErrorException("try to def a variable that is not a pointer",var->varType->name,"a pointer",0,0);
+            throw TypeErrorException(
+                "try to def a variable that is not a pointer",
+                var->varType->name, "a pointer", 0, 0);
         }
         VariableDescriptor *t = SymbolTable::createVariable(
             static_cast<PointerTypeDescriptor *>(var->varType)->ref, true);
@@ -289,7 +303,8 @@ void ASTDispatcher::genUnaryExpr(UnaryExprAST *ast) {
 
     } else {
         throw std::invalid_argument("unknown unary operator");
-        throw UndefinedBehaviorException("unknown unary operator, "+ast->op,0,0);
+        throw UndefinedBehaviorException("unknown unary operator, " + ast->op,
+                                         0, 0);
     }
 }
 
@@ -297,13 +312,16 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     // check whether function exists.
     SymbolDescriptor *raw_descriptor = SymbolTable::lookforType(ast->callee);
     if (!raw_descriptor || raw_descriptor->type != DESCRIPTOR_FUNCTION) {
-        throw SymbolUndefinedException("try to call undefined function",ast->callee,0,0);
+        throw SymbolUndefinedException("try to call undefined function",
+                                       ast->callee, 0, 0);
     }
     FunctionDescriptor *descriptor =
         static_cast<FunctionDescriptor *>(raw_descriptor);
 
     if (descriptor->args.size() != ast->args.size()) {
-        throw TypeErrorException("args not matched for function "+ast->callee,std::to_string(ast->args.size()),std::to_string(descriptor->args.size()),0,0);
+        throw TypeErrorException("args not matched for function " + ast->callee,
+                                 std::to_string(ast->args.size()),
+                                 std::to_string(descriptor->args.size()), 0, 0);
     }
 
     // gen var to catch result val
@@ -324,7 +342,9 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     for (int i = 0; i < ast->args.size(); i++) {
         auto d = std::any_cast<VariableDescriptor *>(ast->args[i]->value);
         if (d->varType != descriptor->args[i]->varType) {
-        throw TypeErrorException("wrong type of arg of function "+ast->callee,d->varType->name,descriptor->args[i]->varType->name,0,0);
+            throw TypeErrorException(
+                "wrong type of arg of function " + ast->callee,
+                d->varType->name, descriptor->args[i]->varType->name, 0, 0);
         }
         // check whether the function wants ref or not
         // we use pointer to simulate this process in c
@@ -348,15 +368,29 @@ void ASTDispatcher::genIfStatementBegin(IfStatementAST *ast) {
     ast->extraData["L0"] = L0;
 }
 
+void ASTDispatcher::genIfStatementEnd(IfStatementAST *ast){
+    WARN(std::cerr<<"todo: if end"<<std::endl;)
+}
+
 void ASTDispatcher::genForStatementBegin(ForStatementAST *ast) {
     ast->extraData["end"] = TagTable::createTagG();
     ast->extraData["begin"] = TagTable::createTagG();
 
-    if (std::any_cast<VariableDescriptor*>(ast->rangeL->value)->varType != SymbolTable::lookforType(TYPE_BASIC_INT)) {
-        throw TypeErrorException("left range of `for` is not an integer",std::any_cast<VariableDescriptor*>(ast->rangeL->value)->varType->name,"a integer",0,0);
+    if (std::any_cast<VariableDescriptor *>(ast->rangeL->value)->varType !=
+        SymbolTable::lookforType(TYPE_BASIC_INT)) {
+        throw TypeErrorException(
+            "left range of `for` is not an integer",
+            std::any_cast<VariableDescriptor *>(ast->rangeL->value)
+                ->varType->name,
+            "a integer", 0, 0);
     }
-    if (std::any_cast<VariableDescriptor*>(ast->rangeR->value)->varType != SymbolTable::lookforType(TYPE_BASIC_INT)) {
-        throw TypeErrorException("right range of `for` is not an integer",std::any_cast<VariableDescriptor*>(ast->rangeL->value)->varType->name,"a integer",0,0);
+    if (std::any_cast<VariableDescriptor *>(ast->rangeR->value)->varType !=
+        SymbolTable::lookforType(TYPE_BASIC_INT)) {
+        throw TypeErrorException(
+            "right range of `for` is not an integer",
+            std::any_cast<VariableDescriptor *>(ast->rangeL->value)
+                ->varType->name,
+            "a integer", 0, 0);
     }
 
     CodeCollector::src()
@@ -433,6 +467,10 @@ void ASTDispatcher::genWhileStatementEnd(WhileStatementAST *ast) {
     CodeCollector::src() << *std::any_cast<std::string *>(ast->extraData["end"])
                          << ":";
     CodeCollector::push_back();
+}
+
+void ASTDispatcher::genFunctionSignature(FunctionSignatureAST *ast) {
+    WARN(std::cerr<<"todo: function sig end"<<std::endl;)
 }
 
 void ASTDispatcher::genFunction(FunctionAST *ast) {
@@ -544,6 +582,7 @@ void CodeCollector::push_front(std::string str) {
 }
 
 void CodeCollector::push_back() {
+    WALK_AST<<cur_section_name.top()<<" "<<ss.str()<<std::endl;
     cur_section->push_back(ss.str());
     ss.str(std::string());
 }
@@ -630,3 +669,40 @@ void CodeCollector::rearrange_section(std::string section, int newPos) {
 }
 
 void CodeCollector::clear() { codes.clear(); }
+
+////////////////////////////////////////////////////////////////
+
+void VisualDispatcher::genGlobalBegin(GlobalAST *ast) {}
+void VisualDispatcher::genGlobalEnd(GlobalAST *ast) {}
+
+void VisualDispatcher::genArrayTypeDecl(ArrayTypeDeclAST *ast) {}
+void VisualDispatcher::genBasicType(BasicTypeAST *ast) {}
+void VisualDispatcher::genPointerTypeDecl(PointerTypeDeclAST *ast) {}
+
+void VisualDispatcher::genNumberExpr(NumberExprAST *ast) {}
+void VisualDispatcher::genStringExpr(StringExprAST *ast) {}
+void VisualDispatcher::genVariableExpr(VariableExprAST *ast) {}
+void VisualDispatcher::genReturn(ReturnAST *ast) {}
+void VisualDispatcher::genUnaryExpr(UnaryExprAST *ast) {}
+void VisualDispatcher::genBinaryExpr(BinaryExprAST *ast) {}
+void VisualDispatcher::genCallExpr(CallExprAST *ast) {}
+
+/// 只生产if，不包含block
+void VisualDispatcher::genIfStatementBegin(IfStatementAST *ast) {}
+void VisualDispatcher::genIfStatementEnd(IfStatementAST *ast) {}
+/// 只生产while，不包含block
+void VisualDispatcher::genWhileStatementBegin(WhileStatementAST *ast) {}
+void VisualDispatcher::genWhileStatementEnd(WhileStatementAST *ast) {}
+/// 只生产for，不包含block
+void VisualDispatcher::genForStatementBegin(ForStatementAST *ast) {}
+void VisualDispatcher::genForStatementEnd(ForStatementAST *ast) {}
+
+void VisualDispatcher::genFunction(FunctionAST *ast) {}
+void VisualDispatcher::genFunctionSignature(FunctionSignatureAST *ast) {}
+
+void VisualDispatcher::genStruct(StructDeclAST *ast) {}
+
+void VisualDispatcher::genBlockBegin(BlockAST *ast) {}
+void VisualDispatcher::genBlockEnd(BlockAST *ast) {}
+
+void VisualDispatcher::genVariableDecl(VariableDeclAST *ast) {}

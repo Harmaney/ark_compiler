@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LOGGER_HPP
+#define LOGGER_HPP
+
 static int LOG_LEVEL=4;
 
 // FATAL    ERROR   WARN    INFO    DEBUG   TRACE
@@ -10,3 +12,10 @@ static int LOG_LEVEL=4;
 #define WARN(a) if(2<=LOG_LEVEL) {a}
 #define ERROR(a) if(1<=LOG_LEVEL) {a}
 #define FATAL(a) if(0<=LOG_LEVEL) {a}
+
+
+#include <fstream>
+
+extern std::ofstream WALK_AST;
+
+#endif

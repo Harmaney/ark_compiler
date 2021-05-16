@@ -37,50 +37,84 @@ class FunctionAST;
 
 struct VariableDescriptor;
 
+class ADispatcher{
+public:
+    virtual void genGlobalBegin(GlobalAST *ast)=0;
+    virtual void genGlobalEnd(GlobalAST *ast)=0;
+
+    virtual void genArrayTypeDecl(ArrayTypeDeclAST *ast)=0;
+    virtual void genBasicType(BasicTypeAST *ast)=0;
+    virtual void genPointerTypeDecl(PointerTypeDeclAST *ast)=0;
+
+    virtual void genNumberExpr(NumberExprAST *ast)=0;
+    virtual void genStringExpr(StringExprAST *ast)=0;
+    virtual void genVariableExpr(VariableExprAST *ast)=0;
+    virtual void genReturn(ReturnAST *ast)=0;
+    virtual void genUnaryExpr(UnaryExprAST *ast)=0;
+    virtual void genBinaryExpr(BinaryExprAST *ast)=0;
+    virtual void genCallExpr(CallExprAST *ast)=0;
+
+    /// 只生产if，不包含block
+    virtual void genIfStatementBegin(IfStatementAST *ast)=0;
+    virtual void genIfStatementEnd(IfStatementAST *ast)=0;
+    /// 只生产while，不包含block
+    virtual void genWhileStatementBegin(WhileStatementAST *ast)=0;
+    virtual void genWhileStatementEnd(WhileStatementAST *ast)=0;
+    /// 只生产for，不包含block
+    virtual void genForStatementBegin(ForStatementAST *ast)=0;
+    virtual void genForStatementEnd(ForStatementAST *ast)=0;
+
+    virtual void genFunction(FunctionAST *ast)=0;
+    virtual void genFunctionSignature(FunctionSignatureAST *ast)=0;
+
+    virtual void genStruct(StructDeclAST *ast)=0;
+
+    virtual void genBlockBegin(BlockAST *ast)=0;
+    virtual void genBlockEnd(BlockAST *ast)=0;
+
+    virtual void genVariableDecl(VariableDeclAST *ast)=0;
+};
+
 /// 输出代码的 visitor
 ///
 /// 访问的规则**不在此定义**，而是在 data 里。
-class ASTDispatcher {
+class ASTDispatcher: public ADispatcher {
    public:
-    void genGlobalBegin(GlobalAST *ast);
-    void genGlobalEnd(GlobalAST *ast);
+    void genGlobalBegin(GlobalAST *ast) override;
+    void genGlobalEnd(GlobalAST *ast) override;
 
-    void genArrayTypeDecl(ArrayTypeDeclAST *ast);
-    void genBasicType(BasicTypeAST *ast);
-    void genPointerTypeDecl(PointerTypeDeclAST *ast);
+    void genArrayTypeDecl(ArrayTypeDeclAST *ast) override;
+    void genBasicType(BasicTypeAST *ast) override;
+    void genPointerTypeDecl(PointerTypeDeclAST *ast) override;
 
-    void genNumberExpr(NumberExprAST *ast);
-    void genStringExpr(StringExprAST *ast);
-    void genVariableExpr(VariableExprAST *ast);
-    void genReturn(ReturnAST *ast);
-    void genUnaryExpr(UnaryExprAST *ast);
-    void genBinaryExpr(BinaryExprAST *ast);
-    void genCallExpr(CallExprAST *ast);
+    void genNumberExpr(NumberExprAST *ast) override;
+    void genStringExpr(StringExprAST *ast) override;
+    void genVariableExpr(VariableExprAST *ast) override;
+    void genReturn(ReturnAST *ast) override;
+    void genUnaryExpr(UnaryExprAST *ast) override;
+    void genBinaryExpr(BinaryExprAST *ast) override;
+    void genCallExpr(CallExprAST *ast) override;
 
     /// 只生产if，不包含block
-    void genIfStatementBegin(IfStatementAST *ast);
-    void genIfStatementEnd(IfStatementAST *ast);
+    void genIfStatementBegin(IfStatementAST *ast) override;
+    void genIfStatementEnd(IfStatementAST *ast) override;
     /// 只生产while，不包含block
-    void genWhileStatementBegin(WhileStatementAST *ast);
-    void genWhileStatementEnd(WhileStatementAST *ast);
+    void genWhileStatementBegin(WhileStatementAST *ast) override;
+    void genWhileStatementEnd(WhileStatementAST *ast) override;
     /// 只生产for，不包含block
-    void genForStatementBegin(ForStatementAST *ast);
-    void genForStatementEnd(ForStatementAST *ast);
+    void genForStatementBegin(ForStatementAST *ast) override;
+    void genForStatementEnd(ForStatementAST *ast) override;
 
-    void genFunction(FunctionAST *ast);
-    void genFunctionSignature(FunctionSignatureAST *ast);
+    void genFunction(FunctionAST *ast) override;
+    void genFunctionSignature(FunctionSignatureAST *ast) override;
 
-    void genStruct(StructDeclAST *ast);
+    void genStruct(StructDeclAST *ast) override;
 
-    void genBlockBegin(BlockAST *ast);
-    void genBlockEnd(BlockAST *ast);
+    void genBlockBegin(BlockAST *ast) override;
+    void genBlockEnd(BlockAST *ast) override;
 
-    void genVariableDecl(VariableDeclAST *ast);
+    void genVariableDecl(VariableDeclAST *ast) override;
 };
-
-// std::string mapVariableType(SymbolDescriptor *type);
-
-// void genVariable(VariableDescriptor *var);
 
 enum PlaceHolder{
     PLACE_VOID,PLACE_BEGIN=1,PLACE_END=2
@@ -124,4 +158,46 @@ class CodeCollector {
     /// 输出代码
     static void output(std::ostream &out);
     static void output();
+};
+
+/////////////////////////////////////
+
+class VisualDispatcher:public ADispatcher{
+    std::ostream &log;
+    public:
+    VisualDispatcher(std::ostream &log):log(log){}
+    void genGlobalBegin(GlobalAST *ast) override;
+    void genGlobalEnd(GlobalAST *ast) override;
+
+    void genArrayTypeDecl(ArrayTypeDeclAST *ast) override;
+    void genBasicType(BasicTypeAST *ast) override;
+    void genPointerTypeDecl(PointerTypeDeclAST *ast) override;
+
+    void genNumberExpr(NumberExprAST *ast) override;
+    void genStringExpr(StringExprAST *ast) override;
+    void genVariableExpr(VariableExprAST *ast) override;
+    void genReturn(ReturnAST *ast) override;
+    void genUnaryExpr(UnaryExprAST *ast) override;
+    void genBinaryExpr(BinaryExprAST *ast) override;
+    void genCallExpr(CallExprAST *ast) override;
+
+    /// 只生产if，不包含block
+    void genIfStatementBegin(IfStatementAST *ast) override;
+    void genIfStatementEnd(IfStatementAST *ast) override;
+    /// 只生产while，不包含block
+    void genWhileStatementBegin(WhileStatementAST *ast) override;
+    void genWhileStatementEnd(WhileStatementAST *ast) override;
+    /// 只生产for，不包含block
+    void genForStatementBegin(ForStatementAST *ast) override;
+    void genForStatementEnd(ForStatementAST *ast) override;
+
+    void genFunction(FunctionAST *ast) override;
+    void genFunctionSignature(FunctionSignatureAST *ast) override;
+
+    void genStruct(StructDeclAST *ast) override;
+
+    void genBlockBegin(BlockAST *ast) override;
+    void genBlockEnd(BlockAST *ast) override;
+
+    void genVariableDecl(VariableDeclAST *ast) override;
 };

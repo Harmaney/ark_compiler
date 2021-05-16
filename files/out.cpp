@@ -1,16 +1,26 @@
 //global_define
-string t0_0 = "a";
-int t0_1=1;
+int t0_0=0;
+string t0_1 = "arr1";
+int t0_2=2;
+int t0_3=2;
 //pre_struct
-struct st;
+struct SP;
+//pre_array
+typedef int t2_0[10];
+typedef SP t1_0[10];
 //struct
-struct st{
-int a;
+struct SP{
+t2_0 arr1;
 };
-//0
+//main
+int a;
 {
-st a;
-int* t1_0;
-t1_0=&((a).a);
-(*t1_0)=(t0_1);
+t1_0 sp;
+SP* t1_1;
+t1_1=&(sp)[(t0_0)];
+t2_0* t1_2;
+t1_2=&((*t1_1).arr1);
+int* t1_3;
+t1_3=&(*t1_2)[(t0_2)];
+(*t1_3)=(t0_3);
 }
