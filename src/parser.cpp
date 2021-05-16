@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "data.h"
-using Json = nlohmann::json;
+#include "logger.h"
 #define inset(y, x) x.find(y) != x.end()
 #define table_exist 1
 using namespace std;
@@ -376,15 +376,7 @@ std::ifstream& operator>>(std::ifstream& ifs, TokenItem& item) {
     }
     return ifs;
 }
-struct GrammarTreeNode {
-    string raw, type, parserSymbol;
-    int row, column;
-    uint64_t ID;
-    std::any prop;
 
-    vector<GrammarTreeNode*> son;
-    GrammarTreeNode(string raw, string type, string parserSymbol, int row, int column, uint64_t ID) : raw(raw), type(type), parserSymbol(parserSymbol), row(row), column(column), ID(ID), son{} {}
-};
 template <typename A>
 inline A cast(std::any arg) {
     if (typeid(A) == typeid(AST*)) {
@@ -875,6 +867,7 @@ GrammarTreeNode* Analyse(string file_name) {
         for (auto node : reducedNode) newNode->son.push_back(node);
         UpdateProperties(newNode);
         unlinkedNodes.push_back(newNode);
+        parserOutputer.AddNode(newNode);
     };
     std::cerr << "start analyse" << endl;
     ifstream lexOut(file_name);
