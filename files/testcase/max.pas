@@ -3,10 +3,13 @@ var i,j,k:integer;
 begin
     read(i);
     read(j);
-    k:=i;
     if i<=j then
         begin
             k:=j;
+        end
+    else
+        begin
+             k:=i;
         end;
     write(k);
 end.
