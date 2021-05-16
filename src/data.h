@@ -112,7 +112,7 @@ class BlockAST : public AST {
    public:
     std::vector<AST *> exprs;
     BlockAST(const std::vector<AST *> exprs) : AST(AST_BLOCK), exprs(exprs) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "BlockAST"},
                                   {"son", Serialize(exprs)}});
     }
@@ -142,7 +142,7 @@ class BasicTypeAST : public TypeDeclAST {
     BasicTypeAST(std::string varType)
         : TypeDeclAST(AST_BASIC_TYPE), varType(varType) {
         parserOutputer.push_back(
-            {{"address", (uint64_t)this}, {"type", "BasicTypeAST:" + varType}});
+            {{"ID", (uint64_t)this}, {"type", "BasicTypeAST:" + varType}});
     }
     void accept(ASTDispatcher &dispatcher) override;
 };
@@ -152,7 +152,7 @@ class TypeDefAST : public TypeDeclAST {
     BasicTypeAST *newName;
     TypeDeclAST *oldName;
     TypeDefAST(BasicTypeAST *newName, TypeDeclAST *oldName)
-        : newName(newName), oldName(oldName) {}
+        : TypeDeclAST(AST_ARRAY_TYPE), newName(newName), oldName(oldName) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -163,7 +163,7 @@ class PointerTypeDeclAST : public TypeDeclAST {
     BasicTypeAST *ref;
     PointerTypeDeclAST(BasicTypeAST *ref)
         : TypeDeclAST(AST_POINTER_TYPE), ref(ref) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "PointerTypeDeclAST"},
                                   {"son", Serialize(ref)}});
     }
@@ -179,13 +179,13 @@ class NumberExprAST : public ExprAST {
     NumberExprAST(double val)
         : ExprAST(AST_NUMBER_EXPR), val_float(val), const_type(CONSTANT_REAL) {
         parserOutputer.push_back(
-            {{"address", (uint64_t)this},
+            {{"ID", (uint64_t)this},
              {"type", "NumberExprAST:" + std::to_string(val_float)}});
     }
     NumberExprAST(int val)
         : ExprAST(AST_NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {
         parserOutputer.push_back(
-            {{"address", (uint64_t)this},
+            {{"ID", (uint64_t)this},
              {"type", "NumberExprAST:" + std::to_string(val_int)}});
     }
 
@@ -204,7 +204,7 @@ class ArrayTypeDeclAST : public TypeDeclAST {
           itemAST(itemAST),
           rangeL(rangeL),
           rangeR(rangeR) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "ArrayTypeDeclAST"},
                                   {"son", Serialize(itemAST, rangeL, rangeR)}});
     }
@@ -217,7 +217,7 @@ class StringExprAST : public ExprAST {
     std::string val;
     StringExprAST(std::string val) : ExprAST(AST_STRING_EXPR), val(val) {
         parserOutputer.push_back(
-            {{"address", (uint64_t)this}, {"type", "StringExprAST:" + val}});
+            {{"ID", (uint64_t)this}, {"type", "StringExprAST:" + val}});
     }
     void accept(ASTDispatcher &dispacher) override;
 };
@@ -238,7 +238,7 @@ class UnaryExprAST : public ExprAST {
     std::string op;
     UnaryExprAST(std::string op, ExprAST *expr)
         : ExprAST(AST_UNARY_EXPR), expr(expr), op(op) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "UnaryExprAST:" + op},
                                   {"son", Serialize(expr)}});
     }
@@ -275,7 +275,7 @@ class CallExprAST : public ExprAST {
     std::vector<ExprAST *> args;
     CallExprAST(const std::string &callee, const std::vector<ExprAST *> &args)
         : ExprAST(AST_CALL_EXPR), callee(callee), args(args) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "CallExprAST:" + callee},
                                   {"son", Serialize(args)}});
     }
@@ -299,7 +299,7 @@ class VariableDeclAST : public AST {
           varType(type),
           isRef(isRef),
           isConst(isConst) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "VariableDeclAST"},
                                   {"son", Serialize(sig, type)}});
     }
@@ -321,7 +321,7 @@ class ForStatementAST : public AST {
           rangeR(rangeR),
           body(body) {
         parserOutputer.push_back(
-            {{"address", (uint64_t)this},
+            {{"ID", (uint64_t)this},
              {"type", "ForStatementAST"},
              {"son", Serialize(itervar, rangeL, rangeR, body)}});
     }
@@ -335,7 +335,7 @@ class WhileStatementAST : public AST {
 
     WhileStatementAST(ExprAST *condition, BlockAST *body)
         : AST(AST_WHILE_STATEMENT), condition(condition), body(body) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "WhileStatementAST"},
                                   {"son", Serialize(condition, body)}});
     }
@@ -355,7 +355,7 @@ class IfStatementAST : public AST {
           body_true(body_true),
           body_false(body_false) {
         parserOutputer.push_back(
-            {{"address", (uint64_t)this},
+            {{"ID", (uint64_t)this},
              {"type", "IfStatementAST"},
              {"son", Serialize(condition, body_true, body_false)}});
     }
@@ -375,7 +375,7 @@ class FunctionSignatureAST : public AST {
           sig(sig),
           args(args),
           resultType(result) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "FunctionSignatureAST:" + sig},
                                   {"son", Serialize(args, resultType)}});
     }
@@ -390,7 +390,7 @@ class FunctionAST : public AST {
     FunctionAST(FunctionSignatureAST *sig,
                 std::vector<VariableDeclAST *> varDecls, BlockAST *body)
         : AST(AST_FUNCTION), sig(sig), varDecls(varDecls), body(body) {
-        parserOutputer.push_back({{"address", (uint64_t)this},
+        parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "FunctionAST"},
                                   {"son", Serialize(sig, varDecls, body)}});
     }
@@ -419,7 +419,7 @@ class GlobalAST : public AST {
           functions(functions),
           mainBlock(mainBlock) {
         parserOutputer.push_back(
-            {{"address", (uint64_t)this},
+            {{"ID", (uint64_t)this},
              {"type", "Global"},
              {"son", Serialize(vars, functions, mainBlock)}});
     }

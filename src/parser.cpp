@@ -854,6 +854,7 @@ GrammarTreeNode* Analyse(string file_name) {
     lexOut >> N;
     for (;;) {
         curState = *states.rbegin();
+        std::cerr << curState << '\n';
         if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0)
             assert(0);
         pair<ACTION, int> act =
@@ -863,6 +864,7 @@ GrammarTreeNode* Analyse(string file_name) {
             symbols.push_back(N.parserSymbol);
             unlinkedNodes.push_back(new GrammarTreeNode(
                 N.raw, N.type, N.parserSymbol, N.row, N.column, rng()));
+            (*unlinkedNodes.rbegin())->Report();
             lexOut >> N;
         } else if (act.first == Reduce) {
             Expr prod = Production_content[act.second];
