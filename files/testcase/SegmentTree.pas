@@ -26,7 +26,7 @@ begin
     if (nowl<=l) and (nowr>=r) then
     begin
         color(l,r,rt,z);
-        exit;
+        exit();
     end;
     push_col(l,r,rt);
     m:=(l+r) div 2;
@@ -39,7 +39,7 @@ begin
         modify(m+1,r,rt*2+1,nowl,nowr,z);
     end;
     sum[rt]:=sum[rt*2]+sum[rt*2+1];
-    exit;
+    exit();
 end;
 
 function query(l,r,rt,nowl,nowr:int64):int64;
@@ -49,7 +49,7 @@ begin
     if (nowl<=l) and (nowr>=r) then
     begin
         query:=sum[rt];
-        exit;
+        exit();
     end;
     push_col(l,r,rt);
     m:=(l+r) div 2;
@@ -72,7 +72,7 @@ begin
     if l=r then
     begin
         sum[rt]:=a[l];
-        exit;
+        exit();
     end;
     m:=(l+r) div 2;
     build(l,m,rt*2);
