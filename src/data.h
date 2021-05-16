@@ -1,12 +1,13 @@
 #pragma once
 #include <any>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 #include "const.h"
 #include "gen.h"
+#include "logger.h"
 
 class ASTDispatcher;
 
@@ -61,7 +62,7 @@ class VariableDescriptor : public SymbolDescriptor {
     bool isLeftVar;
 
     VariableDescriptor(std::string name, SymbolDescriptor *varType, bool isRef,
-                       bool isConst,bool isLeftVar=true)
+                       bool isConst, bool isLeftVar = true)
         : SymbolDescriptor(DESCRIPTOR_VARIABLE, name),
           varType(varType),
           isRef(isRef),
@@ -93,8 +94,8 @@ class FunctionDescriptor : public SymbolDescriptor {
           resultDescriptor(resultDescriptor) {}
 };
 
-std::string get_internal_function_name(std::string name,std::vector<SymbolDescriptor *> args);
-
+std::string get_internal_function_name(std::string name,
+                                       std::vector<SymbolDescriptor *> args);
 
 ////////////////////////////////////////
 
@@ -110,7 +111,11 @@ class AST {
 class BlockAST : public AST {
    public:
     std::vector<AST *> exprs;
-    BlockAST(const std::vector<AST *> exprs) : AST(AST_BLOCK), exprs(exprs) {}
+    BlockAST(const std::vector<AST *> exprs) : AST(AST_BLOCK), exprs(exprs) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "BlockAST"},
+                                  {"son", Serialize(exprs)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -135,11 +140,12 @@ class BasicTypeAST : public TypeDeclAST {
    public:
     std::string varType;
     BasicTypeAST(std::string varType)
-        : TypeDeclAST(AST_BASIC_TYPE), varType(varType) {}
+        : TypeDeclAST(AST_BASIC_TYPE), varType(varType) {
+        parserOutputer.push_back(
+            {{"address", (uint64_t)this}, {"type", "BasicTypeAST:" + varType}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
-
-
 
 /// 指针类型
 class PointerTypeDeclAST : public TypeDeclAST {
@@ -147,7 +153,11 @@ class PointerTypeDeclAST : public TypeDeclAST {
     // do not support multiple pointer and pointer of array, i'm tired.
     BasicTypeAST *ref;
     PointerTypeDeclAST(BasicTypeAST *ref)
-        : TypeDeclAST(AST_POINTER_TYPE), ref(ref) {}
+        : TypeDeclAST(AST_POINTER_TYPE), ref(ref) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "PointerTypeDeclAST"},
+                                  {"son", Serialize(ref)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -158,9 +168,17 @@ class NumberExprAST : public ExprAST {
     int val_int;
     ConstantType const_type;
     NumberExprAST(double val)
-        : ExprAST(AST_NUMBER_EXPR), val_float(val), const_type(CONSTANT_REAL) {}
+        : ExprAST(AST_NUMBER_EXPR), val_float(val), const_type(CONSTANT_REAL) {
+        parserOutputer.push_back(
+            {{"address", (uint64_t)this},
+             {"type", "NumberExprAST:" + std::to_string(val_float)}});
+    }
     NumberExprAST(int val)
-        : ExprAST(AST_NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {}
+        : ExprAST(AST_NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {
+        parserOutputer.push_back(
+            {{"address", (uint64_t)this},
+             {"type", "NumberExprAST:" + std::to_string(val_int)}});
+    }
 
     void accept(ASTDispatcher &dispacher) override;
 };
@@ -171,11 +189,16 @@ class ArrayTypeDeclAST : public TypeDeclAST {
     // does not support pointer
     TypeDeclAST *itemAST;
     NumberExprAST *rangeL, *rangeR;
-    ArrayTypeDeclAST(TypeDeclAST *itemAST, NumberExprAST* rangeL, NumberExprAST* rangeR)
+    ArrayTypeDeclAST(TypeDeclAST *itemAST, NumberExprAST *rangeL,
+                     NumberExprAST *rangeR)
         : TypeDeclAST(AST_ARRAY_TYPE),
           itemAST(itemAST),
           rangeL(rangeL),
-          rangeR(rangeR) {}
+          rangeR(rangeR) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "ArrayTypeDeclAST"},
+                                  {"son", Serialize(itemAST, rangeL, rangeR)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -183,7 +206,10 @@ class ArrayTypeDeclAST : public TypeDeclAST {
 class StringExprAST : public ExprAST {
    public:
     std::string val;
-    StringExprAST(std::string val) : ExprAST(AST_STRING_EXPR), val(val) {}
+    StringExprAST(std::string val) : ExprAST(AST_STRING_EXPR), val(val) {
+        parserOutputer.push_back(
+            {{"address", (uint64_t)this}, {"type", "StringExprAST:" + val}});
+    }
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -202,7 +228,11 @@ class UnaryExprAST : public ExprAST {
     ExprAST *expr;
     std::string op;
     UnaryExprAST(std::string op, ExprAST *expr)
-        : ExprAST(AST_UNARY_EXPR), expr(expr), op(op) {}
+        : ExprAST(AST_UNARY_EXPR), expr(expr), op(op) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "UnaryExprAST:" + op},
+                                  {"son", Serialize(expr)}});
+    }
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -213,7 +243,10 @@ class BinaryExprAST : public ExprAST {
     ExprAST *LHS, *RHS;
 
     BinaryExprAST(std::string op, ExprAST *lhs, ExprAST *rhs)
-        : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {}
+        : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {
+        parserOutputer.push_back(
+            {{"type", "BinaryExprAST:" + op}, {"son", Serialize(LHS, RHS)}});
+    }
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -232,7 +265,11 @@ class CallExprAST : public ExprAST {
     std::string callee;
     std::vector<ExprAST *> args;
     CallExprAST(const std::string &callee, const std::vector<ExprAST *> &args)
-        : ExprAST(AST_CALL_EXPR), callee(callee), args(args) {}
+        : ExprAST(AST_CALL_EXPR), callee(callee), args(args) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "CallExprAST:" + callee},
+                                  {"son", Serialize(args)}});
+    }
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -246,7 +283,11 @@ class VariableDeclAST : public AST {
     // 它只是在C中使用指针模拟，用于处理pascal里的引用类型
     bool isRef;
     VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef)
-        : AST(AST_VARIABLE_DECL), sig(sig), varType(type),isRef(isRef) {}
+        : AST(AST_VARIABLE_DECL), sig(sig), varType(type), isRef(isRef) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "VariableDeclAST"},
+                                  {"son", Serialize(sig, type)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -257,13 +298,18 @@ class ForStatementAST : public AST {
     ExprAST *rangeL, *rangeR;
     BlockAST *body;
 
-    ForStatementAST(VariableExprAST *itervar, ExprAST *rangeL,
-                    ExprAST *rangeR, BlockAST *body)
+    ForStatementAST(VariableExprAST *itervar, ExprAST *rangeL, ExprAST *rangeR,
+                    BlockAST *body)
         : AST(AST_FOR_STATEMENT),
           itervar(itervar),
           rangeL(rangeL),
           rangeR(rangeR),
-          body(body) {}
+          body(body) {
+        parserOutputer.push_back(
+            {{"address", (uint64_t)this},
+             {"type", "ForStatementAST"},
+             {"son", Serialize(itervar, rangeL, rangeR, body)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -273,7 +319,11 @@ class WhileStatementAST : public AST {
     BlockAST *body;
 
     WhileStatementAST(ExprAST *condition, BlockAST *body)
-        : AST(AST_WHILE_STATEMENT), condition(condition), body(body) {}
+        : AST(AST_WHILE_STATEMENT), condition(condition), body(body) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "WhileStatementAST"},
+                                  {"son", Serialize(condition, body)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -288,7 +338,12 @@ class IfStatementAST : public AST {
         : AST(AST_IF_STATEMENT),
           condition(condition),
           body_true(body_true),
-          body_false(body_false) {}
+          body_false(body_false) {
+        parserOutputer.push_back(
+            {{"address", (uint64_t)this},
+             {"type", "IfStatementAST"},
+             {"son", Serialize(condition, body_true, body_false)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -304,21 +359,28 @@ class FunctionSignatureAST : public AST {
         : AST(AST_FUNCTION_SIGNATURE),
           sig(sig),
           args(args),
-          resultType(result) {}
+          resultType(result) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "FunctionSignatureAST:" + sig},
+                                  {"son", Serialize(args, resultType)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
-
 
 class FunctionAST : public AST {
    public:
     FunctionSignatureAST *sig;
-    std::vector<VariableDeclAST*> varDecls;
+    std::vector<VariableDeclAST *> varDecls;
     BlockAST *body;
-    FunctionAST(FunctionSignatureAST *sig,std::vector<VariableDeclAST*> varDecls, BlockAST *body)
-        : AST(AST_FUNCTION), sig(sig),varDecls(varDecls), body(body) {}
+    FunctionAST(FunctionSignatureAST *sig,
+                std::vector<VariableDeclAST *> varDecls, BlockAST *body)
+        : AST(AST_FUNCTION), sig(sig), varDecls(varDecls), body(body) {
+        parserOutputer.push_back({{"address", (uint64_t)this},
+                                  {"type", "FunctionAST"},
+                                  {"son", Serialize(sig, varDecls, body)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
-
 
 class StructDeclAST : public AST {
    public:
@@ -340,7 +402,12 @@ class GlobalAST : public AST {
         : AST(AST_GLOBAL),
           vars(vars),
           functions(functions),
-          mainBlock(mainBlock) {}
+          mainBlock(mainBlock) {
+        parserOutputer.push_back(
+            {{"address", (uint64_t)this},
+             {"type", "Global"},
+             {"son", Serialize(vars, functions, mainBlock)}});
+    }
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -390,12 +457,13 @@ class SymbolTable {
     static VariableDescriptor *lookforVariable(std::string sig);
 
     static void insertType(std::string sig, SymbolDescriptor *descriptor);
-    static void insertFunction(std::string sig,FunctionDescriptor *descriptor);
+    static void insertFunction(std::string sig, FunctionDescriptor *descriptor);
     static ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item,
                                                   int sz);
     static PointerTypeDescriptor *create_pointer_type(SymbolDescriptor *item);
     static SymbolDescriptor *lookforType(std::string sig);
-    static FunctionDescriptor* lookforFunction(std::string sig,std::vector<SymbolDescriptor*> args);
+    static FunctionDescriptor *lookforFunction(
+        std::string sig, std::vector<SymbolDescriptor *> args);
 };
 
 class TagTable {

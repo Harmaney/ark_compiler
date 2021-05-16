@@ -45,7 +45,6 @@ end;
 function query(l,r,rt,nowl,nowr:int64):int64;
 var m,ans:int64;
 begin
-    {writeln(l,r,rt);}
     if (nowl<=l) and (nowr>=r) then
     begin
         query:=sum[rt];
@@ -102,7 +101,7 @@ begin
         begin
             read(x);
             read(y);
-            writeln(query(1,n,1,x,y));
+            write(query(1,n,1,x,y));
         end;
     end;
 end.

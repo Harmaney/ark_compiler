@@ -139,11 +139,14 @@ inline std::vector<VariableDeclAST*> cast(std::any arg) {
 }
 template <>
 inline std::pair<std::vector<VariableDeclAST*>, BlockAST*> cast(std::any arg) {
-    return std::any_cast<std::pair<std::vector<VariableDeclAST*>, BlockAST*>>(arg);
+    return std::any_cast<std::pair<std::vector<VariableDeclAST*>, BlockAST*>>(
+        arg);
 }
 template <>
-inline std::vector<std::pair<NumberExprAST*, NumberExprAST*>> cast(std::any arg) {
-    return std::any_cast<std::vector<std::pair<NumberExprAST*, NumberExprAST*>>>(arg);
+inline std::vector<std::pair<NumberExprAST*, NumberExprAST*>> cast(
+    std::any arg) {
+    return std::any_cast<
+        std::vector<std::pair<NumberExprAST*, NumberExprAST*>>>(arg);
 }
 };  // namespace NodeProperties
 
@@ -154,7 +157,24 @@ struct GrammarTreeNode {
     std::any prop;
 
     vector<GrammarTreeNode*> son;
-    GrammarTreeNode(string raw, string type, string parserSymbol, int row, int column, uint64_t ID) : raw(raw), type(type), parserSymbol(parserSymbol), row(row), column(column), ID(ID), son{} {}
+    GrammarTreeNode(string raw, string type, string parserSymbol, int row,
+                    int column, uint64_t ID)
+        : raw(raw),
+          type(type),
+          parserSymbol(parserSymbol),
+          row(row),
+          column(column),
+          ID(ID),
+          son{} {}
+
+    void Report() {
+        Json j = {{"type", "grammar"}, {"raw", raw},
+                  {"type", type},      {"parserSymbol", parserSymbol},
+                  {"row", row},        {"column", column},
+                  {"ID", ID},          {"son", Json::array()}};
+        for (auto s : son) j["son"] = (uint64_t)s;
+        parserOutputer.push_back(j);
+    }
 };
 
 void init();
