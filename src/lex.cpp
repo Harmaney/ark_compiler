@@ -314,13 +314,13 @@ void lex_work(string file_name){
         switch (s.type)
         {
         case 2:
-            lout << "int";
+            lout << "intVal";
             break;
         case 4:
-            lout << "real";
+            lout << "realVal";
             break;
         case 11:
-            lout << "string";
+            lout << "stringVal";
             break;
         case 1:
             lout << "identify";
