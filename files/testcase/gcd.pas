@@ -8,7 +8,7 @@ function gcd(a,b:integer):integer;
         end
         else
         begin
-            gcd:=gcd(b, a mod b)
+            gcd:=gcd(b, a mod b);
         end;
     end;
 begin
