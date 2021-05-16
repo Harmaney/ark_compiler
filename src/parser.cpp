@@ -390,7 +390,7 @@ std::ifstream& operator>>(std::ifstream& ifs, TokenItem& item) {
         }
         else if (type == "identify")
             parserSymbol = "ID";
-        else if (type == "int" || type == "float" || type == "string")
+        else if (type == "int" || type == "real" || type == "string")
             parserSymbol = type;
         else
             parserSymbol = raw;
