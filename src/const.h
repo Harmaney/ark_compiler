@@ -22,7 +22,7 @@ enum ASTKind {
 };
 
 #define TYPE_BASIC_DOUBLE "double"
-#define TYPE_BASIC_INT "int"
+#define TYPE_BASIC_INT "integer"
 // in fact this is somehow not basic
 #define TYPE_BASIC_STRING "string"
 #define TYPE_BASIC_VOID "void"

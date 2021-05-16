@@ -144,6 +144,9 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
             case AST_WHILE_STATEMENT:
                 static_cast<WhileStatementAST *>(expr)->accept(dispatcher);
                 break;
+            case AST_IF_STATEMENT:
+                static_cast<IfStatementAST *>(expr)->accept(dispatcher);
+                break;
             default:
                 throw std::invalid_argument("unknown type of AST in Block");
                 break;
@@ -195,6 +198,11 @@ void IfStatementAST::accept(ASTDispatcher &dispatcher) {
     TRACE(std::cerr << "into if ast" << std::endl;)
     this->condition->accept(dispatcher);
     dispatcher.genIfStatementBegin(this);
+    this->body_false->accept(dispatcher);
+    dispatcher.genIfStatementElse(this);
+    this->body_true->accept(dispatcher);
+    dispatcher.genIfStatementEnd(this);
+
     // TODO: body and else if
     TRACE(std::cerr << "out if ast" << std::endl;)
 }
@@ -364,15 +372,27 @@ void SymbolTable::insertType(std::string sig, SymbolDescriptor *descriptor) {
     current->insert_type(sig, descriptor);
 }
 
+void SymbolTable::insertFunction(std::string sig,FunctionDescriptor *descriptor){
+    std::vector<SymbolDescriptor*> symbols;
+    for(auto arg:descriptor->args){
+        symbols.push_back(arg->varType);
+    }
+    auto name=get_internal_function_name(sig,symbols);
+    descriptor->name=name;
+    std::cerr<<"???? "<<name<<" "<<descriptor->name<<std::endl;
+    insertType(name,descriptor);
+}
+
+
 ArrayTypeDescriptor *SymbolTable::create_array_type(SymbolDescriptor *item,
                                                     int sz) {
     // array type are seen as global type
-    return current->create_array_type(item, sz);
+    return root->create_array_type(item, sz);
 }
 
 PointerTypeDescriptor *SymbolTable::create_pointer_type(
     SymbolDescriptor *item) {
-    return current->create_pointer_type(item);
+    return root->create_pointer_type(item);
 }
 
 SymbolDescriptor *SymbolTable::lookforType(std::string sig) {
@@ -382,6 +402,21 @@ SymbolDescriptor *SymbolTable::lookforType(std::string sig) {
         table = table->parent;
     }
     return NULL;
+}
+
+FunctionDescriptor* SymbolTable::lookforFunction(std::string sig,std::vector<SymbolDescriptor*> args){
+    auto name=get_internal_function_name(sig,args);
+    return static_cast<FunctionDescriptor*>(lookforType(name));
+}
+
+std::string get_internal_function_name(std::string name,std::vector<SymbolDescriptor *> args){
+    std::stringstream ss;
+    ss<<name;
+    for(auto arg:args){
+        ss<<"_"<<arg->name;
+    }
+    //ss<<"__"<<res->name;
+    return ss.str();
 }
 
 ///////////////////////////////////////////////
