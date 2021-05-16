@@ -139,6 +139,14 @@ class BasicTypeAST : public TypeDeclAST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+class TypeDefAST:public TypeDeclAST{
+    public:
+    BasicTypeAST *newName;
+    TypeDeclAST *oldName;
+    TypeDefAST(BasicTypeAST *newName,TypeDeclAST *oldName):newName(newName),oldName(oldName){}
+    void accept(ASTDispatcher &dispatcher) override;
+};
+
 
 
 /// 指针类型
