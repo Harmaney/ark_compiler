@@ -408,23 +408,6 @@ std::ifstream& operator>>(std::ifstream& ifs, TokenItem& item) {
     }
     return ifs;
 }
-struct GrammarTreeNode {
-    string raw, type, parserSymbol;
-    int row, column;
-    uint64_t ID;
-    std::any prop;
-
-    vector<GrammarTreeNode*> son;
-    GrammarTreeNode(string raw, string type, string parserSymbol, int row,
-        int column, uint64_t ID)
-        : raw(raw),
-        type(type),
-        parserSymbol(parserSymbol),
-        row(row),
-        column(column),
-        ID(ID),
-        son{} {}
-};
 template<typename A> inline A cast(std::any arg) {
     if (typeid(A) == typeid(AST*)) {
         if (arg.type() == typeid(BlockAST*))
@@ -532,13 +515,6 @@ GrammarTreeNode* Analyse(string file_name) {
     vector<string> symbols;
     auto DoReduce = [&](Expr expr) {
         auto UpdateProperties = [&](GrammarTreeNode* node) {
-            auto CreateBinaryAST = [&]() -> ExprAST* {
-                return new BinaryExprAST(
-                    node->son[1]->raw,
-                    cast<ExprAST*>(node->son[0]->prop),
-                    cast<ExprAST*>(node->son[2]->prop)
-                );
-            };
             using S = GlobalAST*;
             using ProgramStruct = GlobalAST*;
             using ProgramBody = map<std::string, std::vector<std::any>>;
@@ -587,7 +563,6 @@ GrammarTreeNode* Analyse(string file_name) {
                 std::vector<FunctionAST*> functions;
                 for (auto i : M["function"])
                     functions.push_back(cast<FunctionAST*>(i));
-                reverse(functions.begin(), functions.end());
                 assert(M["body"].size() == 1);
                 node->prop = new std::remove_pointer<ProgramStruct>::type (
                     vars,
@@ -622,7 +597,7 @@ GrammarTreeNode* Analyse(string file_name) {
                 }
                 else if (node->son[0]->type == "Subprogram") { //Component -> Subprogram ; Component
                     prop = cast<Component>(node->son[2]->prop);
-                    prop["function"].push_back(node->son[0]->prop);
+                    prop["function"].insert(prop["function"].begin(), node->son[0]->prop);
                 }
                 node->prop = prop;
             }
@@ -967,7 +942,11 @@ GrammarTreeNode* Analyse(string file_name) {
                 */
                 Expression prop = nullptr;
                 if (node->son.size() == 3) {
-                    prop = CreateBinaryAST();
+                    prop = new BinaryExprAST(
+                        node->son[1]->raw,
+                        cast<ExprAST*>(node->son[0]->prop),
+                        cast<ExprAST*>(node->son[2]->prop)
+                    );
                 }
                 else if (node->son.size() == 2) {
                     prop = new UnaryExprAST(
@@ -989,16 +968,26 @@ GrammarTreeNode* Analyse(string file_name) {
                 SimpleExpression prop;
                 if (node->son.size() == 1) //SimpleExpression -> Term
                     prop = cast<SimpleExpression>(node->son[0]->prop);
-                else //SimpleExpression -> SimpleExpression addOP Term
-                    prop = CreateBinaryAST();
+                else { //SimpleExpression -> SimpleExpression addOP Term
+                    prop = new BinaryExprAST(
+                        cast<std::string>(node->son[1]->prop),
+                        cast<ExprAST*>(node->son[0]->prop),
+                        cast<ExprAST*>(node->son[2]->prop)
+                    );
+                }
                 node->prop = prop;
             }
             else if (node->type == "Term") {
                 Term prop = nullptr;
                 if (node->son.size() == 1) //Term -> Factor
                     prop = cast<Term>(node->son[0]->prop);
-                else //Term -> Term mulOP Factor
-                    prop = CreateBinaryAST();
+                else { //Term -> Term mulOP Factor
+                    prop = new BinaryExprAST(
+                        node->son[1]->raw,
+                        cast<ExprAST*>(node->son[0]->prop),
+                        cast<ExprAST*>(node->son[2]->prop)
+                    );
+                }
                 node->prop = prop;
             }
             else if (node->type == "Factor") {
