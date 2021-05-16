@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "const.h"
 #include "gen.h"
@@ -91,6 +92,9 @@ class FunctionDescriptor : public SymbolDescriptor {
           args(args),
           resultDescriptor(resultDescriptor) {}
 };
+
+std::string get_internal_function_name(std::string name,std::vector<SymbolDescriptor *> args);
+
 
 ////////////////////////////////////////
 
@@ -303,6 +307,7 @@ class FunctionSignatureAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+
 class FunctionAST : public AST {
    public:
     FunctionSignatureAST *sig;
@@ -312,6 +317,7 @@ class FunctionAST : public AST {
         : AST(AST_FUNCTION), sig(sig),varDecls(varDecls), body(body) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
+
 
 class StructDeclAST : public AST {
    public:
@@ -383,10 +389,12 @@ class SymbolTable {
     static VariableDescriptor *lookforVariable(std::string sig);
 
     static void insertType(std::string sig, SymbolDescriptor *descriptor);
+    static void insertFunction(std::string sig,FunctionDescriptor *descriptor);
     static ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item,
                                                   int sz);
     static PointerTypeDescriptor *create_pointer_type(SymbolDescriptor *item);
     static SymbolDescriptor *lookforType(std::string sig);
+    static FunctionDescriptor* lookforFunction(std::string sig,std::vector<SymbolDescriptor*> args);
 };
 
 class TagTable {

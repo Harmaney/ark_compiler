@@ -9,7 +9,17 @@
 #include "err.h"
 #include "logger.h"
 
-std::string mapVariableType(SymbolDescriptor *type) { return type->name; }
+std::string mapVariableType(SymbolDescriptor *type) { 
+    if(type->name==TYPE_BASIC_DOUBLE){
+        return "double";
+    }else if(type->name==TYPE_BASIC_INT){
+        return "int";
+    }else if(type->name==TYPE_BASIC_STRING){
+        return "string";
+    }else{
+        throw std::invalid_argument("unknown map type");        
+    }
+}
 
 void putVariableDecl(VariableDescriptor *var) {
     // TODO: handle different type
@@ -32,31 +42,23 @@ void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
     CodeCollector::push_back("using namespace std;");
 
     // write int以及其符号
-    CodeCollector::push_back("void write_int(int x){cout<<x;}");
-    SymbolTable::insertType(
-        "write_int",
+    CodeCollector::push_back("void write_integer(int x){cout<<x;}");
+    SymbolTable::insertFunction(
+        "write",
         new FunctionDescriptor(
             "write",
             {new VariableDescriptor(
                 "x", SymbolTable::lookforType(TYPE_BASIC_INT), false, false)},
             SymbolTable::lookforType(TYPE_BASIC_VOID)));
 
-    // write str以及其符号
-    CodeCollector::push_back("void write_str(string x){cout<<x;}");
-    SymbolTable::insertType(
-        "write_str", new FunctionDescriptor(
-                         "write",
-                         {new VariableDescriptor(
-                             "x", SymbolTable::lookforType(TYPE_BASIC_STRING),
-                             false, false)},
-                         SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
     // read int以及其符号
-    CodeCollector::push_back("int read_int(){int x;cin>>x;return x;}");
-    SymbolTable::insertType(
-        "read_int",
-        new FunctionDescriptor("read_int", {},
-                               SymbolTable::lookforType(TYPE_BASIC_INT)));
+    CodeCollector::push_back("void read_integer(int *x){scanf(\"%d\",x);}");
+    SymbolTable::insertFunction(
+        "read", new FunctionDescriptor(
+                         "read",
+                         {new VariableDescriptor(
+                "x", SymbolTable::lookforType(TYPE_BASIC_INT), true,false)},
+                         SymbolTable::lookforType(TYPE_BASIC_VOID)));
     CodeCollector::end_section();
 }
 
@@ -179,7 +181,7 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
     VariableDescriptor *rhs =
         std::any_cast<VariableDescriptor *>(ast->RHS->value);
 
-    if (ast->op == "=") {
+    if (ast->op == ":=") {
         if (lhs->varType != rhs->varType) {
             throw TypeErrorException("type does not match between `=`",
                                      rhs->varType->name, lhs->varType->name, 0,
@@ -310,7 +312,12 @@ void ASTDispatcher::genUnaryExpr(UnaryExprAST *ast) {
 
 void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     // check whether function exists.
-    SymbolDescriptor *raw_descriptor = SymbolTable::lookforType(ast->callee);
+    std::vector<SymbolDescriptor*> argsimbols;
+    for(auto arg:ast->args){
+        argsimbols.push_back(std::any_cast<VariableDescriptor*>(arg->value)->varType);
+    }
+    SymbolDescriptor *raw_descriptor = SymbolTable::lookforFunction(ast->callee,argsimbols);
+
     if (!raw_descriptor || raw_descriptor->type != DESCRIPTOR_FUNCTION) {
         throw SymbolUndefinedException("try to call undefined function",
                                        ast->callee, 0, 0);
@@ -338,7 +345,7 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
         CodeCollector::src() << "=";
     }
 
-    CodeCollector::src() << ast->callee << "(";
+    CodeCollector::src() << descriptor->name << "(";
     for (int i = 0; i < ast->args.size(); i++) {
         auto d = std::any_cast<VariableDescriptor *>(ast->args[i]->value);
         if (d->varType != descriptor->args[i]->varType) {
@@ -365,11 +372,23 @@ void ASTDispatcher::genIfStatementBegin(IfStatementAST *ast) {
 
     std::string *L0 = TagTable::createTagG();
     CodeCollector::src() << "goto " << *L0 << ";";
+    CodeCollector::push_back();
     ast->extraData["L0"] = L0;
 }
 
-void ASTDispatcher::genIfStatementEnd(IfStatementAST *ast){
-    WARN(std::cerr<<"todo: if end"<<std::endl;)
+void ASTDispatcher::genIfStatementElse(IfStatementAST *ast) {
+
+    std::string *END = TagTable::createTagG();
+    CodeCollector::src() << "goto " << *END << ";";
+    CodeCollector::push_back();
+    ast->extraData["END"] = END;
+    CodeCollector::src()<<*std::any_cast<std::string*>(ast->extraData["L0"])<<":";
+    CodeCollector::push_back();
+}
+
+void ASTDispatcher::genIfStatementEnd(IfStatementAST *ast) {
+    CodeCollector::src()<<*std::any_cast<std::string*>(ast->extraData["END"])<<":";
+    CodeCollector::push_back();
 }
 
 void ASTDispatcher::genForStatementBegin(ForStatementAST *ast) {
@@ -470,7 +489,7 @@ void ASTDispatcher::genWhileStatementEnd(WhileStatementAST *ast) {
 }
 
 void ASTDispatcher::genFunctionSignature(FunctionSignatureAST *ast) {
-    WARN(std::cerr<<"todo: function sig end"<<std::endl;)
+    WARN(std::cerr << "todo: function sig end" << std::endl;)
 }
 
 void ASTDispatcher::genFunction(FunctionAST *ast) {
@@ -518,6 +537,12 @@ void ASTDispatcher::genFunction(FunctionAST *ast) {
     for (auto arg : ast->sig->args) {
         SymbolTable::createVariable(arg->sig->name, arg->_varType, arg->isRef);
     }
+    // SymbolTable::createVariable(ast->sig->sig, ast->sig->_resultType, false);
+
+    // add result call to body
+    // ast->body->exprs.push_back(
+        // new ReturnAST(new VariableExprAST(ast->sig->sig)));
+
     // I am nearly throwing up
     ast->body->accept(*this);
     SymbolTable::exit();
@@ -582,7 +607,7 @@ void CodeCollector::push_front(std::string str) {
 }
 
 void CodeCollector::push_back() {
-    WALK_AST<<cur_section_name.top()<<" "<<ss.str()<<std::endl;
+    WALK_AST << cur_section_name.top() << " " << ss.str() << std::endl;
     cur_section->push_back(ss.str());
     ss.str(std::string());
 }

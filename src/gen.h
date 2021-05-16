@@ -56,6 +56,7 @@ public:
 
     /// 只生产if，不包含block
     virtual void genIfStatementBegin(IfStatementAST *ast)=0;
+    virtual void genIfStatementElse(IfStatementAST *ast)=0;
     virtual void genIfStatementEnd(IfStatementAST *ast)=0;
     /// 只生产while，不包含block
     virtual void genWhileStatementBegin(WhileStatementAST *ast)=0;
@@ -97,6 +98,7 @@ class ASTDispatcher: public ADispatcher {
 
     /// 只生产if，不包含block
     void genIfStatementBegin(IfStatementAST *ast) override;
+    void genIfStatementElse(IfStatementAST *ast) override;
     void genIfStatementEnd(IfStatementAST *ast) override;
     /// 只生产while，不包含block
     void genWhileStatementBegin(WhileStatementAST *ast) override;
