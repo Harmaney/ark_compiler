@@ -7,6 +7,9 @@ begin
         begin
             k:=j;
         end
-    else k:=i;
+    else
+        begin
+             k:=i;
+        end;
     write(k);
 end.
