@@ -451,6 +451,75 @@ void TEST_fibonacci(){
     global->accept(dispacher);
 }
 
+////////////////////////////////////////////////////////////
+
+void TEST_typeequal(){
+    auto *ast=new BlockAST({
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new BinaryExprAST("=",new VariableExprAST("a"),new NumberExprAST(1)),
+    });
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
+void TEST_typeassignerror(){
+    auto *ast=new BlockAST({
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new BinaryExprAST("=",new VariableExprAST("a"),new NumberExprAST(1.1)),
+    });
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
+void TEST_leftvarassignerror(){
+    auto *ast=new BlockAST({
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new BinaryExprAST("=",new NumberExprAST(1),new VariableExprAST("a")),
+    });
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
+void TEST_undefinedval(){
+    auto *ast=new BlockAST({
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new BinaryExprAST("=",new VariableExprAST("b"),new NumberExprAST(1)),
+    });
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
+void TEST_nomember(){
+    auto *ast=new BlockAST({
+        new StructDeclAST(
+            "st",
+            {
+                new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false)
+            }
+        ),
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST("st"),false),
+        new BinaryExprAST("=",new BinaryExprAST(".",new VariableExprAST("a"),new StringExprAST("a")),new NumberExprAST(1)),
+    });
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
+void TEST_opbetweendiffobj(){
+    auto *ast=new BlockAST({
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new VariableDeclAST(new VariableExprAST("b"),new BasicTypeAST(TYPE_BASIC_STRING),false),
+        new BinaryExprAST("<",new VariableExprAST("a"),new VariableExprAST("b")),
+    });
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+}
+
 int RUN_TEST(){
     init_code_generator();
     init_basic_type();
@@ -465,10 +534,17 @@ int RUN_TEST(){
     // TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
-    TEST_arrinstruct();
+    // TEST_arrinstruct();
     // TEST_pointer();
     // TEST_case1();
     // TEST_fibonacci();
+
+    // TEST_typeequal();
+    // TEST_typeassignerror();
+    // TEST_leftvarassignerror();
+    // TEST_undefinedval();
+    // TEST_nomember();
+    TEST_opbetweendiffobj();
 
     CodeCollector::end_section(PLACE_END);
     

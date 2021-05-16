@@ -768,7 +768,7 @@ void Analyse(string file_name) {
             }
             else if (node->type == "Variable") {
             auto var = new VariableExprAST(node->son[0]->raw);
-                if (!std::any_cast<nullptr_t>(node->son[1]->prop))
+                if (std::any_cast<nullptr_t>(node->son[1]->prop)==nullptr)
                     node->prop = var;
                 else
                     node->prop = new BinaryExprAST("[]",

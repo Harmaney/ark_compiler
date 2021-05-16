@@ -115,10 +115,12 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
         case CONSTANT_INT:
             t = SymbolTable::createVariableG(
                 SymbolTable::lookforType(TYPE_BASIC_INT), false);
+            t->isLeftVar=false;
             break;
         case CONSTANT_REAL:
             t = SymbolTable::createVariableG(
                 SymbolTable::lookforType(TYPE_BASIC_DOUBLE), false);
+            t->isLeftVar=false;
             break;
         default:
             throw InternalErrorException("unknown constant type: " +
@@ -145,6 +147,7 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
 void ASTDispatcher::genStringExpr(StringExprAST *ast) {
     VariableDescriptor *t = SymbolTable::createVariableG(
         SymbolTable::lookforType(TYPE_BASIC_STRING), false);
+    t->isLeftVar=false;
 
     CodeCollector::begin_section("global_define");
     CodeCollector::src() << mapVariableType(t->varType) << " " << t->name
@@ -179,6 +182,9 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
     if (ast->op == "=") {
         if (lhs->varType != rhs->varType) {
             throw TypeErrorException("type does not match between `=`",rhs->varType->name,lhs->varType->name,0,0);
+        }
+        if(lhs->isLeftVar==false){
+            throw TypeErrorException("try using `=` on right value","right val","left val",0,0);
         }
         putVariableExpr(lhs);
         CodeCollector::src() << "=";

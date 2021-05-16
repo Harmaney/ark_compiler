@@ -57,13 +57,15 @@ class VariableDescriptor : public SymbolDescriptor {
     bool isRef;
     // 现在没有用上
     bool isConst;
+    bool isLeftVar;
 
     VariableDescriptor(std::string name, SymbolDescriptor *varType, bool isRef,
-                       bool isConst)
+                       bool isConst,bool isLeftVar=true)
         : SymbolDescriptor(DESCRIPTOR_VARIABLE, name),
           varType(varType),
           isRef(isRef),
-          isConst(isConst) {}
+          isConst(isConst),
+          isLeftVar(isLeftVar) {}
 };
 
 class StructDescriptor : public SymbolDescriptor {
