@@ -69,7 +69,7 @@ ExpressionList -> ExpressionList , Expression @
 ExpressionList -> Expression @
 Expression -> SimpleExpression relOP SimpleExpression @
 Expression -> SimpleExpression = SimpleExpression @
-Expression -> string @
+Expression -> stringVal @
 Expression -> SimpleExpression @
 Expression -> Expression ^ @
 SimpleExpression -> SimpleExpression addOP Term @
@@ -86,9 +86,9 @@ ComposedVariable -> ComposedVariable . ID @
 ComposedVariable -> Variable @
 ComposedVariable -> ProcedureCall(ARG) @
 ComposedVariable -> ( Expression ) @
-Num -> int @ 
-Num -> float @
-Digits -> int @
+Num -> intVal @ 
+Num -> realVal @
+Digits -> intVal @
 addOP -> + @
 addOP -> - @
 addOP -> or @
