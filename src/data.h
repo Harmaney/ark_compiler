@@ -246,7 +246,7 @@ class VariableDeclAST : public AST {
     // 它只是在C中使用指针模拟，用于处理pascal里的引用类型
     bool isRef;
     bool isConst;
-    VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef,bool isConst)
+    VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef,bool isConst=false)
         : AST(AST_VARIABLE_DECL), sig(sig), varType(type),isRef(isRef),isConst(isConst) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
