@@ -23,6 +23,8 @@ enum ASTKind {
 
 #define TYPE_BASIC_DOUBLE "double"
 #define TYPE_BASIC_INT "integer"
+#define TYPE_BASIC_LONGINT "longint"
+#define TYPE_BASIC_INT64 "int64"
 // in fact this is somehow not basic
 #define TYPE_BASIC_STRING "string"
 #define TYPE_BASIC_VOID "void"
