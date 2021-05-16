@@ -1,27 +1,14 @@
 program Hello;
-var i,j:integer;
-function magic(k:int64):int64;
+function magic(k:integer):integer;
 begin
-    magic:=j;
-    j:=j+1;
-    if j<=5 then
+    magic:=0;
+    if k<0 then
     begin
-        magic:=magic(magic(k))+magic+k;
+        exit();
     end;
+    magic:=k+magic(k-1);
 end;
-function magic:int64;
 begin
-    magic:=i;
-    i:=i+1;
-    if i<=5 then
-    begin
-        magic:=magic+magic()+magic(magic);
-    end;
-end;
-var y:integer;
-begin
-    i:=0;
-    j:=0;
-    writeln(magic);
+    writeln(magic(5));
     
 end.
