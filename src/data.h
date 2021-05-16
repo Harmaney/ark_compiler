@@ -147,6 +147,15 @@ class BasicTypeAST : public TypeDeclAST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
+class TypeDefAST : public TypeDeclAST {
+   public:
+    BasicTypeAST *newName;
+    TypeDeclAST *oldName;
+    TypeDefAST(BasicTypeAST *newName, TypeDeclAST *oldName)
+        : newName(newName), oldName(oldName) {}
+    void accept(ASTDispatcher &dispatcher) override;
+};
+
 /// 指针类型
 class PointerTypeDeclAST : public TypeDeclAST {
    public:
@@ -281,9 +290,15 @@ class VariableDeclAST : public AST {
     SymbolDescriptor *_varType;
     // 这个东西的意义并不和指针等价！
     // 它只是在C中使用指针模拟，用于处理pascal里的引用类型
-    bool isRef;
-    VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef)
-        : AST(AST_VARIABLE_DECL), sig(sig), varType(type), isRef(isRef) {
+    bool isRef, isConst;
+
+    VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef,
+                    bool isConst = false)
+        : AST(AST_VARIABLE_DECL),
+          sig(sig),
+          varType(type),
+          isRef(isRef),
+          isConst(isConst) {
         parserOutputer.push_back({{"address", (uint64_t)this},
                                   {"type", "VariableDeclAST"},
                                   {"son", Serialize(sig, type)}});
@@ -382,12 +397,12 @@ class FunctionAST : public AST {
     void accept(ASTDispatcher &dispatcher) override;
 };
 
-class StructDeclAST : public AST {
+class StructDeclAST : public TypeDeclAST {
    public:
     std::string sig;
     std::vector<VariableDeclAST *> varDecl;
     StructDeclAST(std::string sig, std::vector<VariableDeclAST *> varDecl)
-        : AST(AST_STRUCT_DECL), sig(sig), varDecl(varDecl) {}
+        : TypeDeclAST(AST_STRUCT_DECL), sig(sig), varDecl(varDecl) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 
@@ -445,12 +460,12 @@ class SymbolTable {
     static void exit();
     static VariableDescriptor *createVariable(std::string sig,
                                               SymbolDescriptor *type,
-                                              bool isRef);
+                                              bool isRef, bool isConst);
     static VariableDescriptor *createVariableG(std::string sig,
                                                SymbolDescriptor *type,
                                                bool isRef);
     static VariableDescriptor *createVariable(SymbolDescriptor *type,
-                                              bool isRef);
+                                              bool isRef, bool isConst);
     static VariableDescriptor *createVariableG(SymbolDescriptor *type,
                                                bool isRef);
 
