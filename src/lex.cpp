@@ -317,7 +317,7 @@ void lex_work(string file_name){
             lout << "int";
             break;
         case 4:
-            lout << "float";
+            lout << "real";
             break;
         case 11:
             lout << "string";
