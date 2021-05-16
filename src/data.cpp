@@ -94,7 +94,8 @@ void UnaryExprAST::accept(ASTDispatcher &dispatcher) {
 
 void ReturnAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    this->expr->accept(dispatcher);
+    if(this->expr)
+        this->expr->accept(dispatcher);
 
     dispatcher.genReturn(this);
 }

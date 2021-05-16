@@ -222,6 +222,7 @@ class ReturnAST : public AST {
    public:
     ExprAST *expr;
     ReturnAST(ExprAST *expr) : AST(AST_RETURN), expr(expr) {}
+    ReturnAST() : AST(AST_RETURN), expr(nullptr) {}
     void accept(ASTDispatcher &dispacher) override;
 };
 
