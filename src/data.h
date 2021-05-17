@@ -152,7 +152,7 @@ class TypeDefAST : public TypeDeclAST {
     BasicTypeAST *newName;
     TypeDeclAST *oldName;
     TypeDefAST(BasicTypeAST *newName, TypeDeclAST *oldName)
-        : TypeDeclAST(AST_ARRAY_TYPE), newName(newName), oldName(oldName) {}
+        : TypeDeclAST(AST_TYPE_DEF), newName(newName), oldName(oldName) {}
     void accept(ASTDispatcher &dispatcher) override;
 };
 

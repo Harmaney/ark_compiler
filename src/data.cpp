@@ -34,6 +34,11 @@ void BasicTypeAST::accept(ASTDispatcher &dispatcher) {
     dispatcher.genBasicType(this);
 }
 
+void TypeDefAST::accept(ASTDispatcher &dispatcher) {
+    LOG_WALK(this);
+    dispatcher.genTypeDef(this);
+}
+
 void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     switch (this->itemAST->type) {

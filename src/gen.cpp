@@ -155,6 +155,15 @@ void ASTDispatcher::genPointerTypeDecl(PointerTypeDeclAST *ast) {
     ast->_descriptor = descriptor;
 }
 
+void ASTDispatcher::genTypeDef(TypeDefAST *ast){
+    // 这看起来不太靠谱
+    SymbolTable::insertType(ast->newName->varType,ast->oldName->_descriptor);
+
+    CodeCollector::src() << "typedef "<<mapVariableType(ast->oldName->_descriptor)
+                         << " " << ast->newName->varType << ";";
+    CodeCollector::push_back();
+}
+
 void ASTDispatcher::genBasicType(BasicTypeAST *ast) {
     auto descriptor = SymbolTable::lookforType(ast->varType);
     if (descriptor == nullptr) {
