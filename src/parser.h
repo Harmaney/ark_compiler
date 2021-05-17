@@ -177,7 +177,7 @@ struct GrammarTreeNode {
                   {"row", row},           {"column", column},
                   {"ID", (uint64_t)this}, {"son", Json::array()}};
         for (auto s : son) j["son"].push_back((uint64_t)s);
-        parserOutputer.push_back(j);
+        parser_info.push_back(j);
     }
 };
 

@@ -113,7 +113,7 @@ class BlockAST : public AST {
    public:
     std::vector<AST *> exprs;
     BlockAST(const std::vector<AST *> exprs) : AST(AST_BLOCK), exprs(exprs) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "BlockAST"},
                                   {"son", Serialize(exprs)}});
     }
@@ -142,7 +142,7 @@ class BasicTypeAST : public TypeDeclAST {
     std::string varType;
     BasicTypeAST(std::string varType)
         : TypeDeclAST(AST_BASIC_TYPE), varType(varType) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this}, {"type", "BasicTypeAST:" + varType}});
     }
     void accept(ASTDispatcher &dispatcher) override;
@@ -164,7 +164,7 @@ class PointerTypeDeclAST : public TypeDeclAST {
     BasicTypeAST *ref;
     PointerTypeDeclAST(BasicTypeAST *ref)
         : TypeDeclAST(AST_POINTER_TYPE), ref(ref) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "PointerTypeDeclAST"},
                                   {"son", Serialize(ref)}});
     }
@@ -179,13 +179,13 @@ class NumberExprAST : public ExprAST {
     ConstantType const_type;
     NumberExprAST(double val)
         : ExprAST(AST_NUMBER_EXPR), val_float(val), const_type(CONSTANT_REAL) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this},
              {"type", "NumberExprAST:" + std::to_string(val_float)}});
     }
     NumberExprAST(int val)
         : ExprAST(AST_NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this},
              {"type", "NumberExprAST:" + std::to_string(val_int)}});
     }
@@ -205,7 +205,7 @@ class ArrayTypeDeclAST : public TypeDeclAST {
           itemAST(itemAST),
           rangeL(rangeL),
           rangeR(rangeR) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "ArrayTypeDeclAST"},
                                   {"son", Serialize(itemAST, rangeL, rangeR)}});
     }
@@ -217,7 +217,7 @@ class StringExprAST : public ExprAST {
    public:
     std::string val;
     StringExprAST(std::string val) : ExprAST(AST_STRING_EXPR), val(val) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this}, {"type", "StringExprAST:" + val}});
     }
     void accept(ASTDispatcher &dispacher) override;
@@ -228,7 +228,7 @@ class CharExprAST : public ExprAST {
    public:
     char val;
     CharExprAST(char val) : ExprAST(AST_CHAR_EXPR), val(val) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this}, {"type", "CharExprAST:" + val}});
     }
     void accept(ASTDispatcher &dispacher) override;
@@ -240,7 +240,7 @@ class VariableExprAST : public ExprAST {
     std::string name;
     VariableExprAST(const std::string &name)
         : ExprAST(AST_VARIABLE_EXPR), name(name) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this}, {"type", "VariableExprAST:" + name}});
     }
     void accept(ASTDispatcher &dispacher) override;
@@ -253,7 +253,7 @@ class UnaryExprAST : public ExprAST {
     std::string op;
     UnaryExprAST(std::string op, ExprAST *expr)
         : ExprAST(AST_UNARY_EXPR), expr(expr), op(op) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "UnaryExprAST:" + op},
                                   {"son", Serialize(expr)}});
     }
@@ -268,7 +268,7 @@ class BinaryExprAST : public ExprAST {
 
     BinaryExprAST(std::string op, ExprAST *lhs, ExprAST *rhs)
         : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "BinaryExprAST:" + op},
                                   {"son", Serialize(LHS, RHS)}});
     }
@@ -291,7 +291,7 @@ class CallExprAST : public ExprAST {
     std::vector<ExprAST *> args;
     CallExprAST(const std::string &callee, const std::vector<ExprAST *> &args)
         : ExprAST(AST_CALL_EXPR), callee(callee), args(args) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "CallExprAST:" + callee},
                                   {"son", Serialize(args)}});
     }
@@ -318,7 +318,7 @@ class VariableDeclAST : public AST {
           isRef(isRef),
           isConst(isConst),
           initVal(initVal) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "VariableDeclAST"},
                                   {"son", Serialize(sig, type)}});
     }
@@ -339,7 +339,7 @@ class ForStatementAST : public AST {
           rangeL(rangeL),
           rangeR(rangeR),
           body(body) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this},
              {"type", "ForStatementAST"},
              {"son", Serialize(itervar, rangeL, rangeR, body)}});
@@ -354,7 +354,7 @@ class WhileStatementAST : public AST {
 
     WhileStatementAST(ExprAST *condition, BlockAST *body)
         : AST(AST_WHILE_STATEMENT), condition(condition), body(body) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "WhileStatementAST"},
                                   {"son", Serialize(condition, body)}});
     }
@@ -373,7 +373,7 @@ class IfStatementAST : public AST {
           condition(condition),
           body_true(body_true),
           body_false(body_false) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this},
              {"type", "IfStatementAST"},
              {"son", Serialize(condition, body_true, body_false)}});
@@ -394,7 +394,7 @@ class FunctionSignatureAST : public AST {
           sig(sig),
           args(args),
           resultType(result) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "FunctionSignatureAST:" + sig},
                                   {"son", Serialize(args, resultType)}});
     }
@@ -409,7 +409,7 @@ class FunctionAST : public AST {
     FunctionAST(FunctionSignatureAST *sig,
                 std::vector<VariableDeclAST *> varDecls, BlockAST *body)
         : AST(AST_FUNCTION), sig(sig), varDecls(varDecls), body(body) {
-        parserOutputer.push_back({{"ID", (uint64_t)this},
+        parser_info.push_back({{"ID", (uint64_t)this},
                                   {"type", "FunctionAST"},
                                   {"son", Serialize(sig, varDecls, body)}});
     }
@@ -440,7 +440,7 @@ class GlobalAST : public AST {
           vars(vars),
           functions(functions),
           mainBlock(mainBlock) {
-        parserOutputer.push_back(
+        parser_info.push_back(
             {{"ID", (uint64_t)this},
              {"type", "Global"},
              {"son", Serialize(vars, functions, mainBlock)}});
@@ -451,7 +451,7 @@ class GlobalAST : public AST {
 ////////////////////////////////////////////
 
 class _SymbolTable {
-    int nextSlot;
+    int next_slot;
     std::map<std::string, SymbolDescriptor *> refType;
     std::map<std::string, VariableDescriptor *> refVar;
 
@@ -461,14 +461,14 @@ class _SymbolTable {
    public:
     int group;
     _SymbolTable *parent;
-    _SymbolTable(int group) : group(group), nextSlot(0), parent(NULL) {}
-    std::string getSlot();
+    _SymbolTable(int group) : group(group), next_slot(0), parent(NULL) {}
+    std::string get_slot();
     void insert_variable(std::string sig, VariableDescriptor *var);
     void insert_type(std::string sig, SymbolDescriptor *var);
     ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item, int sz,int beg);
     PointerTypeDescriptor *create_pointer_type(SymbolDescriptor *item);
-    VariableDescriptor *searchVariable(std::string sig);
-    SymbolDescriptor *searchType(std::string sig);
+    VariableDescriptor *search_variable(std::string sig);
+    SymbolDescriptor *search_type(std::string sig);
 };
 
 class SymbolTable {
@@ -480,33 +480,33 @@ class SymbolTable {
     static void init();
     static void enter();
     static void exit();
-    static VariableDescriptor *createVariable(std::string sig,
+    static VariableDescriptor *create_variable(std::string sig,
                                               SymbolDescriptor *type,
                                               bool isRef, bool isConst);
-    static VariableDescriptor *createVariableG(std::string sig,
+    static VariableDescriptor *create_variable_G(std::string sig,
                                                SymbolDescriptor *type,
                                                bool isRef);
-    static VariableDescriptor *createVariable(SymbolDescriptor *type,
+    static VariableDescriptor *create_variable(SymbolDescriptor *type,
                                               bool isRef, bool isConst);
-    static VariableDescriptor *createVariableG(SymbolDescriptor *type,
+    static VariableDescriptor *create_variable_G(SymbolDescriptor *type,
                                                bool isRef);
 
-    static VariableDescriptor *lookforVariable(std::string sig);
+    static VariableDescriptor *lookfor_variable(std::string sig);
 
-    static void insertType(std::string sig, SymbolDescriptor *descriptor);
-    static void insertFunction(std::string sig, FunctionDescriptor *descriptor);
+    static void insert_type(std::string sig, SymbolDescriptor *descriptor);
+    static void insert_function(std::string sig, FunctionDescriptor *descriptor);
     static ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item,
                                                   int sz,int beg);
     static PointerTypeDescriptor *create_pointer_type(SymbolDescriptor *item);
-    static SymbolDescriptor *lookforType(std::string sig);
-    static FunctionDescriptor *lookforFunction(
+    static SymbolDescriptor *lookfor_type(std::string sig);
+    static FunctionDescriptor *lookfor_function(
         std::string sig, std::vector<SymbolDescriptor *> args);
 };
 
 class TagTable {
-    static int nextSlot;
+    static int next_slot;
 
    public:
     static void init();
-    static std::string *createTagG();
+    static std::string *create_tag_G();
 };

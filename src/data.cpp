@@ -8,7 +8,7 @@
 
 void LOG_WALK(AST *ast) {
     //    WALK_AST<<"ARRIVE "<<ast<<std::endl;
-    genOutputer.push_back({{"ARRIVE", (uint64_t)ast}});
+    gen_info.push_back({{"ARRIVE", (uint64_t)ast}});
 }
 
 void ExprAST::accept(ASTDispatcher &dispatcher) {
@@ -32,12 +32,12 @@ void ExprAST::accept(ASTDispatcher &dispatcher) {
 
 void BasicTypeAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    dispatcher.genBasicType(this);
+    dispatcher.gen_basic_type(this);
 }
 
 void TypeDefAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    dispatcher.genTypeDef(this);
+    dispatcher.gen_type_def(this);
 }
 
 void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
@@ -53,40 +53,40 @@ void ArrayTypeDeclAST::accept(ASTDispatcher &dispatcher) {
             throw std::invalid_argument("not support type in array");
             break;
     }
-    dispatcher.genArrayTypeDecl(this);
+    dispatcher.gen_array_type_decl(this);
 }
 
 void PointerTypeDeclAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     this->ref->accept(dispatcher);
-    dispatcher.genPointerTypeDecl(this);
+    dispatcher.gen_pointer_type_decl(this);
 }
 
 void NumberExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     TRACE(std::cerr << "into number ast" << std::endl;)
-    dispatcher.genNumberExpr(this);
+    dispatcher.gen_number_expr(this);
     TRACE(std::cerr << "out number ast" << std::endl;)
 }
 
 void StringExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     TRACE(std::cerr << "into string ast" << std::endl;)
-    dispatcher.genStringExpr(this);
+    dispatcher.gen_string_expr(this);
     TRACE(std::cerr << "out string ast" << std::endl;)
 }
 
 void CharExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     TRACE(std::cerr << "into char ast" << std::endl;)
-    dispatcher.genCharExpr(this);
+    dispatcher.gen_char_expr(this);
     TRACE(std::cerr << "out char ast" << std::endl;)
 }
 
 void VariableExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     TRACE(std::cerr << "into variable ast" << std::endl;)
-    dispatcher.genVariableExpr(this);
+    dispatcher.gen_variable_expr(this);
     TRACE(std::cerr << "out variable ast" << std::endl;)
 }
 
@@ -95,21 +95,21 @@ void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
     LHS->accept(dispatcher);
     RHS->accept(dispatcher);
 
-    dispatcher.genBinaryExpr(this);
+    dispatcher.gen_binary_expr(this);
 }
 
 void UnaryExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     expr->accept(dispatcher);
 
-    dispatcher.genUnaryExpr(this);
+    dispatcher.gen_unary_expr(this);
 }
 
 void ReturnAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     if (this->expr) this->expr->accept(dispatcher);
 
-    dispatcher.genReturn(this);
+    dispatcher.gen_return(this);
 }
 
 void CallExprAST::accept(ASTDispatcher &dispatcher) {
@@ -119,13 +119,13 @@ void CallExprAST::accept(ASTDispatcher &dispatcher) {
     }
 
     TRACE(std::cerr << "into cell ast" << std::endl;)
-    dispatcher.genCallExpr(this);
+    dispatcher.gen_call_expr(this);
     TRACE(std::cerr << "out cell ast" << std::endl;)
 }
 
 void BlockAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    dispatcher.genBlockBegin(this);
+    dispatcher.gen_block_begin(this);
     SymbolTable::enter();
 
     for (auto expr : exprs) {
@@ -167,7 +167,7 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
     }
 
     SymbolTable::exit();
-    dispatcher.genBlockEnd(this);
+    dispatcher.gen_block_end(this);
 }
 
 void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
@@ -182,7 +182,7 @@ void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
     }
 
     TRACE(std::cerr << "into variable ast" << std::endl;)
-    dispatcher.genVariableDecl(this);
+    dispatcher.gen_variable_decl(this);
     TRACE(std::cerr << "out variable ast" << std::endl;)
 }
 
@@ -193,9 +193,9 @@ void ForStatementAST::accept(ASTDispatcher &dispatcher) {
     this->rangeR->accept(dispatcher);
 
     TRACE(std::cerr << "into for ast" << std::endl;)
-    dispatcher.genForStatementBegin(this);
+    dispatcher.gen_for_statement_begin(this);
     this->body->accept(dispatcher);
-    dispatcher.genForStatementEnd(this);
+    dispatcher.gen_for_statement_end(this);
     TRACE(std::cerr << "into for ast" << std::endl;)
 }
 
@@ -205,23 +205,23 @@ void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
     this->condition->accept(dispatcher);
     TRACE(std::cerr << "out condition of while" << std::endl;)
 
-    dispatcher.genWhileStatementBegin(this);
+    dispatcher.gen_while_statement_begin(this);
     this->body->accept(dispatcher);
 
     // to get the new result of condition
     this->condition->accept(dispatcher);
-    dispatcher.genWhileStatementEnd(this);
+    dispatcher.gen_while_statement_end(this);
 }
 
 void IfStatementAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     TRACE(std::cerr << "into if ast" << std::endl;)
     this->condition->accept(dispatcher);
-    dispatcher.genIfStatementBegin(this);
+    dispatcher.gen_if_statement_begin(this);
     this->body_false->accept(dispatcher);
-    dispatcher.genIfStatementElse(this);
+    dispatcher.gen_if_statement_else(this);
     this->body_true->accept(dispatcher);
-    dispatcher.genIfStatementEnd(this);
+    dispatcher.gen_if_statement_end(this);
 
     // TODO: body and else if
     TRACE(std::cerr << "out if ast" << std::endl;)
@@ -230,7 +230,7 @@ void IfStatementAST::accept(ASTDispatcher &dispatcher) {
 void GlobalAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
     TRACE(std::cerr << "into global ast" << std::endl;)
-    dispatcher.genGlobalBegin(this);
+    dispatcher.gen_global_begin(this);
 
     for (auto var : this->vars) {
         var->accept(dispatcher);
@@ -247,7 +247,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
         func->accept(dispatcher);
     }
 
-    dispatcher.genGlobalEnd(this);
+    dispatcher.gen_global_end(this);
     TRACE(std::cerr << "out global ast" << std::endl;)
 }
 
@@ -265,20 +265,20 @@ void FunctionAST::accept(ASTDispatcher &dispatcher) {
     this->body->exprs.insert(this->body->exprs.begin(), this->varDecls.begin(),
                              this->varDecls.end());
 
-    dispatcher.genFunction(this);
+    dispatcher.gen_function(this);
 }
 
 void FunctionSignatureAST::accept(ASTDispatcher &dispatcher) {}
 
 void StructDeclAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    dispatcher.genStruct(this);
+    dispatcher.gen_struct(this);
 }
 
 ///////////////////////////////////////
 
-std::string _SymbolTable::getSlot() {
-    return "t" + std::to_string(group) + "_" + std::to_string(nextSlot++);
+std::string _SymbolTable::get_slot() {
+    return "t" + std::to_string(group) + "_" + std::to_string(next_slot++);
 }
 
 void _SymbolTable::insert_variable(std::string sig, VariableDescriptor *var) {
@@ -291,9 +291,9 @@ ArrayTypeDescriptor *_SymbolTable::create_array_type(SymbolDescriptor *item,
                                                      int sz, int beg) {
     if (this->hasArrayType.count(std::make_pair(item, sz))) {
         return static_cast<ArrayTypeDescriptor *>(
-            this->searchType(this->hasArrayType[std::make_pair(item, sz)]));
+            this->search_type(this->hasArrayType[std::make_pair(item, sz)]));
     }
-    auto slot = getSlot();
+    auto slot = get_slot();
     ArrayTypeDescriptor *arrayDescriptor =
         new ArrayTypeDescriptor(slot, item, sz, beg);
     this->insert_type(slot, arrayDescriptor);
@@ -304,23 +304,23 @@ PointerTypeDescriptor *_SymbolTable::create_pointer_type(
     SymbolDescriptor *item) {
     if (this->hasPointerType.count(item)) {
         return static_cast<PointerTypeDescriptor *>(
-            this->searchType(this->hasPointerType[item]));
+            this->search_type(this->hasPointerType[item]));
     }
-    auto slot = getSlot();
+    auto slot = get_slot();
     PointerTypeDescriptor *pointerDescriptor =
         new PointerTypeDescriptor(slot, item);
     this->insert_type(slot, pointerDescriptor);
     return pointerDescriptor;
 }
 
-VariableDescriptor *_SymbolTable::searchVariable(std::string sig) {
+VariableDescriptor *_SymbolTable::search_variable(std::string sig) {
     if (refVar.count(sig)) {
         return refVar[sig];
     } else
         return NULL;
 }
 
-SymbolDescriptor *_SymbolTable::searchType(std::string sig) {
+SymbolDescriptor *_SymbolTable::search_type(std::string sig) {
     if (refType.count(sig)) {
         return refType[sig];
     } else
@@ -347,60 +347,60 @@ void SymbolTable::exit() {
     delete t;
 }
 
-VariableDescriptor *SymbolTable::createVariable(std::string sig,
-                                                SymbolDescriptor *type,
-                                                bool isRef, bool isConst) {
-    current->insert_variable(sig,
-                             new VariableDescriptor(sig, type, isRef, isConst));
-    return current->searchVariable(sig);
-}
-
-VariableDescriptor *SymbolTable::createVariableG(std::string sig,
+VariableDescriptor *SymbolTable::create_variable(std::string sig,
                                                  SymbolDescriptor *type,
-                                                 bool isRef) {
-    root->insert_variable(sig, new VariableDescriptor(sig, type, isRef, false));
-    return root->searchVariable(sig);
-}
-
-VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type,
-                                                bool isRef, bool isConst) {
-    std::string sig = current->getSlot();
+                                                 bool isRef, bool isConst) {
     current->insert_variable(sig,
                              new VariableDescriptor(sig, type, isRef, isConst));
-    return current->searchVariable(sig);
+    return current->search_variable(sig);
 }
 
-VariableDescriptor *SymbolTable::createVariableG(SymbolDescriptor *type,
-                                                 bool isRef) {
-    std::string sig = root->getSlot();
+VariableDescriptor *SymbolTable::create_variable_G(std::string sig,
+                                                   SymbolDescriptor *type,
+                                                   bool isRef) {
     root->insert_variable(sig, new VariableDescriptor(sig, type, isRef, false));
-    return root->searchVariable(sig);
+    return root->search_variable(sig);
 }
 
-VariableDescriptor *SymbolTable::lookforVariable(std::string sig) {
+VariableDescriptor *SymbolTable::create_variable(SymbolDescriptor *type,
+                                                 bool isRef, bool isConst) {
+    std::string sig = current->get_slot();
+    current->insert_variable(sig,
+                             new VariableDescriptor(sig, type, isRef, isConst));
+    return current->search_variable(sig);
+}
+
+VariableDescriptor *SymbolTable::create_variable_G(SymbolDescriptor *type,
+                                                   bool isRef) {
+    std::string sig = root->get_slot();
+    root->insert_variable(sig, new VariableDescriptor(sig, type, isRef, false));
+    return root->search_variable(sig);
+}
+
+VariableDescriptor *SymbolTable::lookfor_variable(std::string sig) {
     _SymbolTable *table = current;
     while (table) {
-        if (table->searchVariable(sig)) return table->searchVariable(sig);
+        if (table->search_variable(sig)) return table->search_variable(sig);
         table = table->parent;
     }
     return NULL;
 }
 
-void SymbolTable::insertType(std::string sig, SymbolDescriptor *descriptor) {
+void SymbolTable::insert_type(std::string sig, SymbolDescriptor *descriptor) {
     DEBUG(std::cerr << "insert type " << sig << std::endl;)
     current->insert_type(sig, descriptor);
 }
 
-void SymbolTable::insertFunction(std::string sig,
-                                 FunctionDescriptor *descriptor) {
+void SymbolTable::insert_function(std::string sig,
+                                  FunctionDescriptor *descriptor) {
     std::vector<SymbolDescriptor *> symbols;
     for (auto arg : descriptor->args) {
         symbols.push_back(arg->varType);
     }
     auto name = get_internal_function_name(sig, symbols);
     descriptor->name = name;
-    std::cerr << "???? " << name << " " << descriptor->name << std::endl;
-    insertType(name, descriptor);
+    DEBUG(std::cerr << "???? " << name << " " << descriptor->name << std::endl;)
+    insert_type(name, descriptor);
 }
 
 ArrayTypeDescriptor *SymbolTable::create_array_type(SymbolDescriptor *item,
@@ -414,19 +414,19 @@ PointerTypeDescriptor *SymbolTable::create_pointer_type(
     return root->create_pointer_type(item);
 }
 
-SymbolDescriptor *SymbolTable::lookforType(std::string sig) {
+SymbolDescriptor *SymbolTable::lookfor_type(std::string sig) {
     _SymbolTable *table = current;
     while (table) {
-        if (table->searchType(sig)) return table->searchType(sig);
+        if (table->search_type(sig)) return table->search_type(sig);
         table = table->parent;
     }
     return NULL;
 }
 
-FunctionDescriptor *SymbolTable::lookforFunction(
+FunctionDescriptor *SymbolTable::lookfor_function(
     std::string sig, std::vector<SymbolDescriptor *> args) {
     auto name = get_internal_function_name(sig, args);
-    return static_cast<FunctionDescriptor *>(lookforType(name));
+    return static_cast<FunctionDescriptor *>(lookfor_type(name));
 }
 
 std::string get_internal_function_name(std::string name,
@@ -442,10 +442,10 @@ std::string get_internal_function_name(std::string name,
 
 ///////////////////////////////////////////////
 
-int TagTable::nextSlot;
+int TagTable::next_slot;
 
-void TagTable::init() { TagTable::nextSlot = 0; }
+void TagTable::init() { TagTable::next_slot = 0; }
 
-std::string *TagTable::createTagG() {
-    return new std::string("L" + std::to_string(TagTable::nextSlot++));
+std::string *TagTable::create_tag_G() {
+    return new std::string("L" + std::to_string(TagTable::next_slot++));
 }

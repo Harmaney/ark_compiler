@@ -349,7 +349,7 @@ TokenQueue lex_work(std::string all_chars) {
                 break;
         }
         lout << type << std::endl;
-        lexOutputer.push_back({{"word", s.word},
+        lex_info.push_back({{"word", s.word},
                                {"row", s.row},
                                {"column", s.column},
                                {"type", type}});
