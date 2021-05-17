@@ -15,7 +15,7 @@
 #define inset(y, x) x.find(y) != x.end()
 #define table_exist 1
 
-std::string fjcS;
+std::string globalS;
 std::set<std::string> terminal, non_terminal;
 typedef std::pair<std::string, std::vector<std::string>> Expr;
 std::vector<Expr> productions;
@@ -24,17 +24,17 @@ std::map<Expr, int> production_ID;
 int production_num = 0;
 std::vector<std::string> empty_vec;
 std::map<std::string, std::set<std::string>> first;
-std::map<std::string, std::set<std::vector<std::string>>> RHS_set;
+std::map<std::string, std::set<std::vector<std::string>>> rhs_set;
 std::set<std::string> get_epsilon;
 void init() {
     std::ifstream input("../files/grammar.txt");
     if (!input) {
-        std::cerr << "找不到grammar.txt" << std::endl;
+        FATAL(std::cerr << "grammar.txt not found." << std::endl;)
         abort();
     }
     int mode = 0;
-    std::string LHS;
-    std::vector<std::string> RHS;
+    std::string lhs;
+    std::vector<std::string> rhs;
     while (!input.eof()) {
         std::string str;
         input >> str;
@@ -42,28 +42,28 @@ void init() {
         if (str == "->")
             mode = 1;
         else if (str == "@" || str == "|") {
-            RHS_set[LHS].insert(RHS);
+            rhs_set[lhs].insert(rhs);
 
-            Expr prod = make_pair(LHS, RHS);
+            Expr prod = make_pair(lhs, rhs);
             productions.push_back(prod);
             production_ID[prod] = ++production_num;
             production_content[production_num] = prod;
 
-            if (RHS.empty()) get_epsilon.insert(LHS);
-            RHS.clear();
+            if (rhs.empty()) get_epsilon.insert(lhs);
+            rhs.clear();
             if (str == "@") mode = 0;
         } else if (mode == 0) {
-            LHS = str, non_terminal.insert(str);
-            if (fjcS.empty()) fjcS = LHS;
+            lhs = str, non_terminal.insert(str);
+            if (globalS.empty()) globalS = lhs;
         } else
-            RHS.push_back(str), terminal.insert(str);
+            rhs.push_back(str), terminal.insert(str);
     }
     for (auto str : non_terminal) terminal.erase(str);
 
     //	for(auto str:Nonterminal){
     //		cout<<str<<"->";
-    //		for(auto RHS:RHS_set[str]){
-    //			for(auto x:RHS) cout<<x<<" ";
+    //		for(auto rhs:rhs_set[str]){
+    //			for(auto x:rhs) cout<<x<<" ";
     //			cout<<" | ";
     //		}
     //		cout<<endl;
@@ -111,10 +111,10 @@ void get_first() {
     bool changed = true;
     while (changed) {
         changed = false;
-        for (auto LHS : non_terminal) {
-            for (auto RHS : RHS_set[LHS]) {
-                if (RHS.empty()) continue;
-                changed |= merge(get_first(RHS), first[LHS]);
+        for (auto lhs : non_terminal) {
+            for (auto rhs : rhs_set[lhs]) {
+                if (rhs.empty()) continue;
+                changed |= merge(get_first(rhs), first[lhs]);
             }
         }
     }
@@ -147,37 +147,37 @@ bool operator==(std::vector<std::string> A, std::vector<std::string> B) {
     return true;
 }
 struct Item {
-    std::string LHS;
-    std::string LookAhead;
+    std::string lhs;
+    std::string look_ahead;
     std::vector<std::string> previous, next;
     Item() {}
-    Item(std::string LHS, std::vector<std::string> previous,
+    Item(std::string lhs, std::vector<std::string> previous,
          std::vector<std::string> next, std::string LookAhead)
-        : LHS(LHS), previous(previous), next(next), LookAhead(LookAhead) {}
+        : lhs(lhs), previous(previous), next(next), look_ahead(LookAhead) {}
     bool operator<(const Item other) const {
-        if (LHS != other.LHS) {
-            return LHS < other.LHS;
+        if (lhs != other.lhs) {
+            return lhs < other.lhs;
         } else if (!(previous == other.previous)) {
             return previous < other.previous;
         } else if (!(next == other.next)) {
             return next < other.next;
         } else
-            return LookAhead < other.LookAhead;
+            return look_ahead < other.look_ahead;
     }
     bool operator==(const Item other) const {
-        if (LHS != other.LHS) {
+        if (lhs != other.lhs) {
             return false;
         } else if (!(previous == other.previous)) {
             return false;
         } else if (!(next == other.next)) {
             return false;
-        } else if (LookAhead != other.LookAhead)
+        } else if (look_ahead != other.look_ahead)
             return false;
         return true;
     }
 };
-std::map<std::set<Item>, int> Item_set;
-std::map<int, std::set<Item>> Item_content;
+std::map<std::set<Item>, int> item_set;
+std::map<int, std::set<Item>> item_content;
 int item_num = 0;
 std::set<Item> get_closure(Item I) {
     std::set<Item> J;
@@ -194,13 +194,13 @@ std::set<Item> get_closure(Item I) {
             std::string B = *next.begin();  // B
             std::vector<std::string> temp = next;
             temp.erase(temp.begin());
-            temp.push_back(item.LookAhead);  // temp = bx
+            temp.push_back(item.look_ahead);  // temp = bx
 
             std::set<std::string> bx_first = get_first(temp);
 
-            for (auto RHS : RHS_set[B]) {
+            for (auto rhs : rhs_set[B]) {
                 for (auto str : bx_first) {
-                    Item new_item = Item(B, empty_vec, RHS, str);  // B->.y,bx
+                    Item new_item = Item(B, empty_vec, rhs, str);  // B->.y,bx
                     J_add.insert(new_item);
                 }
             }
@@ -209,7 +209,7 @@ std::set<Item> get_closure(Item I) {
     } while (changed);
     return J;
 }
-std::set<Item> GO(std::set<Item> I, std::string X) {
+std::set<Item> go(std::set<Item> I, std::string X) {
     std::set<Item> J;
     for (auto item : I) {
         // A->a.Bb,x
@@ -223,28 +223,28 @@ std::set<Item> GO(std::set<Item> I, std::string X) {
     return J;
 }
 void get_items() {
-    Item_content[item_num] =
-        get_closure(Item(fjcS, empty_vec, *RHS_set[fjcS].begin(), "$"));
-    Item_set[get_closure(Item(fjcS, empty_vec, *RHS_set[fjcS].begin(), "$"))] =
-        item_num++;
-    std::set<std::string> Sign;
-    merge(terminal, Sign);
-    merge(non_terminal, Sign);
+    item_content[item_num] =
+        get_closure(Item(globalS, empty_vec, *rhs_set[globalS].begin(), "$"));
+    item_set[get_closure(
+        Item(globalS, empty_vec, *rhs_set[globalS].begin(), "$"))] = item_num++;
+    std::set<std::string> sign;
+    merge(terminal, sign);
+    merge(non_terminal, sign);
     // ofstream itemout("item.txt");
     bool changed = true;
     do {
         changed = false;
-        for (auto I : Item_set) {
-            for (auto X : Sign) {
+        for (auto I : item_set) {
+            for (auto X : sign) {
                 if (X.empty()) continue;
-                std::set<Item> Goix = GO(I.first, X);
-                if (!Goix.empty() && Item_set.count(Goix) == 0) {
-                    Item_content[item_num] = Goix;
-                    Item_set[Goix] = item_num++;
+                std::set<Item> go_ix = go(I.first, X);
+                if (!go_ix.empty() && item_set.count(go_ix) == 0) {
+                    item_content[item_num] = go_ix;
+                    item_set[go_ix] = item_num++;
                     changed = true;
                     // itemout<<"================\n";
                     // for(auto x:Goix){
-                    // 	itemout<<x.LHS<<"-> ";
+                    // 	itemout<<x.lhs<<"-> ";
                     // 	for(auto str:x.previous) itemout<<str<<" ";
                     // 	itemout<<". ";
                     // 	for(auto str:x.next) itemout<<str<<" ";
@@ -276,7 +276,7 @@ void add_action(std::pair<ACTION, int> act, std::pair<int, std::string> pos) {
 void load_table() {
     std::ifstream inf("../files/analyse_table.txt");
     if (!inf) {
-        std::cerr << "找不到文件analyse_table.txt" << std::endl;
+        FATAL(std::cerr << "analyse_table.txt not found." << std::endl;)
         abort();
     }
     int I, id, ACT_id;
@@ -306,27 +306,27 @@ void generate_table() {
     }
     std::cerr << "generating table\n";
     get_items();
-    for (auto I : Item_set) {
+    for (auto I : item_set) {
         for (auto it : I.first) {
             std::vector<std::string> next = it.next;
             if (!next.empty()) {
                 add_action(
-                    std::make_pair(SHIFT, Item_set[GO(I.first, *next.begin())]),
+                    std::make_pair(SHIFT, item_set[go(I.first, *next.begin())]),
                     std::make_pair(I.second, *next.begin()));
-            } else if (it.LHS != fjcS) {
+            } else if (it.lhs != globalS) {
                 add_action(
                     std::make_pair(
-                        REDUCE, production_ID[make_pair(it.LHS, it.previous)]),
-                    std::make_pair(I.second, it.LookAhead));
+                        REDUCE, production_ID[make_pair(it.lhs, it.previous)]),
+                    std::make_pair(I.second, it.look_ahead));
             } else {
                 add_action(std::make_pair(ACC, 0),
-                           std::make_pair(I.second, it.LookAhead));
+                           std::make_pair(I.second, it.look_ahead));
             }
         }
         for (auto A : non_terminal) {
-            std::set<Item> GoIA = GO(I.first, A);
+            std::set<Item> GoIA = go(I.first, A);
             if (GoIA.empty()) continue;
-            goto_table[make_pair(I.second, A)] = Item_set[GoIA];
+            goto_table[make_pair(I.second, A)] = item_set[GoIA];
         }
     }
     std::ofstream of("analyse_table.txt");
@@ -334,7 +334,7 @@ void generate_table() {
         std::cerr << "找不到文件analyse_table.txt" << std::endl;
         abort();
     }
-    for (auto I : Item_set) {
+    for (auto I : item_set) {
         for (auto a : terminal) {
             if (action_table.count(std::make_pair(I.second, a))) {
                 of << I.second << " " << a << " "
