@@ -363,7 +363,6 @@ struct TokenItem {
     TokenItem() {}
     TokenItem(string raw, string type, string parserSymbol, int row, int column)
         : raw(raw),
-<<<<<<< HEAD
           type(type),
           parserSymbol(parserSymbol),
           row(row),
@@ -390,30 +389,6 @@ struct TokenItem {
             else if (_type == "intVal" || _type == "realVal" ||
                      _type == "stringVal")
                 _parserSymbol = _type;
-=======
-        type(type),
-        parserSymbol(parserSymbol),
-        row(row),
-        column(column) {}
-};
-std::ifstream& operator>>(std::ifstream& ifs, TokenItem& item) {
-    std::string raw, type;
-    int row, column;
-    ifs >> raw >> row >> column >> type;
-    if (raw == "")
-        item = { "", "", "$", 0, 0 };
-    else {
-        string parserSymbol;
-        if (type == "keyword" || type == "punc") {
-            if (raw == ":=")
-                parserSymbol = "assignOP";
-            else if (raw == "<>" || raw == ">" || raw == "<" ||
-                raw == ">=" || raw == "<=")
-                parserSymbol = "relOP";
-            else if (raw == "*" || raw == "/" || raw == "div" || raw == "mod" ||
-                raw == "and")
-                parserSymbol = "mulOP";
->>>>>>> 391fdd50922c36d802e546fc41bc55b339bedcb9
             else
                 _parserSymbol = _raw;
             *this = {_raw, _type, _parserSymbol, _row, _column};
