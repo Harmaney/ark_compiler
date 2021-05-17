@@ -92,6 +92,7 @@ ComposedVariable -> ProcedureCall(ARG) @
 ComposedVariable -> ( Expression ) @
 Num -> intVal @ 
 Num -> realVal @
+Num -> charVal @
 Digits -> intVal @
 addOP -> + @
 addOP -> - @
