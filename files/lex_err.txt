@@ -1,3 +1,5 @@
 program
+var
+string
 begin
 end

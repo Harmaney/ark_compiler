@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     }
     auto sourceCode = load_file(argv[1]);
     */
-    auto sourceCode = load_file("testcase/1.pas");
+    auto sourceCode = load_file("testcase/string.pas");
     std::cerr << sourceCode << '\n';
 
     auto tq = lex_work(sourceCode);
@@ -33,11 +33,12 @@ int main(int argc, char **argv) {
     CodeCollector::push_back("}");
     CodeCollector::end_section();
 
+    CodeCollector::rearrange_section({"prelude", "global_define", "pre_struct",
+                                      "pre_array", "struct", "init_string",
+                                      "main"});
+
     ofstream codeOut("out.c");
     CodeCollector::output(codeOut);
-
-    CodeCollector::rearrange_section({"prelude", "pre_struct", "pre_array",
-                                      "struct", "init_string", "main"});
 
     std::ofstream info("info.json");
     info << ((Json){

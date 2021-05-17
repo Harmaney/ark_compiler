@@ -39,49 +39,57 @@ void init_read_write() {
         {"lld", TYPE_BASIC_INT64},
         {"s", TYPE_BASIC_STRING}};
     std::function<void(std::string, int, std::string, std::string, std::string,
-                       std::string, std::vector<VariableDescriptor *>)>
+                       std::string, std::string,
+                       std::vector<VariableDescriptor *>)>
         dfs_all = [&](std::string func, int lev, std::string funcSuffix,
-                      std::string argList, std::string formatString,
-                      std::string idList,
+                      std::string argList, std::string preMalloc,
+                      std::string formatString, std::string idList,
                       std::vector<VariableDescriptor *> args) {
             if (lev == 0) {
                 read_write_overloads_code[func + funcSuffix] =
-                    func == "write" ? "void " + func + funcSuffix + "(" +
-                                          argList + ") { printf(\"" +
-                                          formatString + "\"" + idList + "); }"
-                                    : "void " + func + funcSuffix + "(" +
-                                          argList + ") { scanf(\"" +
-                                          formatString + "\"" + idList + "); }";
+                    func == "write"
+                        ? "void " + func + funcSuffix + "(" + argList +
+                              ") { printf(\"" + formatString + "\"" + idList +
+                              "); }"
+                        : "void " + func + funcSuffix + "(" + argList + ") { " +
+                              preMalloc + "scanf(\"" + formatString + "\"" +
+                              idList + "); }";
                 SymbolTable::insertFunction(
                     func,
                     new FunctionDescriptor(
                         func, args, SymbolTable::lookforType(TYPE_BASIC_VOID)));
             } else {
                 for (auto [format, type] : basic_type) {
-                    std::string _funcSuffix, _argList, _formatString, _idList;
+                    std::string _funcSuffix, _argList, _formatString, _idList,
+                        _preMalloc;
                     std::vector<VariableDescriptor *> _args = args;
                     _funcSuffix = funcSuffix + "_" + type;
                     std::string varName = "a" + std::to_string(lev);
                     _argList = argList + (argList == "" ? "" : ",") +
                                mapVariableType(SymbolTable::lookforType(type)) +
                                (func == "read" ? "* " : "") + " " + varName;
+                    _preMalloc = preMalloc;
+                    if (type == TYPE_BASIC_STRING)
+                        _preMalloc += "*" + varName + "=malloc(255);";
                     _formatString = formatString + "%" + format;
                     _idList =
                         idList + ", " +
-                        (func == "write" || type == TYPE_BASIC_STRING ? ""
-                                                                      : "&") +
+                        ((func == "write" && type != TYPE_BASIC_STRING) ||
+                                 (func == "read" && type == TYPE_BASIC_STRING)
+                             ? "*"
+                             : "") +
                         varName;
                     _args.push_back(new VariableDescriptor(
                         varName, SymbolTable::lookforType(type),
                         (func == "read"), false));
-                    dfs_all(func, lev - 1, _funcSuffix, _argList, _formatString,
-                            _idList, _args);
+                    dfs_all(func, lev - 1, _funcSuffix, _argList, _preMalloc,
+                            _formatString, _idList, _args);
                 }
             }
         };
     for (int i = 1; i <= 3; ++i) {
-        dfs_all("write", i, "", "", "", "", {});
-        dfs_all("read", i, "", "", "", "", {});
+        dfs_all("write", i, "", "", "", "", "", {});
+        dfs_all("read", i, "", "", "", "", "", {});
     }
 }
 ///
@@ -873,18 +881,20 @@ void CodeCollector::end_section(PlaceHolder place) {
 void CodeCollector::output() {
     for (auto sid : section_order) {
         DEBUG(std::cerr << "// section " << sid << std::endl;)
-        for (auto str : *codes[sid]) {
-            DEBUG(std::cerr << str << std::endl;)
-        }
+        if (codes.count(sid))
+            for (auto str : *codes[sid]) {
+                DEBUG(std::cerr << str << std::endl;)
+            }
     }
 }
 
 void CodeCollector::output(std::ostream &out) {
     for (auto sid : section_order) {
         out << "//" << sid << std::endl;
-        for (auto str : *codes[sid]) {
-            out << str << std::endl;
-        }
+        if (codes.count(sid))
+            for (auto str : *codes[sid]) {
+                out << str << std::endl;
+            }
     }
 }
 
