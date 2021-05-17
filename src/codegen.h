@@ -1,8 +1,7 @@
 #pragma once
 #include "data.h"
-#include "logger.h"
 #include "gen.h"
-
+#include "logger.h"
 
 void init_code_generator() {
     SymbolTable::init();
@@ -11,7 +10,8 @@ void init_code_generator() {
 
 void init_basic_type() {
     SymbolTable::insertType(
-        TYPE_BASIC_VOID, new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_VOID));
+        TYPE_BASIC_VOID,
+        new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_VOID));
     SymbolTable::insertType(
         TYPE_BASIC_INT, new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_INT));
     SymbolTable::insertType(
@@ -20,4 +20,10 @@ void init_basic_type() {
     SymbolTable::insertType(
         TYPE_BASIC_STRING,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_STRING));
+    SymbolTable::insertType(
+        TYPE_BASIC_LONGINT,
+        new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_LONGINT));
+        SymbolTable::insertType(
+        TYPE_BASIC_INT64,
+        new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_INT64));
 }

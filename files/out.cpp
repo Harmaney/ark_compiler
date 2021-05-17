@@ -2,30 +2,20 @@
 #include <iostream>
 #include <string>
 using namespace std;
+int ____nouse=1;
 void write_integer(int x){cout<<x;}
+void write_int64(long long x){cout<<x;}
+void write_integer_string(int a1,string a2){cout<<a1<<" "<<a2;}
 void read_integer(int *x){scanf("%d",x);}
+void read_int64(long long *x){scanf("%lld",x);}
 //global_define
-int t0_0=0;
+long long t0_0=1;
+long long t0_1=0;
 //main
-int i;
-int j;
-int k;
 int main()
 {
-read_integer(&i);
-read_integer(&j);
-(k)=(i);
-int t2_0;
-(t2_0)=(i)<=(j);
-if (t2_0)goto L0;
-{
-}
-goto L1;
-L0:
-{
-(k)=(j);
-}
-L1:
-write_integer(k);
-return t0_0;
+int __ret;
+write_int64((t0_0));
+return t0_1;
+return __ret;
 }

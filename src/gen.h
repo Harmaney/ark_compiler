@@ -16,6 +16,7 @@ class StringExprAST;
 class ArrayTypeDeclAST;
 class PointerTypeDeclAST;
 class BasicTypeAST;
+class TypeDefAST;
 
 class VariableExprAST;
 class ReturnAST;
@@ -45,6 +46,7 @@ public:
     virtual void genArrayTypeDecl(ArrayTypeDeclAST *ast)=0;
     virtual void genBasicType(BasicTypeAST *ast)=0;
     virtual void genPointerTypeDecl(PointerTypeDeclAST *ast)=0;
+    virtual void genTypeDef(TypeDefAST *ast)=0;
 
     virtual void genNumberExpr(NumberExprAST *ast)=0;
     virtual void genStringExpr(StringExprAST *ast)=0;
@@ -87,6 +89,7 @@ class ASTDispatcher: public ADispatcher {
     void genArrayTypeDecl(ArrayTypeDeclAST *ast) override;
     void genBasicType(BasicTypeAST *ast) override;
     void genPointerTypeDecl(PointerTypeDeclAST *ast) override;
+    void genTypeDef(TypeDefAST *ast)override;
 
     void genNumberExpr(NumberExprAST *ast) override;
     void genStringExpr(StringExprAST *ast) override;

@@ -9,7 +9,7 @@ using namespace std;
 
 void TEST_vardecl() {
     auto ast = new VariableDeclAST(new VariableExprAST("a"),
-                                   new BasicTypeAST(TYPE_BASIC_INT),false);
+                                   new BasicTypeAST(TYPE_BASIC_INT),false,false);
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -18,7 +18,7 @@ void TEST_vardecl() {
 void TEST_arraydecl() {
     auto ast = new VariableDeclAST(
         new VariableExprAST("a"),
-        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), new NumberExprAST(1), new NumberExprAST(2)),false);
+        new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), new NumberExprAST(1), new NumberExprAST(2)),false,false);
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -27,7 +27,7 @@ void TEST_arraydecl() {
 void TEST_arrayofarray() {
     BlockAST *ast = new BlockAST({new VariableDeclAST(
         new VariableExprAST("a"),
-        new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(1),new NumberExprAST(10)), new NumberExprAST(1), new NumberExprAST(100)),false)});
+        new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(1),new NumberExprAST(10)), new NumberExprAST(1), new NumberExprAST(100)),false,false)});
 
     ASTDispatcher dispatcher;
     ast->accept(dispatcher);
@@ -38,12 +38,12 @@ void TEST_arrayuse() {
         new VariableDeclAST(
             new VariableExprAST("a"),
             new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), new NumberExprAST(1), new NumberExprAST(2)),
-            false
+            false,false
         ),
         new VariableDeclAST(
             new VariableExprAST("i"),
             new BasicTypeAST(TYPE_BASIC_INT),
-            false
+            false,false
         ),
         new BinaryExprAST(
             "=",
@@ -67,12 +67,12 @@ void TEST_arrayofarrayuse() {
             new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(1),new NumberExprAST(10)), 
             new NumberExprAST(1),
             new NumberExprAST(100)),
-            false
+            false,false
         ),
         new VariableDeclAST(
             new VariableExprAST("i"),
             new BasicTypeAST(TYPE_BASIC_INT),
-            false
+            false,false
         ),
         new BinaryExprAST(
             "=",
@@ -115,19 +115,19 @@ void TEST_struct() {
                     new VariableDeclAST(
                         new VariableExprAST("a"),
                         new BasicTypeAST(TYPE_BASIC_INT),
-                        false
+                        false,false
                     )
                 }
             ),
             new VariableDeclAST(
                 new VariableExprAST("test"),
                 new BasicTypeAST("Test"),
-                false
+                false,false
             ),
             new VariableDeclAST(
                 new VariableExprAST("p"),
                 new BasicTypeAST(TYPE_BASIC_INT),
-                false
+                false,false
             ),
             new BinaryExprAST(
                 "=",
@@ -156,7 +156,7 @@ void TEST_struct() {
         }
     );
 
-    GlobalAST *ast=new GlobalAST({},{},block_ast);
+    GlobalAST *ast=new GlobalAST({},{},{},block_ast);
 
     ASTDispatcher dispacher;
     ast->accept(dispacher);
@@ -170,14 +170,14 @@ void TEST_arrinstruct(){
                 new VariableDeclAST(
                     new VariableExprAST("arr1"),
                     new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(0),new NumberExprAST(10)),
-                    false
+                    false,false
                 ),
             }
         ),
         new VariableDeclAST(
             new VariableExprAST("sp"),
             new ArrayTypeDeclAST(new BasicTypeAST("SP"),new NumberExprAST(0),new NumberExprAST(10)),
-            false
+            false,false
         ),
         new BinaryExprAST(
             "=",
@@ -205,12 +205,12 @@ void TEST_arrinstruct(){
 void TEST_while() {
     BlockAST *env = new BlockAST({});
     env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),
-                                             new BasicTypeAST(TYPE_BASIC_INT),false));
+                                             new BasicTypeAST(TYPE_BASIC_INT),false,false));
 
     BlockAST *while_block = new BlockAST({});
 
     while_block->exprs.push_back(new VariableDeclAST(
-        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_INT),false));
+        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_INT),false,false));
     WhileStatementAST *while_ast = new WhileStatementAST(
         new BinaryExprAST("<", new VariableExprAST("i"), new NumberExprAST(5)),
         while_block);
@@ -224,12 +224,12 @@ void TEST_while() {
 void TEST_for() {
     BlockAST *env = new BlockAST({});
     env->exprs.push_back(new VariableDeclAST(new VariableExprAST("i"),
-                                             new BasicTypeAST(TYPE_BASIC_INT),false));
+                                             new BasicTypeAST(TYPE_BASIC_INT),false,false));
 
     BlockAST *for_block = new BlockAST({});
 
     for_block->exprs.push_back(new VariableDeclAST(
-        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_DOUBLE),false));
+        new VariableExprAST("domjudge"), new BasicTypeAST(TYPE_BASIC_DOUBLE),false,false));
     ForStatementAST *for_ast =
         new ForStatementAST(new VariableExprAST("i"), new NumberExprAST(1),
                             new NumberExprAST(5), for_block);
@@ -248,7 +248,7 @@ void TEST_funcdef(){
                 new VariableDeclAST(
                     new VariableExprAST("a"),
                     new BasicTypeAST(TYPE_BASIC_INT),
-                    true
+                    true,false
                 ),
             },
             new BasicTypeAST(TYPE_BASIC_INT)
@@ -271,7 +271,7 @@ void TEST_funccall() {
     BlockAST *block = new BlockAST({});
 
     VariableDeclAST *decl = new VariableDeclAST(
-        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_INT),false);
+        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_INT),false,false);
     block->exprs.push_back(decl);
 
     BinaryExprAST *t1 = new BinaryExprAST("=", new VariableExprAST("a"),
@@ -284,7 +284,7 @@ void TEST_funccall() {
     CallExprAST *call = new CallExprAST("write_int", callargs);
     block->exprs.push_back(call);
 
-    GlobalAST *global = new GlobalAST({}, {},block);
+    GlobalAST *global = new GlobalAST({}, {},{},block);
 
     ASTDispatcher dispacher;
     global->accept(dispacher);
@@ -293,11 +293,11 @@ void TEST_funccall() {
 void TEST_pointer() {
     BlockAST *ast = new BlockAST(
         {new VariableDeclAST(new VariableExprAST("a"),
-                             new BasicTypeAST(TYPE_BASIC_INT),false),
+                             new BasicTypeAST(TYPE_BASIC_INT),false,false),
          new BinaryExprAST("=", new VariableExprAST("a"), new NumberExprAST(1)),
          new VariableDeclAST(
              new VariableExprAST("p"),
-             new PointerTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT)),false),
+             new PointerTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT)),false,false),
          new BinaryExprAST("=", new VariableExprAST("a"),
                            new UnaryExprAST("*", new VariableExprAST("p")))});
 
@@ -310,8 +310,9 @@ void TEST_case1() {
         new VariableDeclAST(
             new VariableExprAST("i"),
             new BasicTypeAST(TYPE_BASIC_INT),
-            false
+            false,false
         )},
+        {},
         {},
         new BlockAST(
             {
@@ -348,32 +349,33 @@ void TEST_fibonacci(){
             new VariableDeclAST(
                 new VariableExprAST("i"),
                 new BasicTypeAST(TYPE_BASIC_INT),
-                false
+                false,false
             ),
             new VariableDeclAST(
                 new VariableExprAST("a"),
                 new BasicTypeAST(TYPE_BASIC_INT),
-                false
+                false,false
             ),
             new VariableDeclAST(
                 new VariableExprAST("b"),
                 new BasicTypeAST(TYPE_BASIC_INT),
-                false
+                false,false
             ),
             new VariableDeclAST(
                 new VariableExprAST("c"),
                 new BasicTypeAST(TYPE_BASIC_INT),
-                false
+                false,false
             ),
         },
+        {},
         {
             new FunctionAST(
                 new FunctionSignatureAST(
                     "add",
                     {
-                        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
-                        new VariableDeclAST(new VariableExprAST("b"),new BasicTypeAST(TYPE_BASIC_INT),false),
-                        new VariableDeclAST(new VariableExprAST("c"),new BasicTypeAST(TYPE_BASIC_INT),true),
+                        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
+                        new VariableDeclAST(new VariableExprAST("b"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
+                        new VariableDeclAST(new VariableExprAST("c"),new BasicTypeAST(TYPE_BASIC_INT),true,false),
                     },
                     new BasicTypeAST(TYPE_BASIC_VOID)
                 ),
@@ -455,7 +457,7 @@ void TEST_fibonacci(){
 
 void TEST_typeequal(){
     auto *ast=new BlockAST({
-        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
         new BinaryExprAST("=",new VariableExprAST("a"),new NumberExprAST(1)),
     });
 
@@ -465,7 +467,7 @@ void TEST_typeequal(){
 
 void TEST_typeassignerror(){
     auto *ast=new BlockAST({
-        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
         new BinaryExprAST("=",new VariableExprAST("a"),new NumberExprAST(1.1)),
     });
 
@@ -475,7 +477,7 @@ void TEST_typeassignerror(){
 
 void TEST_leftvarassignerror(){
     auto *ast=new BlockAST({
-        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
         new BinaryExprAST("=",new NumberExprAST(1),new VariableExprAST("a")),
     });
 
@@ -485,7 +487,7 @@ void TEST_leftvarassignerror(){
 
 void TEST_undefinedval(){
     auto *ast=new BlockAST({
-        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
         new BinaryExprAST("=",new VariableExprAST("b"),new NumberExprAST(1)),
     });
 
@@ -498,10 +500,10 @@ void TEST_nomember(){
         new StructDeclAST(
             "st",
             {
-                new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false)
+                new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false)
             }
         ),
-        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST("st"),false),
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST("st"),false,false),
         new BinaryExprAST("=",new BinaryExprAST(".",new VariableExprAST("a"),new StringExprAST("a")),new NumberExprAST(1)),
     });
 
@@ -511,8 +513,8 @@ void TEST_nomember(){
 
 void TEST_opbetweendiffobj(){
     auto *ast=new BlockAST({
-        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false),
-        new VariableDeclAST(new VariableExprAST("b"),new BasicTypeAST(TYPE_BASIC_STRING),false),
+        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
+        new VariableDeclAST(new VariableExprAST("b"),new BasicTypeAST(TYPE_BASIC_STRING),false,false),
         new BinaryExprAST("<",new VariableExprAST("a"),new VariableExprAST("b")),
     });
 
