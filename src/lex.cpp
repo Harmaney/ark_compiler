@@ -359,6 +359,7 @@ TokenQueue lex_work(string all_chars) {
                 break;
             case 101:
                 type = "charVal";
+                break;
             default:
                 type = "punc";
                 break;
