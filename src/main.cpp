@@ -1,8 +1,6 @@
 #include "codegen.h"
 #include "lex.h"
 #include "parser.h"
-#include "test_ast.h"
-using namespace std;
 
 int main(int argc, char **argv) {
     std::string inputPas;
@@ -43,7 +41,7 @@ int main(int argc, char **argv) {
                                       "pre_array", "struct", "init_string",
                                       "main"});
 
-    ofstream codeOut("out.c");
+    std::ofstream codeOut("out.c");
     CodeCollector::output(codeOut);
 
     std::ofstream info("info.json");

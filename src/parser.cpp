@@ -14,30 +14,28 @@
 #include "logger.h"
 #define inset(y, x) x.find(y) != x.end()
 #define table_exist 1
-using namespace std;
-string fjcS;
-set<string> Terminal, Nonterminal;
-typedef pair<string, vector<string>> Expr;
-vector<Expr> Productions;
-map<int, Expr> Production_content;
-map<Expr, int> Production_ID;
+std::string fjcS;
+std::set<std::string> Terminal, Nonterminal;
+typedef std::pair<std::string, std::vector<std::string>> Expr;
+std::vector<Expr> Productions;
+std::map<int, Expr> Production_content;
+std::map<Expr, int> Production_ID;
 int Production_num = 0;
-vector<string> empty_vec;
-map<string, set<string>> First;
-map<string, set<vector<string>>> RHS_set;
-set<string> Get_epsilon;
-std::default_random_engine rng(2018210789);
+std::vector<std::string> empty_vec;
+std::map<std::string, std::set<std::string>> First;
+std::map<std::string, std::set<std::vector<std::string>>> RHS_set;
+std::set<std::string> Get_epsilon;
 void init() {
-    ifstream input("../files/grammar.txt");
+    std::ifstream input("../files/grammar.txt");
     if (!input) {
-        cerr << "找不到grammar.txt" << endl;
+        std::cerr << "找不到grammar.txt" << std::endl;
         abort();
     }
     int mode = 0;
-    string LHS;
-    vector<string> RHS;
+    std::string LHS;
+    std::vector<std::string> RHS;
     while (!input.eof()) {
-        string str;
+        std::string str;
         input >> str;
         if (str.empty()) continue;
         if (str == "->")
@@ -75,7 +73,7 @@ void init() {
     //	for(auto str:Terminal) cout<<str<<endl;
 }
 template <typename T>
-bool merge(const set<T>& A, set<T>& B) {
+bool merge(const std::set<T>& A, std::set<T>& B) {
     bool flg = false;
     for (auto x : A) {
         if (B.find(x) == B.end()) {
@@ -85,10 +83,10 @@ bool merge(const set<T>& A, set<T>& B) {
     }
     return flg;
 }
-set<string> get_first(vector<string> strlist) {
-    set<string> res;
-    vector<string>::iterator it = strlist.begin();
-    string Head = *it;
+std::set<std::string> get_first(std::vector<std::string> strlist) {
+    std::set<std::string> res;
+    std::vector<std::string>::iterator it = strlist.begin();
+    std::string Head = *it;
     while (1) {
         merge(First[Head], res);
         if (inset(Head, Terminal)) break;
@@ -134,13 +132,13 @@ void get_first() {
 }
 // typedef tuple<string,vector<string>,vector<string>,string>
 // Item;//0A->1a.2Bb,3x
-bool operator<(vector<string> A, vector<string> B) {
+bool operator<(std::vector<std::string> A, std::vector<std::string> B) {
     for (int i = 0; i < A.size() && i < B.size(); i++) {
         if (A[i] != B[i]) return A[i] < B[i];
     }
     if (A.size() != B.size()) return A.size() < B.size();
 }
-bool operator==(vector<string> A, vector<string> B) {
+bool operator==(std::vector<std::string> A, std::vector<std::string> B) {
     if (A.size() != B.size()) return false;
     for (int i = 0; i < A.size() && i < B.size(); i++) {
         if (A[i] != B[i]) return false;
@@ -148,12 +146,12 @@ bool operator==(vector<string> A, vector<string> B) {
     return true;
 }
 struct Item {
-    string LHS;
-    string LookAhead;
-    vector<string> previous, next;
+    std::string LHS;
+    std::string LookAhead;
+    std::vector<std::string> previous, next;
     Item() {}
-    Item(string LHS, vector<string> previous, vector<string> next,
-         string LookAhead)
+    Item(std::string LHS, std::vector<std::string> previous,
+         std::vector<std::string> next, std::string LookAhead)
         : LHS(LHS), previous(previous), next(next), LookAhead(LookAhead) {}
     bool operator<(const Item other) const {
         if (LHS != other.LHS) {
@@ -177,27 +175,27 @@ struct Item {
         return true;
     }
 };
-map<set<Item>, int> Item_set;
-map<int, set<Item>> Item_content;
+std::map<std::set<Item>, int> Item_set;
+std::map<int, std::set<Item>> Item_content;
 int item_num = 0;
-set<Item> get_closure(Item I) {
-    set<Item> J;
+std::set<Item> get_closure(Item I) {
+    std::set<Item> J;
     J.insert(I);
     bool changed = true;
     do {
         changed = false;
-        set<Item> J_new;
-        set<Item> J_add;
+        std::set<Item> J_new;
+        std::set<Item> J_add;
         merge(J, J_new);
         for (auto item : J_new) {
-            vector<string> next = item.next;
+            std::vector<std::string> next = item.next;
             if (next.empty()) continue;
-            string B = *next.begin();  // B
-            vector<string> temp = next;
+            std::string B = *next.begin();  // B
+            std::vector<std::string> temp = next;
             temp.erase(temp.begin());
             temp.push_back(item.LookAhead);  // temp = bx
 
-            set<string> bx_first = get_first(temp);
+            std::set<std::string> bx_first = get_first(temp);
 
             for (auto RHS : RHS_set[B]) {
                 for (auto str : bx_first) {
@@ -210,8 +208,8 @@ set<Item> get_closure(Item I) {
     } while (changed);
     return J;
 }
-set<Item> GO(set<Item> I, string X) {
-    set<Item> J;
+std::set<Item> GO(std::set<Item> I, std::string X) {
+    std::set<Item> J;
     for (auto item : I) {
         // A->a.Bb,x
         if (item.next.empty()) continue;
@@ -228,7 +226,7 @@ void get_items() {
         get_closure(Item(fjcS, empty_vec, *RHS_set[fjcS].begin(), "$"));
     Item_set[get_closure(Item(fjcS, empty_vec, *RHS_set[fjcS].begin(), "$"))] =
         item_num++;
-    set<string> Sign;
+    std::set<std::string> Sign;
     merge(Terminal, Sign);
     merge(Nonterminal, Sign);
     // ofstream itemout("item.txt");
@@ -238,7 +236,7 @@ void get_items() {
         for (auto I : Item_set) {
             for (auto X : Sign) {
                 if (X.empty()) continue;
-                set<Item> Goix = GO(I.first, X);
+                std::set<Item> Goix = GO(I.first, X);
                 if (!Goix.empty() && Item_set.count(Goix) == 0) {
                     Item_content[item_num] = Goix;
                     Item_set[Goix] = item_num++;
@@ -259,9 +257,9 @@ void get_items() {
     printf("%d\n", item_num);
 }
 enum ACTION { Shift = 1, Reduce, ACC };
-map<pair<int, string>, pair<ACTION, int>> actionTable;
-map<pair<int, string>, int> Goto;
-void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
+std::map<std::pair<int, std::string>, std::pair<ACTION, int>> actionTable;
+std::map<std::pair<int, std::string>, int> Goto;
+void AddAction(std::pair<ACTION, int> act, std::pair<int, std::string> pos) {
     if (actionTable.count(pos)) {
         if (actionTable[pos] != act) {
             // if (actionTable[pos].first == Shift) return;
@@ -275,17 +273,17 @@ void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
     actionTable[pos] = act;
 }
 void LoadTable() {
-    ifstream inf("../files/analyse_table.txt");
+    std::ifstream inf("../files/analyse_table.txt");
     if (!inf) {
-        cerr << "找不到文件analyse_table.txt" << endl;
+        std::cerr << "找不到文件analyse_table.txt" << std::endl;
         abort();
     }
     int I, id, ACT_id;
-    string a;
+    std::string a;
     while (!inf.eof()) {
         inf >> I >> a >> ACT_id >> id;
         if (id == -1) {
-            Goto[make_pair(I, a)] = ACT_id;
+            Goto[std::make_pair(I, a)] = ACT_id;
         } else {
             enum ACTION ACT;
             if (ACT_id == 1)
@@ -296,7 +294,7 @@ void LoadTable() {
                 ACT = ACC;
             else
                 assert(0);
-            actionTable[make_pair(I, a)] = make_pair(ACT, id);
+            actionTable[make_pair(I, a)] = std::make_pair(ACT, id);
         }
     }
 }
@@ -309,59 +307,64 @@ void generate_table() {
     get_items();
     for (auto I : Item_set) {
         for (auto it : I.first) {
-            vector<string> next = it.next;
+            std::vector<std::string> next = it.next;
             if (!next.empty()) {
                 AddAction(
-                    make_pair(Shift, Item_set[GO(I.first, *next.begin())]),
-                    make_pair(I.second, *next.begin()));
+                    std::make_pair(Shift, Item_set[GO(I.first, *next.begin())]),
+                    std::make_pair(I.second, *next.begin()));
             } else if (it.LHS != fjcS) {
                 AddAction(
-                    make_pair(Reduce,
-                              Production_ID[make_pair(it.LHS, it.previous)]),
-                    make_pair(I.second, it.LookAhead));
+                    std::make_pair(
+                        Reduce, Production_ID[make_pair(it.LHS, it.previous)]),
+                    std::make_pair(I.second, it.LookAhead));
             } else {
-                AddAction(make_pair(ACC, 0), make_pair(I.second, it.LookAhead));
+                AddAction(std::make_pair(ACC, 0),
+                          std::make_pair(I.second, it.LookAhead));
             }
         }
         for (auto A : Nonterminal) {
-            set<Item> GoIA = GO(I.first, A);
+            std::set<Item> GoIA = GO(I.first, A);
             if (GoIA.empty()) continue;
             Goto[make_pair(I.second, A)] = Item_set[GoIA];
         }
     }
-    ofstream of("analyse_table.txt");
+    std::ofstream of("analyse_table.txt");
     if (!of) {
-        cerr << "找不到文件analyse_table.txt" << endl;
+        std::cerr << "找不到文件analyse_table.txt" << std::endl;
         abort();
     }
     for (auto I : Item_set) {
         for (auto a : Terminal) {
-            if (actionTable.count(make_pair(I.second, a))) {
+            if (actionTable.count(std::make_pair(I.second, a))) {
                 of << I.second << " " << a << " "
-                   << actionTable[make_pair(I.second, a)].first << " "
-                   << actionTable[make_pair(I.second, a)].second << endl;
+                   << actionTable[std::make_pair(I.second, a)].first << " "
+                   << actionTable[std::make_pair(I.second, a)].second
+                   << std::endl;
             }
         }
-        if (actionTable.count(make_pair(I.second, "$"))) {
+        if (actionTable.count(std::make_pair(I.second, "$"))) {
             of << I.second << " "
                << "$"
-               << " " << actionTable[make_pair(I.second, "$")].first << " "
-               << actionTable[make_pair(I.second, "$")].second << endl;
+               << " " << actionTable[std::make_pair(I.second, "$")].first << " "
+               << actionTable[std::make_pair(I.second, "$")].second
+               << std::endl;
         }
         for (auto A : Nonterminal) {
-            if (Goto.count(make_pair(I.second, A))) {
+            if (Goto.count(std::make_pair(I.second, A))) {
                 of << I.second << " " << A << " "
-                   << Goto[make_pair(I.second, A)] << " -1" << endl;
+                   << Goto[std::make_pair(I.second, A)] << " -1" << std::endl;
             }
         }
     }
-    cout << "table ready" << endl;
+    std::cout << "table ready" << std::endl;
 }
+
 struct TokenItem {
-    string raw, type, parserSymbol;
+    std::string raw, type, parserSymbol;
     int row, column;
     TokenItem() {}
-    TokenItem(string raw, string type, string parserSymbol, int row, int column)
+    TokenItem(std::string raw, std::string type, std::string parserSymbol,
+              int row, int column)
         : raw(raw),
           type(type),
           parserSymbol(parserSymbol),
@@ -372,7 +375,7 @@ struct TokenItem {
         if (_raw == "")
             *this = {"", "", "$", 0, 0};
         else {
-            string _parserSymbol;
+            std::string _parserSymbol;
             if (_type == "keyword" || _type == "punc") {
                 if (_raw == ":=")
                     _parserSymbol = "assignOP";
@@ -408,10 +411,10 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
     using namespace NodeProperties;
 
     //记录下来每个node->prop的类型
-    vector<GrammarTreeNode*> unlinkedNodes;
+    std::vector<GrammarTreeNode*> unlinkedNodes;
     int curState;
-    vector<int> states;
-    vector<string> symbols;
+    std::vector<int> states;
+    std::vector<std::string> symbols;
     auto DoReduce = [&](Expr expr) {
         auto evalConst = [&](AST* node) {
             int flag = 1;
@@ -587,8 +590,9 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
             } else if (node->type == "Period") {
                 Period prop;
                 if (node->son.size() == 3) {  // Period -> Digits .. Digits
-                    prop = Period{make_pair(cast<Digits>(node->son[0]->prop),
-                                            cast<Digits>(node->son[2]->prop))};
+                    prop = Period{
+                        std::make_pair(cast<Digits>(node->son[0]->prop),
+                                       cast<Digits>(node->son[2]->prop))};
                 } else {  // Period -> Period , Digits .. Digits
                     prop = cast<Period>(node->son[0]->prop);
                     prop.emplace_back(cast<Digits>(node->son[2]->prop),
@@ -924,7 +928,7 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
             assert(node->prop.has_value());  //每个结点都必有一个属性
         };
         int popNum = expr.second.size();
-        vector<GrammarTreeNode*> reducedNode;
+        std::vector<GrammarTreeNode*> reducedNode;
         for (int i = 0; i < popNum; i++) {
             states.pop_back();
             symbols.pop_back();
@@ -934,9 +938,8 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
         curState = *states.rbegin();
         states.push_back(Goto[make_pair(curState, expr.first)]);
         symbols.push_back(expr.first);
-        uint64_t gid = rng();
         GrammarTreeNode* newNode =
-            new GrammarTreeNode("", expr.first, expr.first, 0, 0, gid);
+            new GrammarTreeNode("", expr.first, expr.first, 0, 0);
         reverse(reducedNode.begin(), reducedNode.end());
         for (auto node : reducedNode) newNode->son.push_back(node);
         UpdateProperties(newNode);
@@ -945,7 +948,7 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
         if (newNode->type == "Statement")
             std::cerr << "report = " << newNode->type << '\n';
     };
-    std::cerr << "start analyse" << endl;
+    std::cerr << "start analyse" << std::endl;
     states.push_back(0);
     symbols.push_back("");
     TokenItem N;
@@ -960,13 +963,13 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
         // std::cerr << "row:" << N.row << " column: " << N.column << " type: "
         // << N.parserSymbol << endl;
         if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0) throw;
-        pair<ACTION, int> act =
+        std::pair<ACTION, int> act =
             actionTable[make_pair(curState, N.parserSymbol)];
         if (act.first == Shift) {
             states.push_back(act.second);
             symbols.push_back(N.parserSymbol);
             unlinkedNodes.push_back(new GrammarTreeNode(
-                N.raw, N.type, N.parserSymbol, N.row, N.column, rng()));
+                N.raw, N.type, N.parserSymbol, N.row, N.column));
             (*unlinkedNodes.rbegin())->Report();
             assert(!tq.empty());
             N.Load(tq.front());
@@ -977,7 +980,7 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
             DoReduce(prod);
         } else if (act.first == ACC) {
             DoReduce({"S", {"ProgramStruct"}});
-            cout << "ACCEPT!" << endl;
+            std::cout << "ACCEPT!" << std::endl;
             break;
         }
     }

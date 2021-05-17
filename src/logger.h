@@ -33,13 +33,9 @@ static int LOG_LEVEL = 4;
 
 #include <bits/stdc++.h>
 
-#include <fstream>
-
 #include "json.hpp"
 
 using Json = nlohmann::json;
-
-extern std::ofstream WALK_AST;
 
 template <typename P, typename... T>
 Json Serialize(P* ptr) {
