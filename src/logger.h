@@ -31,38 +31,46 @@ static int LOG_LEVEL = 4;
         a                 \
     }
 
+#include <bits/stdc++.h>
+
 #include <fstream>
 
 #include "json.hpp"
-#include "parser.h"
+
 using Json = nlohmann::json;
 
 extern std::ofstream WALK_AST;
-struct ParserOutputer {
-    Json j;
-    /*
-      address :
-      type: 'pst' / 'ast'
 
-    */
-    ParserOutputer() : j(Json::array()) {}
-    void AddNode(GrammarTreeNode* node) {
-        using namespace NodeProperties;
-        Json nj;
-        std::map<std::string, std::function<void()>>  //
-            deal = {                                  //
-                    {"S",                             //
-                     [&]() {
-                         nj['ast'] = {{"name", "GlobalAST"}, {"addr", (uint64_t)cast<S>(node->prop)}};
-                     }},               //
-                    {"ProgramStruct",  //
-                     [&]() { ; }}};
-        nj["addr"] = (uint64_t)node;
-        if (deal.count(node->type)) deal[node->type]();
-        j.push_back(nj);
-    }
-};
+template <typename P, typename... T>
+Json Serialize(P* ptr) {
+    Json ret;
+    ret.push_back((uint64_t)ptr);
+    return ret;
+}
 
-extern ParserOutputer parserOutputer;
+template <typename P, typename... T>
+Json Serialize(const std::vector<P*>& vec) {
+    Json ret;
+    for (auto ptr : vec) ret.push_back((uint64_t)ptr);
+    return ret;
+}
+
+template <typename P, typename... T>
+Json Serialize(P* ptr, const T&... arg) {
+    Json ret;
+    ret.push_back((uint64_t)ptr);
+    for (auto i : Serialize(arg...)) ret.push_back(i);
+    return ret;
+}
+
+template <typename P, typename... T>
+Json Serialize(const std::vector<P*>& vec, const T&... arg) {
+    Json ret;
+    for (auto ptr : vec) ret.push_back((uint64_t)ptr);
+    for (auto i : Serialize(arg...)) ret.push_back(i);
+    return ret;
+}
+
+extern Json parserOutputer;
 
 #endif

@@ -5,7 +5,7 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    lex_work("testcase/SegmentTree.pas");
+    lex_work("SegmentTree.pas");
     auto ast = parser_work("lex_out.txt");
 
     init_code_generator();
