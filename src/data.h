@@ -43,12 +43,13 @@ class PointerTypeDescriptor : public SymbolDescriptor {
 class ArrayTypeDescriptor : public SymbolDescriptor {
    public:
     int sz;
+    int beg;
     SymbolDescriptor *itemDescriptor;
     ArrayTypeDescriptor(std::string name, SymbolDescriptor *itemDescriptor,
-                        int sz)
+                        int sz,int beg)
         : SymbolDescriptor(DESCRIPTOR_ARRAY, name),
           itemDescriptor(itemDescriptor),
-          sz(sz) {}
+          sz(sz),beg(beg) {}
 };
 
 /// 变量定义
@@ -218,6 +219,17 @@ class StringExprAST : public ExprAST {
     StringExprAST(std::string val) : ExprAST(AST_STRING_EXPR), val(val) {
         parserOutputer.push_back(
             {{"ID", (uint64_t)this}, {"type", "StringExprAST:" + val}});
+    }
+    void accept(ASTDispatcher &dispacher) override;
+};
+
+/// 字符常量
+class CharExprAST : public ExprAST {
+   public:
+    char val;
+    CharExprAST(char val) : ExprAST(AST_CHAR_EXPR), val(val) {
+        parserOutputer.push_back(
+            {{"ID", (uint64_t)this}, {"type", "CharExprAST:" + val}});
     }
     void accept(ASTDispatcher &dispacher) override;
 };
@@ -453,7 +465,7 @@ class _SymbolTable {
     std::string getSlot();
     void insert_variable(std::string sig, VariableDescriptor *var);
     void insert_type(std::string sig, SymbolDescriptor *var);
-    ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item, int sz);
+    ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item, int sz,int beg);
     PointerTypeDescriptor *create_pointer_type(SymbolDescriptor *item);
     VariableDescriptor *searchVariable(std::string sig);
     SymbolDescriptor *searchType(std::string sig);
@@ -484,7 +496,7 @@ class SymbolTable {
     static void insertType(std::string sig, SymbolDescriptor *descriptor);
     static void insertFunction(std::string sig, FunctionDescriptor *descriptor);
     static ArrayTypeDescriptor *create_array_type(SymbolDescriptor *item,
-                                                  int sz);
+                                                  int sz,int beg);
     static PointerTypeDescriptor *create_pointer_type(SymbolDescriptor *item);
     static SymbolDescriptor *lookforType(std::string sig);
     static FunctionDescriptor *lookforFunction(
