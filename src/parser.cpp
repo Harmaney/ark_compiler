@@ -273,11 +273,11 @@ void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
     if (actionTable.count(pos)) {
         if (actionTable[pos] != act) {
             // if (actionTable[pos].first == Shift) return;
-            std::cerr << "???" << endl;
+            /*std::cerr << "???" << endl;
             cerr << actionTable[pos].first << " " << actionTable[pos].second
                 << endl;
             cerr << act.first << " " << act.second << endl;
-            cerr << pos.first << " " << pos.second << endl;
+            cerr << pos.first << " " << pos.second << endl;*/
         }
     }
     actionTable[pos] = act;
@@ -459,9 +459,9 @@ GrammarTreeNode* Analyse(string file_name) {
                     types.push_back(cast<TypeDefAST*>(i));
                 assert(M["body"].size() == 1);
                 node->prop = new std::remove_pointer<ProgramStruct>::type(
-                    vars, 
+                    vars,
                     types,
-                    functions, 
+                    functions,
                     cast<BlockAST*>((M["body"]).front())
                 );
             }
@@ -781,27 +781,58 @@ GrammarTreeNode* Analyse(string file_name) {
                     prop = cast<Statement>(node->son[0]->prop);
                 }
                 else if (node->son[0]->raw == "if") {
-                    // Statement -> if Expression then CompoundStatement
-                    // ElsePart @
-                    prop = new IfStatementAST(
-                        cast<Expression>(node->son[1]->prop),
-                        cast<CompoundStatement>(node->son[3]->prop),
-                        cast<ElsePart>(node->son[4]->prop));
+                    if (node->son[3]->type == "CompoundStatement") {
+                        // Statement -> if Expression then CompoundStatement ElsePart
+                        prop = new IfStatementAST(
+                            cast<Expression>(node->son[1]->prop),
+                            cast<CompoundStatement>(node->son[3]->prop),
+                            cast<ElsePart>(node->son[4]->prop));
+                    }
+                    else {
+                        //Statement -> if Expression then Statement ElsePart
+                        auto statement = cast<Statement>(node->son[3]->prop);
+                        auto statementlist = StatementList{ statement };
+                        prop = new IfStatementAST(
+                            cast<Expression>(node->son[1]->prop),
+                            new std::remove_pointer<CompoundStatement>::type(statementlist),
+                            cast<ElsePart>(node->son[4]->prop));
+                    }
                 }
                 else if (node->son[0]->raw == "for") {
-                    // Statement -> for ID assignOP Expression to Expression do
-                    // CompoundStatement
-                    prop = new ForStatementAST(
-                        new VariableExprAST(node->son[1]->raw),
-                        cast<Expression>(node->son[3]->prop),
-                        cast<Expression>(node->son[5]->prop),
-                        cast<CompoundStatement>(node->son[7]->prop));
+                    // Statement -> for ID assignOP Expression to Expression do CompoundStatement
+                    if (node->son[7]->type == "CompoundStatement") {
+                        prop = new ForStatementAST(
+                            new VariableExprAST(node->son[1]->raw),
+                            cast<Expression>(node->son[3]->prop),
+                            cast<Expression>(node->son[5]->prop),
+                            cast<CompoundStatement>(node->son[7]->prop));
+                    }
+                    else {
+                        //Statement -> for ID assignOP Expression to Expression do Statement
+                        auto statement = cast<Statement>(node->son[7]->prop);
+                        auto statementlist = StatementList{ statement };
+                        prop = new ForStatementAST(
+                            new VariableExprAST(node->son[1]->raw),
+                            cast<Expression>(node->son[3]->prop),
+                            cast<Expression>(node->son[5]->prop),
+                            new std::remove_pointer<CompoundStatement>::type(statementlist));
+                    }
                 }
                 else if (node->son[0]->raw == "while") {
-                    // Statement -> while Expression do CompoundStatement
-                    prop = new WhileStatementAST(
-                        cast<ExprAST*>(node->son[1]->prop),
-                        cast<CompoundStatement>(node->son[3]->prop));
+                    if (node->son[3]->type == "CompoundStatement") {
+                        // Statement -> while Expression do CompoundStatement
+                        prop = new WhileStatementAST(
+                            cast<ExprAST*>(node->son[1]->prop),
+                            cast<CompoundStatement>(node->son[3]->prop));
+                    }
+                    else {
+                        // Statement -> while Expression do Statement
+                        auto statement = cast<Statement>(node->son[3]->prop);
+                        auto statementlist = StatementList{ statement };
+                        prop = new WhileStatementAST(
+                            cast<ExprAST*>(node->son[1]->prop),
+                            new std::remove_pointer<CompoundStatement>::type(statementlist));
+                    }
                 }
                 node->prop = prop;
             }
@@ -1004,11 +1035,11 @@ GrammarTreeNode* Analyse(string file_name) {
     lexOut >> N;
     for (;;) {
         curState = *states.rbegin();
-        std::cerr << curState << '\n';
-		// for(auto x:symbols) std::cerr << x << " ";
-		// std::cerr << endl;
-		// std::cerr << " str: " << N.raw << " type: " << N.type << endl;
-		// std::cerr << "row:" << N.row << " column: " << N.column << " type: " << N.parserSymbol << endl;
+        //std::cerr << curState << '\n';
+        //for (auto x : symbols) std::cerr << x << " ";
+        //std::cerr << endl;
+        //std::cerr << " str: " << N.raw << " type: " << N.type << endl;
+        //std::cerr << "row:" << N.row << " column: " << N.column << " type: " << N.parserSymbol << endl;
         if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0)
             assert(0);
         pair<ACTION, int> act =
