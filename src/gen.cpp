@@ -707,6 +707,10 @@ void ASTDispatcher::genVariableDecl(VariableDeclAST *ast) {
     auto var =
         SymbolTable::createVariable(ast->sig->name, ast->_varType, ast->isRef,ast->isConst);
     putVariableDecl(var);
+    if(ast->initVal){
+        CodeCollector::src()<<"=";
+        putVariableExpr(std::any_cast<VariableDescriptor*>(ast->initVal->value));
+    }
     CodeCollector::src() << ";";
     CodeCollector::push_back();
 }

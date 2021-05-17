@@ -61,6 +61,8 @@ class VariableDescriptor : public SymbolDescriptor {
     bool isConst;
     bool isLeftVar;
 
+    
+
     VariableDescriptor(std::string name, SymbolDescriptor *varType, bool isRef,
                        bool isConst, bool isLeftVar = true)
         : SymbolDescriptor(DESCRIPTOR_VARIABLE, name),
@@ -292,13 +294,16 @@ class VariableDeclAST : public AST {
     // 它只是在C中使用指针模拟，用于处理pascal里的引用类型
     bool isRef, isConst;
 
+    NumberExprAST *initVal;
+
     VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef,
-                    bool isConst = false)
+                    bool isConst = false,NumberExprAST *initVal=nullptr)
         : AST(AST_VARIABLE_DECL),
           sig(sig),
           varType(type),
           isRef(isRef),
-          isConst(isConst) {
+          isConst(isConst),
+          initVal(initVal) {
         parserOutputer.push_back({{"ID", (uint64_t)this},
                                   {"type", "VariableDeclAST"},
                                   {"son", Serialize(sig, type)}});
