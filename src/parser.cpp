@@ -70,8 +70,8 @@ void init() {
     //	}
 
     //	for(auto str:Nonterminal) cout<<str<<endl;
-    //	cout<<"Terminal\n";
-    //	for(auto str:Terminal) cout<<str<<endl;
+    //	cout<<"terminal\n";
+    //	for(auto str:terminal) cout<<str<<endl;
 }
 template <typename T>
 bool merge(const std::set<T>& A, std::set<T>& B) {
@@ -119,7 +119,7 @@ void get_first() {
         }
     }
 
-    //	for(auto str:Terminal){
+    //	for(auto str:terminal){
     //		cout<<str<<":";
     //		for(auto x:First[str]) cout<<x<<" ";
     //		cout<<endl;
@@ -260,10 +260,11 @@ void get_items() {
 enum ACTION { SHIFT = 1, REDUCE, ACC };
 std::map<std::pair<int, std::string>, std::pair<ACTION, int>> action_table;
 std::map<std::pair<int, std::string>, int> goto_table;
+std::map<std::pair<int, std::string>, std::string> parser_err_table;
 void add_action(std::pair<ACTION, int> act, std::pair<int, std::string> pos) {
     if (action_table.count(pos)) {
         if (action_table[pos] != act) {
-            // if (actionTable[pos].first == Shift) return;
+            // if (actionTable[pos].first == SHIFT) return;
             /*std::cerr << "???" << endl;
             cerr << actionTable[pos].first << " " << actionTable[pos].second
                 << endl;
@@ -279,25 +280,27 @@ void load_table() {
         FATAL(std::cerr << "analyse_table.txt not found." << std::endl;)
         abort();
     }
-    int I, id, ACT_id;
-    std::string a;
-    while (!inf.eof()) {
-        inf >> I >> a >> ACT_id >> id;
-        if (id == -1) {
-            goto_table[std::make_pair(I, a)] = ACT_id;
-        } else {
-            enum ACTION ACT;
-            if (ACT_id == 1)
+    int I,id;
+	std::string a,data;
+	while(!inf.eof()){
+		inf>>I>>a>>data>>id;
+		if(id == -1) {
+			goto_table[std::make_pair(I,a)]=stoi(data);
+		} else if(id == -2) {
+			parser_err_table[std::make_pair(I,a)]=data;
+		} else {
+			enum ACTION ACT;
+			if(stoi(data) == 1) 
                 ACT = SHIFT;
-            else if (ACT_id == 2)
+			else if(stoi(data) == 2) 
                 ACT = REDUCE;
-            else if (ACT_id == 3)
+			else if(stoi(data) == 3) 
                 ACT = ACC;
-            else
+			else 
                 assert(0);
-            action_table[make_pair(I, a)] = std::make_pair(ACT, id);
-        }
-    }
+			action_table[std::make_pair(I,a)]=std::make_pair(ACT,id);
+		}
+	}
 }
 void generate_table() {
     if (table_exist) {
@@ -328,6 +331,20 @@ void generate_table() {
             if (GoIA.empty()) continue;
             goto_table[make_pair(I.second, A)] = item_set[GoIA];
         }
+		bool flg = false;
+        for(auto it : I.first) {
+        	if (it.LookAhead == ";") flg = true;
+        	if (!it.next.empty()){
+        		if(*it.next.begin() == ";") flg = true;
+        	}
+        }
+        if(flg) {
+        	for(auto x:terminal) {
+        		if (action_table.count(std::make_pair(I.second, x)) == 0) {
+        			parser_err_table[std::make_pair(I.second, x)] = ";";
+        		}
+        	}
+        }
     }
     std::ofstream of("analyse_table.txt");
     if (!of) {
@@ -341,7 +358,10 @@ void generate_table() {
                    << action_table[std::make_pair(I.second, a)].first << " "
                    << action_table[std::make_pair(I.second, a)].second
                    << std::endl;
-            }
+            }else{
+				if(parser_err_table.count(std::make_pair(I.second,a)))
+					of<<I.second<<" "<<a<<" "<<parser_err_table[make_pair(I.second,a)]<<" -2"<<endl;
+			}
         }
         if (action_table.count(std::make_pair(I.second, "$"))) {
             of << I.second << " "
@@ -963,8 +983,13 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
         // std::cerr << " str: " << N.raw << " type: " << N.type << endl;
         // std::cerr << "row:" << N.row << " column: " << N.column << " type: "
         // << N.parserSymbol << endl;
-        if (action_table.count(make_pair(cur_state, n.parser_symbol)) == 0)
-            throw;
+        if(action_table.count(std::make_pair(cur_state,n.parser_symbol)) == 0){
+			if(parser_err_table.count(std::make_pair(cur_state,n.parser_symbol))){
+				std::cout<<"Error: Expect "<<parser_err_table[std::make_pair(cur_state,n.parser_symbol)]
+                    <<"  but "<<n.parser_symbol<<" found."<<std::endl;
+			}
+			throw;
+		}
         std::pair<ACTION, int> act =
             action_table[make_pair(cur_state, n.parser_symbol)];
         if (act.first == SHIFT) {
