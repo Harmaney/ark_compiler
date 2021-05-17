@@ -5,6 +5,5 @@
 #include "data.h"
 
 using Json = nlohmann::json;
-std::ofstream WALK_AST("walk_ast.log");
 
 Json lexOutputer, parserOutputer, genOutputer;

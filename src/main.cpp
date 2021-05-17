@@ -5,8 +5,9 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    lex_work("testcase/1.pas");
-    auto ast = parser_work("lex_out.txt");
+    auto tq = lex_work("testcase/1.pas");
+
+    auto ast = parser_work(tq);
 
     init_code_generator();
     init_basic_type();
