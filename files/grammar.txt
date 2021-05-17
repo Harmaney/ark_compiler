@@ -50,12 +50,12 @@ SubComponent -> const ConstDeclaration ; SubComponent @
 SubComponent -> var VarDeclaration ; SubComponent @
 SubComponent -> @
 CompoundStatement -> begin StatementList end @
-StatementList -> StatementList Statement ; @
-StatementList -> Statement ; @
+StatementList -> StatementList ; Statement @
+StatementList -> Statement @
 Statement -> ComposedVariable assignOP Expression @
 Statement -> ProcedureCall(ARG) @
 Statement -> if Expression then CompoundStatement ElsePart @
-Statement -> if Expression then Statement ; ElsePart @
+Statement -> if Expression then Statement ElsePart @
 Statement -> for ID assignOP Expression to Expression do CompoundStatement @
 Statement -> for ID assignOP Expression to Expression do Statement @
 Statement -> while Expression do CompoundStatement @
