@@ -5,7 +5,11 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    auto sourceCode = load_file("testcase/SegmentTree.pas");
+    if (argc <= 1) {
+        FATAL(std::cerr << "please give input.pas" << std::endl;)
+        return 0;
+    }
+    auto sourceCode = load_file(argv[1]);
 
     auto tq = lex_work(sourceCode);
 

@@ -78,6 +78,7 @@
 #define add_end remain_token += now_char;
 #define add_and_reset                                                     \
     columns = i - n_columns - remain_token.length() + 1;                  \
+    if(remain_token.length() == 3){present_state = 101;}                  \
     token_stream.push_back({remain_token, rows, columns, present_state}); \
     remain_token.clear();                                                 \
     present_state = 0;
@@ -328,6 +329,10 @@ TokenQueue lex_work(string all_chars) {
 
     TokenQueue result;
     for (auto s : token_stream) {
+		if (s.type == 11) {
+            s.word = s.word.substr(1);
+            s.word.pop_back();
+        }
         lout << s.word << " " << s.row << " " << s.column << " ";
 
         std::string type;
@@ -351,6 +356,9 @@ TokenQueue lex_work(string all_chars) {
                 break;
             case 100:
                 type = "keyword";
+                break;
+            case 101:
+                type = "charVal";
                 break;
             default:
                 type = "punc";
