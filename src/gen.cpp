@@ -72,6 +72,15 @@ void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
                 "x", SymbolTable::lookforType(TYPE_BASIC_INT), false, false)},
             SymbolTable::lookforType(TYPE_BASIC_VOID)));
 
+    CodeCollector::push_back("void write_string(string x){cout<<x;}");
+    SymbolTable::insertFunction(
+        "write",
+        new FunctionDescriptor(
+            "write",
+            {new VariableDescriptor(
+                "x", SymbolTable::lookforType(TYPE_BASIC_STRING), false, false)},
+            SymbolTable::lookforType(TYPE_BASIC_VOID)));
+
     CodeCollector::push_back("void write_int64(long long x){cout<<x;}");
     SymbolTable::insertFunction(
         "write",
@@ -102,6 +111,16 @@ void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
             "read",
             {new VariableDescriptor(
                 "x", SymbolTable::lookforType(TYPE_BASIC_INT), true, false)},
+            SymbolTable::lookforType(TYPE_BASIC_VOID)));
+    
+    CodeCollector::push_back("void read_integer_integer(int *x,int *y){scanf(\"%d%d\",x,y);}");
+    SymbolTable::insertFunction(
+        "read",
+        new FunctionDescriptor(
+            "read",
+            {new VariableDescriptor(
+                "x", SymbolTable::lookforType(TYPE_BASIC_INT), true, false),new VariableDescriptor(
+                "y", SymbolTable::lookforType(TYPE_BASIC_INT), true, false)},
             SymbolTable::lookforType(TYPE_BASIC_VOID)));
 
     CodeCollector::push_back(
@@ -338,12 +357,13 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
         if (ast->op == "div") ast->op = "/";
         if (ast->op == "and") ast->op = "&&";
         if (ast->op == "or") ast->op = "||";
-        if (ast->op == "-" || ast->op == "+" || ast->op == "*" ||
+        if (ast->op == "mod") ast->op = "%";
+        if (ast->op == "-" || ast->op == "+" || ast->op == "*" || ast->op=="%" ||
             ast->op == "/" || ast->op == "==" || ast->op == "!=" ||
             ast->op == "<" || ast->op == ">" || ast->op == "<=" ||
             ast->op == ">=" || ast->op == "||" || ast->op == "&&") {
             // FIX: calculate type
-            if (lhs->varType != rhs->varType) {
+            if (lhs->varType != rhs->varType && !isPossibleToLevelUp(lhs->varType,rhs->varType) && !isPossibleToLevelUp(rhs->varType,lhs->varType)) {
                 throw TypeErrorException("type of objects does not match",
                                          rhs->varType->name, lhs->varType->name,
                                          0, 0);
@@ -708,10 +728,10 @@ void ASTDispatcher::genVariableDecl(VariableDeclAST *ast) {
     ast->_varType = ast->varType->_descriptor;
     VariableDescriptor *var = nullptr;
     if (!ast->initVal) {
-        auto var = SymbolTable::createVariable(ast->sig->name, ast->_varType,
+        var = SymbolTable::createVariable(ast->sig->name, ast->_varType,
                                                ast->isRef, ast->isConst);
     }else{
-        auto var = SymbolTable::createVariable(ast->sig->name, std::any_cast<VariableDescriptor*>(ast->initVal->value)->varType,
+        var = SymbolTable::createVariable(ast->sig->name, std::any_cast<VariableDescriptor*>(ast->initVal->value)->varType,
                                                ast->isRef, ast->isConst);
     }
     putVariableDecl(var);
