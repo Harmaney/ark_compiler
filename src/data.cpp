@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "logger.h"
+#include "err.h"
 
 void LOG_WALK(AST *ast) {
     //    WALK_AST<<"ARRIVE "<<ast<<std::endl;
@@ -164,7 +165,11 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
 
 void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    this->varType->accept(dispatcher);
+    if (this->varType) this->varType->accept(dispatcher);
+    else if (this->initVal) this->initVal->accept(dispatcher);
+    else{
+        throw TypeErrorException("missing type for variable "+this->sig->name,"<>","<?>",0,0);
+    }
 
     TRACE(std::cerr << "into variable ast" << std::endl;)
     dispatcher.genVariableDecl(this);

@@ -22,7 +22,7 @@ enum ASTKind {
     AST_IF_STATEMENT,
 };
 
-#define TYPE_BASIC_DOUBLE "double"
+#define TYPE_BASIC_DOUBLE "real"
 #define TYPE_BASIC_INT "integer"
 #define TYPE_BASIC_LONGINT "longint"
 #define TYPE_BASIC_INT64 "int64"
