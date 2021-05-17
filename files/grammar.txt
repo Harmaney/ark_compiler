@@ -14,7 +14,7 @@ ConstDeclaration -> ConstDeclaration ; ID = ConstValue @
 ConstDeclaration -> ID = ConstValue @
 ConstValue -> + Num @
 ConstValue -> - Num @
-ConstValue -> Num @
+ConstValue -> Value @
 TypeDeclaration -> TypeDeclaration ; ID = ActualType @
 TypeDeclaration -> ID = ActualType @
 ActualType -> Type @
@@ -80,7 +80,7 @@ SimpleExpression -> SimpleExpression addOP Term @
 SimpleExpression -> Term @
 Term -> Term mulOP Factor @
 Term -> Factor @
-Factor -> Num @
+Factor -> Value @
 Factor -> + Num @
 Factor -> - Num @
 Factor -> not Factor @
@@ -92,7 +92,8 @@ ComposedVariable -> ProcedureCall(ARG) @
 ComposedVariable -> ( Expression ) @
 Num -> intVal @ 
 Num -> realVal @
-Num -> charVal @
+Value -> Num @
+Value -> stringVal @
 Digits -> intVal @
 addOP -> + @
 addOP -> - @
