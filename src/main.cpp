@@ -5,7 +5,9 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    auto tq = lex_work("testcase/1.pas");
+    auto sourceCode = load_file("testcase/1.pas");
+
+    auto tq = lex_work(sourceCode);
 
     auto ast = parser_work(tq);
 
@@ -21,5 +23,13 @@ int main(int argc, char **argv) {
     ofstream codeOut("out.cpp");
     CodeCollector::output(codeOut);
 
+    std::ofstream info("info.json");
+    info << ((Json){
+                 {"code", sourceCode},
+                 {"lex", lexOutputer},
+                 {"parser", parserOutputer},
+                 {"gen", genOutputer},
+             })
+                .dump();
     return 0;
 }

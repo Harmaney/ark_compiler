@@ -110,12 +110,11 @@ struct Mark {
     int type;
 };
 
-TokenQueue lex_work(string file_name) {
+TokenQueue lex_work(string all_chars) {
     // init
     //    string file_name = argv[1];
     // load
     load_key_words();
-    string all_chars = load_file(file_name);
     int present_state = 0;
     vector<Mark> token_stream;
     string remain_token;
