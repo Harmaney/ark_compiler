@@ -5,7 +5,7 @@ typedef char* string;
 int ____nouse = 1;
 
 void assign_string_(string* a, string b) {
-    free(*a);
+    if (*a) free(*a);
     char* p = malloc(strlen(b) + 1);
     strcpy(p, b);
     *a = p;

@@ -229,7 +229,7 @@ void ASTDispatcher::genStringExpr(StringExprAST *ast) {
 
     CodeCollector::begin_section("global_define");
     CodeCollector::src() << mapVariableType(t->varType) << " " << t->name
-                         << ";";
+                         << " = NULL;";
     CodeCollector::push_back();
     CodeCollector::end_section();
 
@@ -399,12 +399,13 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
             VariableDescriptor *t =
                 SymbolTable::createVariable(lhs->varType, false, false);
             putVariableDecl(t);
-            CodeCollector::src() << ";";
+            CodeCollector::src()
+                << (lhs->varType->name == "string" ? "=NULL" : "") << ";";
             CodeCollector::push_back();
             if (lhs->varType->name == "string") {
                 assert(rhs->varType->name == "string");
                 assert(ast->op == "+");
-                CodeCollector::src() << "assign_string(&";
+                CodeCollector::src() << "assign_string_(&";
                 putVariableExpr(t);
                 CodeCollector::src() << ",add_string_(";
                 putVariableExpr(lhs);

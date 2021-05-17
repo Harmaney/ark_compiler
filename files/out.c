@@ -6,7 +6,7 @@ typedef char* string;
 int ____nouse = 1;
 
 void assign_string_(string* a, string b) {
-    free(*a);
+    if (*a) free(*a);
     char* p = malloc(strlen(b) + 1);
     strcpy(p, b);
     *a = p;
@@ -27,15 +27,25 @@ string new_string_(const char* s) {
 
 void write_string(string a1) { printf("%s", a1); }
 // global_define
-string t0_0;
-int t0_1 = 0;
+string t0_0 = NULL;
+string t0_1 = NULL;
+string t0_2 = NULL;
+int t0_3 = 0;
 // init_string
-void init_string_() { t0_0 = new_string_("Hello World"); }
+void init_string_() {
+    t0_0 = new_string_("Hello");
+    t0_1 = new_string_(" ");
+    t0_2 = new_string_("World");
+}
 // main
 int main() {
     init_string_();
     int __ret;
-    write_string((t0_0));
-    return t0_1;
+    string t2_0 = NULL;
+    assign_string_(&(t2_0), add_string_((t0_0), (t0_1)));
+    string t2_1 = NULL;
+    assign_string_(&(t2_1), add_string_((t2_0), (t0_2)));
+    write_string((t2_1));
+    return t0_3;
     return __ret;
 }
