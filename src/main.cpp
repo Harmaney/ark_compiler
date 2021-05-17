@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     //     FATAL(std::cerr<<"please give input.pas"<<std::endl;)
     //     return 0;
     // }
-    auto sourceCode = load_file("testcase/record.pas");
+    auto sourceCode = load_file("testcase/const.pas");
 
     auto tq = lex_work(sourceCode);
 

@@ -12,6 +12,7 @@ class SymbolDescriptor;
 class BlockAST;
 class NumberExprAST;
 class StringExprAST;
+class CharExprAST;
 
 class ArrayTypeDeclAST;
 class PointerTypeDeclAST;
@@ -50,6 +51,7 @@ public:
 
     virtual void genNumberExpr(NumberExprAST *ast)=0;
     virtual void genStringExpr(StringExprAST *ast)=0;
+    virtual void genCharExpr(CharExprAST *ast)=0;
     virtual void genVariableExpr(VariableExprAST *ast)=0;
     virtual void genReturn(ReturnAST *ast)=0;
     virtual void genUnaryExpr(UnaryExprAST *ast)=0;
@@ -93,6 +95,7 @@ class ASTDispatcher: public ADispatcher {
 
     void genNumberExpr(NumberExprAST *ast) override;
     void genStringExpr(StringExprAST *ast) override;
+    void genCharExpr(CharExprAST *ast) override;
     void genVariableExpr(VariableExprAST *ast) override;
     void genReturn(ReturnAST *ast) override;
     void genUnaryExpr(UnaryExprAST *ast) override;

@@ -9,188 +9,13 @@
 #include "err.h"
 #include "logger.h"
 #include "stdsupport.h"
-
-// std
-void init_std_write() {
-    static const std::vector<std::pair<std::string, std::string>> basic_type = {
-        {"f", TYPE_BASIC_DOUBLE},
-        {"d", TYPE_BASIC_INT},
-        {"d", TYPE_BASIC_LONGINT},
-        {"lld", TYPE_BASIC_INT64},
-        {"s", TYPE_BASIC_STRING}};
-    std::function<void(std::string, int, std::string, std::string, std::string,
-                       std::string, std::vector<VariableDescriptor *>)>
-        dfs_all = [&](std::string func, int lev, std::string funcSuffix,
-                      std::string argList, std::string formatString,
-                      std::string idList,
-                      std::vector<VariableDescriptor *> args) {
-            if (lev == 0) {
-                if (func == "write")
-                    CodeCollector::push_back("void " + func + funcSuffix + "(" +
-                                             argList + ") { printf(\"" +
-                                             formatString + "\"," + idList +
-                                             "); }");
-                else
-                    CodeCollector::push_back("void " + func + funcSuffix + "(" +
-                                             argList + ") { scanf(\"" +
-                                             formatString + "\"," + idList +
-                                             "); }");
-                SymbolTable::insertFunction(
-                    func,
-                    new FunctionDescriptor(
-                        func, args, SymbolTable::lookforType(TYPE_BASIC_VOID)));
-            } else {
-                for (auto [format, type] : basic_type) {
-                    std::string _funcSuffix, _argList, _formatString, _idList;
-                    std::vector<VariableDescriptor *> _args = args;
-                    _funcSuffix = funcSuffix + "_" + type;
-                    std::string varName = "a" + std::to_string(lev);
-                    _argList = argList + (argList == "" ? "" : ",") + type +
-                               " " + varName;
-                    _formatString = formatString + "%" + format;
-                    _idList = idList + (idList == "" ? "" : ",") + " " +
-                              (func == "write" ? "" : "&") + varName;
-                    _args.push_back(new VariableDescriptor(
-                        varName, SymbolTable::lookforType(TYPE_BASIC_LONGINT),
-                        (func == "read"), false));
-                    dfs_all(func, lev - 1, _funcSuffix, _argList, _formatString,
-                            _idList, _args);
-                }
-            }
-        };
-    for (int i = 1; i <= 5; ++i) {
-        dfs_all("write", i, "", "", "", "", {});
-        dfs_all("read", i, "", "", "", "", {});
-    }
-    // write 以及其符号
-    
-    CodeCollector::push_back("void write_longint(int x){cout<<x;}");
-    SymbolTable::insertFunction(
-        "write", new FunctionDescriptor(
-                     "write",
-                     {new VariableDescriptor(
-                         "x", SymbolTable::lookforType(TYPE_BASIC_LONGINT),
-                         false, false)},
-                     SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back("void write_string(string x){cout<<x;}");
-    SymbolTable::insertFunction(
-        "write", new FunctionDescriptor(
-                     "write",
-                     {new VariableDescriptor(
-                         "x", SymbolTable::lookforType(TYPE_BASIC_STRING),
-                         false, false)},
-                     SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back("void write_int64(long long x){cout<<x;}");
-    SymbolTable::insertFunction(
-        "write",
-        new FunctionDescriptor(
-            "write",
-            {new VariableDescriptor(
-                "x", SymbolTable::lookforType(TYPE_BASIC_INT64), false, false)},
-            SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back("void write_real(double x){cout<<x;}");
-    SymbolTable::insertFunction(
-        "write", new FunctionDescriptor(
-                     "write",
-                     {new VariableDescriptor(
-                         "x", SymbolTable::lookforType(TYPE_BASIC_DOUBLE),
-                         false, false)},
-                     SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back(
-        "void write_integer_integer(int a1,int a2){cout<<a1<<\" \"<<a2;}");
-    SymbolTable::insertFunction(
-        "write",
-        new FunctionDescriptor(
-            "write",
-            {new VariableDescriptor(
-                 "a1", SymbolTable::lookforType(TYPE_BASIC_INT), false, false),
-             new VariableDescriptor(
-                 "a2", SymbolTable::lookforType(TYPE_BASIC_INT), false, false)},
-            SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back(
-        "void write_integer_longint(int a1,int a2){cout<<a1<<\" \"<<a2;}");
-    SymbolTable::insertFunction(
-        "write",
-        new FunctionDescriptor(
-            "write",
-            {new VariableDescriptor(
-                 "a1", SymbolTable::lookforType(TYPE_BASIC_INT), false, false),
-             new VariableDescriptor(
-                 "a2", SymbolTable::lookforType(TYPE_BASIC_LONGINT), false,
-                 false)},
-            SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back(
-        "void write_integer_int64(int a1,long long a2){cout<<a1<<\" \"<<a2;}");
-    SymbolTable::insertFunction(
-        "write",
-        new FunctionDescriptor(
-            "write",
-            {new VariableDescriptor(
-                 "a1", SymbolTable::lookforType(TYPE_BASIC_INT), false, false),
-             new VariableDescriptor("a2",
-                                    SymbolTable::lookforType(TYPE_BASIC_INT64),
-                                    false, false)},
-            SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back(
-        "void write_integer_string(int a1,string a2){cout<<a1<<\" \"<<a2;}");
-    SymbolTable::insertFunction(
-        "write",
-        new FunctionDescriptor(
-            "write",
-            {new VariableDescriptor(
-                 "a1", SymbolTable::lookforType(TYPE_BASIC_INT), false, false),
-             new VariableDescriptor("a2",
-                                    SymbolTable::lookforType(TYPE_BASIC_STRING),
-                                    false, false)},
-            SymbolTable::lookforType(TYPE_BASIC_VOID)));
-}
-void init_std_read() {
-    // read int以及其符号
-    CodeCollector::push_back("void read_integer(int *x){scanf(\"%d\",x);}");
-    SymbolTable::insertFunction(
-        "read",
-        new FunctionDescriptor(
-            "read",
-            {new VariableDescriptor(
-                "x", SymbolTable::lookforType(TYPE_BASIC_INT), true, false)},
-            SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back(
-        "void read_integer_integer(int *x,int *y){scanf(\"%d%d\",x,y);}");
-    SymbolTable::insertFunction(
-        "read",
-        new FunctionDescriptor(
-            "read",
-            {new VariableDescriptor(
-                 "x", SymbolTable::lookforType(TYPE_BASIC_INT), true, false),
-             new VariableDescriptor(
-                 "y", SymbolTable::lookforType(TYPE_BASIC_INT), true, false)},
-            SymbolTable::lookforType(TYPE_BASIC_VOID)));
-
-    CodeCollector::push_back(
-        "void read_int64(long long *x){scanf(\"%lld\",x);}");
-    SymbolTable::insertFunction(
-        "read",
-        new FunctionDescriptor(
-            "read",
-            {new VariableDescriptor(
-                "x", SymbolTable::lookforType(TYPE_BASIC_INT64), true, false)},
-            SymbolTable::lookforType(TYPE_BASIC_VOID)));
-}
-///
-
 std::string mapVariableType(SymbolDescriptor *type) {
     if (type->name == TYPE_BASIC_DOUBLE) {
         return "double";
     } else if (type->name == TYPE_BASIC_INT) {
         return "int";
+    } else if (type->name == TYPE_BASIC_CHAR) {
+        return "char";
     } else if (type->name == TYPE_BASIC_STRING) {
         return "string";
     } else if (type->name == TYPE_BASIC_LONGINT) {
@@ -202,6 +27,62 @@ std::string mapVariableType(SymbolDescriptor *type) {
         // throw std::invalid_argument("unknown map type "+type->name);
     }
 }
+// std
+void init_read_write() {
+    static const std::vector<std::pair<std::string, std::string>> basic_type = {
+        {"lf", TYPE_BASIC_DOUBLE},
+        {"d", TYPE_BASIC_INT},
+        {"d", TYPE_BASIC_LONGINT},
+        {"lld", TYPE_BASIC_INT64},
+        {"c", TYPE_BASIC_CHAR}};
+    std::function<void(std::string, int, std::string, std::string, std::string,
+                       std::string, std::vector<VariableDescriptor *>)>
+        dfs_all = [&](std::string func, int lev, std::string funcSuffix,
+                      std::string argList, std::string formatString,
+                      std::string idList,
+                      std::vector<VariableDescriptor *> args) {
+            if (lev == 0) {
+                if (func == "write")
+                    CodeCollector::push_back("void " + func + funcSuffix + "(" +
+                                             argList + ") { printf(\"" +
+                                             formatString + "\"" + idList +
+                                             "); }");
+                else
+                    CodeCollector::push_back(
+                        "void " + func + funcSuffix + "(" + argList +
+                        ") { scanf(\"" + formatString + "\"" + idList + "); }");
+                SymbolTable::insertFunction(
+                    func,
+                    new FunctionDescriptor(
+                        func, args, SymbolTable::lookforType(TYPE_BASIC_VOID)));
+            } else {
+                for (auto [format, type] : basic_type) {
+                    std::string _funcSuffix, _argList, _formatString, _idList;
+                    std::vector<VariableDescriptor *> _args = args;
+                    _funcSuffix = funcSuffix + "_" + type;
+                    std::string varName = "a" + std::to_string(lev);
+                    _argList = argList + (argList == "" ? "" : ",") +
+                               mapVariableType(SymbolTable::lookforType(type)) +
+                               (func == "read" ? "* " : "") + " " + varName;
+                    _formatString = formatString + "%" + format;
+                    _idList = idList + ", " /* +
+                               (func == "write" || type == TYPE_BASIC_STRING ?
+                               "" : "&")*/
+                              + varName;
+                    _args.push_back(new VariableDescriptor(
+                        varName, SymbolTable::lookforType(type),
+                        (func == "read"), false));
+                    dfs_all(func, lev - 1, _funcSuffix, _argList, _formatString,
+                            _idList, _args);
+                }
+            }
+        };
+    for (int i = 1; i <= 3; ++i) {
+        dfs_all("write", i, "", "", "", "", {});
+        dfs_all("read", i, "", "", "", "", {});
+    }
+}
+///
 
 bool isPossibleToLevelUp(SymbolDescriptor *src, SymbolDescriptor *target) {
     std::vector<SymbolDescriptor *> level;
@@ -211,7 +92,7 @@ bool isPossibleToLevelUp(SymbolDescriptor *src, SymbolDescriptor *target) {
 
     bool checked = false;
     for (auto ty : level) {
-        if (src == ty) checked = true;
+        if (src == ty)checked = true;
         if (checked && target == ty) return true;
     }
     return false;
@@ -234,13 +115,11 @@ void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
     // TODO:
     CodeCollector::begin_section("prelude");
 
-    CodeCollector::push_back("#include <iostream>");
-    CodeCollector::push_back("#include <string>");
-    CodeCollector::push_back("using namespace std;");
+    CodeCollector::push_back("#include <stdio.h>");
+    CodeCollector::push_back("typedef char* string;");
     CodeCollector::push_back("int ____nouse=1;");
 
-    init_std_write();
-    init_std_read();
+    init_read_write();
 
     CodeCollector::end_section();
 }
@@ -259,7 +138,7 @@ void ASTDispatcher::genArrayTypeDecl(ArrayTypeDeclAST *ast) {
     }
 
     auto descriptor = SymbolTable::create_array_type(
-        ast->itemAST->_descriptor, ast->rangeR->val_int - ast->rangeL->val_int);
+        ast->itemAST->_descriptor, ast->rangeR->val_int - ast->rangeL->val_int,ast->rangeL->val_int);
 
     // this is wrong when using custom type
     // to fix this, you should think about how to resolve typedef in struct too
@@ -309,7 +188,7 @@ void ASTDispatcher::genNumberExpr(NumberExprAST *ast) {
     switch (ast->const_type) {
         case CONSTANT_INT:
             t = SymbolTable::createVariableG(
-                SymbolTable::lookforType(TYPE_BASIC_INT64), false);
+                SymbolTable::lookforType(TYPE_BASIC_INT), false);
             t->isLeftVar = false;
             break;
         case CONSTANT_REAL:
@@ -352,6 +231,18 @@ void ASTDispatcher::genStringExpr(StringExprAST *ast) {
     ast->value = t;
 }
 
+void ASTDispatcher::genCharExpr(CharExprAST *ast) {
+    VariableDescriptor *t = SymbolTable::createVariableG(
+        SymbolTable::lookforType(TYPE_BASIC_STRING), false);
+    t->isLeftVar = false;
+    CodeCollector::begin_section("global_define");
+    CodeCollector::src() << mapVariableType(t->varType) << " " << t->name
+                         << " = \'" << ast->val << "\';";
+    CodeCollector::push_back();
+    CodeCollector::end_section();
+    ast->value = t;
+}
+
 void ASTDispatcher::genVariableExpr(VariableExprAST *ast) {
     VariableDescriptor *t = SymbolTable::lookforVariable(ast->name);
     if (!t) {
@@ -387,7 +278,7 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
 
     if (ast->op == ":=") {
         if (lhs->varType != rhs->varType &&
-            isPossibleToLevelUp(rhs->varType, lhs->varType)) {
+            isPossibleToLevelUp(rhs->varType, lhs->varType)==false) {
             throw TypeErrorException("type does not match between `=`",
                                      rhs->varType->name, lhs->varType->name, 0,
                                      0);
@@ -411,6 +302,14 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
         }
 
         auto array = static_cast<ArrayTypeDescriptor *>(lhs->varType);
+
+        VariableDescriptor *realid=
+            SymbolTable::createVariable(rhs->varType, false, false);
+        putVariableDecl(realid);
+        CodeCollector::src() << "=";
+        putVariableExpr(realid);
+        CodeCollector::src()<<"-"<<array->beg<<";";
+        CodeCollector::push_back();
 
         VariableDescriptor *t =
             SymbolTable::createVariable(array->itemDescriptor, true, false);

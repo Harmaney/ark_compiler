@@ -21,6 +21,9 @@ void init_basic_type() {
         TYPE_BASIC_STRING,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_STRING));
     SymbolTable::insertType(
+        TYPE_BASIC_CHAR,
+        new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_CHAR));
+    SymbolTable::insertType(
         TYPE_BASIC_LONGINT,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_LONGINT));
         SymbolTable::insertType(
