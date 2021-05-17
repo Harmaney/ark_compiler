@@ -306,6 +306,10 @@ void lex_work(string file_name){
     ofstream lout("../files/lex_out.txt");
     ofstream lerr("../files/lex_err.txt");
     for(auto s : token_stream){
+        if (s.type == 11) {
+            s.word = s.word.substr(1);
+            s.word.pop_back();
+        }
         lout << s.word << " " << s.row << " " << s.colomn << " ";
         if(inset(s.word,key_words)){
             lerr << s.word << endl;
