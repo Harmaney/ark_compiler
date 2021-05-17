@@ -390,7 +390,7 @@ std::ifstream& operator>>(std::ifstream& ifs, TokenItem& item) {
         if (type == "keyword" || type == "punc") {
             if (raw == ":=")
                 parserSymbol = "assignOP";
-            else if (raw == "=" || raw == "<>" || raw == ">" || raw == "<" ||
+            else if (raw == "<>" || raw == ">" || raw == "<" ||
                 raw == ">=" || raw == "<=")
                 parserSymbol = "relOP";
             else if (raw == "*" || raw == "/" || raw == "div" || raw == "mod" ||
@@ -1005,10 +1005,10 @@ GrammarTreeNode* Analyse(string file_name) {
     for (;;) {
         curState = *states.rbegin();
         std::cerr << curState << '\n';
-		for(auto x:symbols) std::cerr << x << " ";
-		std::cerr << endl;
-		std::cerr << " str: " << N.raw << " type: " << N.type << endl;
-		std::cerr << "row:" << N.row << " column: " << N.column << " type: " << N.parserSymbol << endl;
+		// for(auto x:symbols) std::cerr << x << " ";
+		// std::cerr << endl;
+		// std::cerr << " str: " << N.raw << " type: " << N.type << endl;
+		// std::cerr << "row:" << N.row << " column: " << N.column << " type: " << N.parserSymbol << endl;
         if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0)
             assert(0);
         pair<ACTION, int> act =
