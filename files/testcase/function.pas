@@ -9,6 +9,6 @@ begin
     magic:=k+magic(k-1);
 end;
 begin
-    writeln(magic(5));
+    write(magic(5));
     
 end.
