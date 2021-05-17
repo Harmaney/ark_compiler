@@ -2,5 +2,10 @@ program 1 1 keyword
 Hello 1 9 identify
 ; 1 14 punc
 begin 2 1 keyword
-end 3 1 keyword
-. 3 4 punc
+writeln 3 2 identify
+( 3 9 punc
+'HelloWorld' 3 9 stringVal
+) 3 22 punc
+; 3 23 punc
+end 4 1 keyword
+. 4 4 punc
