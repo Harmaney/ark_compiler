@@ -3,6 +3,7 @@ array
 begin
 boolean
 case
+char
 const
 div
 do
