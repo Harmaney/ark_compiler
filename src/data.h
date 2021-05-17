@@ -227,7 +227,10 @@ class VariableExprAST : public ExprAST {
    public:
     std::string name;
     VariableExprAST(const std::string &name)
-        : ExprAST(AST_VARIABLE_EXPR), name(name) {}
+        : ExprAST(AST_VARIABLE_EXPR), name(name) {
+        parserOutputer.push_back(
+            {{"ID", (uint64_t)this}, {"type", "VariableExprAST:" + name}});
+    }
     void accept(ASTDispatcher &dispacher) override;
 };
 
@@ -253,8 +256,9 @@ class BinaryExprAST : public ExprAST {
 
     BinaryExprAST(std::string op, ExprAST *lhs, ExprAST *rhs)
         : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {
-        parserOutputer.push_back(
-            {{"type", "BinaryExprAST:" + op}, {"son", Serialize(LHS, RHS)}});
+        parserOutputer.push_back({{"ID", (uint64_t)this},
+                                  {"type", "BinaryExprAST:" + op},
+                                  {"son", Serialize(LHS, RHS)}});
     }
     void accept(ASTDispatcher &dispacher) override;
 };

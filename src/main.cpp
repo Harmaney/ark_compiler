@@ -5,7 +5,7 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    auto sourceCode = load_file("testcase/1.pas");
+    auto sourceCode = load_file("testcase/SegmentTree.pas");
 
     auto tq = lex_work(sourceCode);
 

@@ -927,6 +927,7 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
         UpdateProperties(newNode);
         unlinkedNodes.push_back(newNode);
         newNode->Report();
+        std::cerr << "report = " << newNode->type << '\n';
     };
     std::cerr << "start analyse" << endl;
     states.push_back(0);
@@ -951,7 +952,6 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
             unlinkedNodes.push_back(new GrammarTreeNode(
                 N.raw, N.type, N.parserSymbol, N.row, N.column, rng()));
             (*unlinkedNodes.rbegin())->Report();
-
             assert(!tq.empty());
             N.Load(tq.front());
             tq.pop();
