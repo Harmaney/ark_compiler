@@ -156,7 +156,7 @@ void TEST_struct() {
         }
     );
 
-    GlobalAST *ast=new GlobalAST({},{},block_ast);
+    GlobalAST *ast=new GlobalAST({},{},{},block_ast);
 
     ASTDispatcher dispacher;
     ast->accept(dispacher);
@@ -284,7 +284,7 @@ void TEST_funccall() {
     CallExprAST *call = new CallExprAST("write_int", callargs);
     block->exprs.push_back(call);
 
-    GlobalAST *global = new GlobalAST({}, {},block);
+    GlobalAST *global = new GlobalAST({}, {},{},block);
 
     ASTDispatcher dispacher;
     global->accept(dispacher);
@@ -312,6 +312,7 @@ void TEST_case1() {
             new BasicTypeAST(TYPE_BASIC_INT),
             false,false
         )},
+        {},
         {},
         new BlockAST(
             {
@@ -366,6 +367,7 @@ void TEST_fibonacci(){
                 false,false
             ),
         },
+        {},
         {
             new FunctionAST(
                 new FunctionSignatureAST(

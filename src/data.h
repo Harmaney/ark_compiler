@@ -61,8 +61,6 @@ class VariableDescriptor : public SymbolDescriptor {
     bool isConst;
     bool isLeftVar;
 
-    
-
     VariableDescriptor(std::string name, SymbolDescriptor *varType, bool isRef,
                        bool isConst, bool isLeftVar = true)
         : SymbolDescriptor(DESCRIPTOR_VARIABLE, name),
@@ -297,7 +295,7 @@ class VariableDeclAST : public AST {
     NumberExprAST *initVal;
 
     VariableDeclAST(VariableExprAST *sig, TypeDeclAST *type, bool isRef,
-                    bool isConst = false,NumberExprAST *initVal=nullptr)
+                    bool isConst = false, NumberExprAST *initVal = nullptr)
         : AST(AST_VARIABLE_DECL),
           sig(sig),
           varType(type),
@@ -415,11 +413,14 @@ class StructDeclAST : public TypeDeclAST {
 class GlobalAST : public AST {
    public:
     std::vector<VariableDeclAST *> vars;
+    std::vector<TypeDefAST *> typeDefs;
     std::vector<FunctionAST *> functions;
     BlockAST *mainBlock;
     GlobalAST(std::vector<VariableDeclAST *> vars,
+              std::vector<TypeDefAST *> typeDefs,
               std::vector<FunctionAST *> functions, BlockAST *mainBlock)
         : AST(AST_GLOBAL),
+          typeDefs(typeDefs),
           vars(vars),
           functions(functions),
           mainBlock(mainBlock) {
