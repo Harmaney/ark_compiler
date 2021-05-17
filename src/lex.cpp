@@ -325,13 +325,17 @@ TokenQueue lex_work(string all_chars) {
     }
     ofstream lout("../files/lex_out.txt");
     ofstream lerr("../files/lex_err.txt");
-    for(auto s : token_stream){
-        if (s.type == 11) {
+
+    TokenQueue result;
+    for (auto s : token_stream) {
+		if (s.type == 11) {
             s.word = s.word.substr(1);
             s.word.pop_back();
         }
-        lout << s.word << " " << s.row << " " << s.colomn << " ";
-        if(inset(s.word,key_words)){
+        lout << s.word << " " << s.row << " " << s.column << " ";
+
+        std::string type;
+        if (inset(s.word, key_words)) {
             lerr << s.word << endl;
             s.type = 100;
         }
