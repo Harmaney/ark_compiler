@@ -5,13 +5,19 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    /*if (argc <= 1) {
-        FATAL(std::cerr << "please give input.pas" << std::endl;)
+    std::string inputPas;
+    if (argc <= 1) {
+        std::cerr << "please give input.pas" << std::endl;
+        std::cin >> inputPas;
+    } else
+        inputPas = argv[1];
+    std::ifstream soureFileStream(inputPas);
+    if (!soureFileStream) {
+        FATAL(std::cerr << "file doesn't exist.\n";)
         return 0;
     }
-    auto sourceCode = load_file(argv[1]);
-    */
-    auto sourceCode = load_file("testcase/string.pas");
+    std::string sourceCode((std::istreambuf_iterator<char>(soureFileStream)),
+                           (std::istreambuf_iterator<char>()));
     std::cerr << sourceCode << '\n';
 
     auto tq = lex_work(sourceCode);
@@ -48,5 +54,6 @@ int main(int argc, char **argv) {
                  {"gen", genOutputer},
              })
                 .dump();
+    system("gcc out.c -o out");
     return 0;
 }

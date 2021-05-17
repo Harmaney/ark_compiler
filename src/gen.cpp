@@ -70,14 +70,14 @@ void init_read_write() {
                                (func == "read" ? "* " : "") + " " + varName;
                     _preMalloc = preMalloc;
                     if (type == TYPE_BASIC_STRING)
-                        _preMalloc += "*" + varName + "=malloc(255);";
+                        _preMalloc += "if(*" + varName + ") free(" + "*" +
+                                      varName + ");" + "*" + varName +
+                                      "=malloc(255);";
                     _formatString = formatString + "%" + format;
                     _idList =
                         idList + ", " +
-                        ((func == "write" && type != TYPE_BASIC_STRING) ||
-                                 (func == "read" && type == TYPE_BASIC_STRING)
-                             ? "*"
-                             : "") +
+                        (func == "read" && type == TYPE_BASIC_STRING ? "*"
+                                                                     : "") +
                         varName;
                     _args.push_back(new VariableDescriptor(
                         varName, SymbolTable::lookforType(type),

@@ -84,17 +84,6 @@
     present_state = 0;
 using namespace std;
 
-string load_file(string file_name) {
-    ifstream input(file_name);
-    string result_string;
-    string each_line;
-    while (true) {
-        if (!getline(input, each_line)) break;
-        result_string += each_line + '\n';
-        each_line.clear();
-    }
-    return result_string;
-}
 
 set<string> key_words;
 

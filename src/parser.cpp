@@ -53,12 +53,10 @@ void init() {
             if (RHS.empty()) Get_epsilon.insert(LHS);
             RHS.clear();
             if (str == "@") mode = 0;
-        }
-        else if (mode == 0) {
+        } else if (mode == 0) {
             LHS = str, Nonterminal.insert(str);
             if (fjcS.empty()) fjcS = LHS;
-        }
-        else
+        } else
             RHS.push_back(str), Terminal.insert(str);
     }
     for (auto str : Nonterminal) Terminal.erase(str);
@@ -99,12 +97,10 @@ set<string> get_first(vector<string> strlist) {
             if (it == strlist.end()) {
                 merge(First[""], res);
                 break;
-            }
-            else {
+            } else {
                 Head = *it;
             }
-        }
-        else
+        } else
             break;
     }
     return res;
@@ -157,32 +153,26 @@ struct Item {
     vector<string> previous, next;
     Item() {}
     Item(string LHS, vector<string> previous, vector<string> next,
-        string LookAhead)
+         string LookAhead)
         : LHS(LHS), previous(previous), next(next), LookAhead(LookAhead) {}
     bool operator<(const Item other) const {
         if (LHS != other.LHS) {
             return LHS < other.LHS;
-        }
-        else if (!(previous == other.previous)) {
+        } else if (!(previous == other.previous)) {
             return previous < other.previous;
-        }
-        else if (!(next == other.next)) {
+        } else if (!(next == other.next)) {
             return next < other.next;
-        }
-        else
+        } else
             return LookAhead < other.LookAhead;
     }
     bool operator==(const Item other) const {
         if (LHS != other.LHS) {
             return false;
-        }
-        else if (!(previous == other.previous)) {
+        } else if (!(previous == other.previous)) {
             return false;
-        }
-        else if (!(next == other.next)) {
+        } else if (!(next == other.next)) {
             return false;
-        }
-        else if (LookAhead != other.LookAhead)
+        } else if (LookAhead != other.LookAhead)
             return false;
         return true;
     }
@@ -296,8 +286,7 @@ void LoadTable() {
         inf >> I >> a >> ACT_id >> id;
         if (id == -1) {
             Goto[make_pair(I, a)] = ACT_id;
-        }
-        else {
+        } else {
             enum ACTION ACT;
             if (ACT_id == 1)
                 ACT = Shift;
@@ -325,14 +314,12 @@ void generate_table() {
                 AddAction(
                     make_pair(Shift, Item_set[GO(I.first, *next.begin())]),
                     make_pair(I.second, *next.begin()));
-            }
-            else if (it.LHS != fjcS) {
+            } else if (it.LHS != fjcS) {
                 AddAction(
                     make_pair(Reduce,
-                        Production_ID[make_pair(it.LHS, it.previous)]),
+                              Production_ID[make_pair(it.LHS, it.previous)]),
                     make_pair(I.second, it.LookAhead));
-            }
-            else {
+            } else {
                 AddAction(make_pair(ACC, 0), make_pair(I.second, it.LookAhead));
             }
         }
@@ -351,20 +338,20 @@ void generate_table() {
         for (auto a : Terminal) {
             if (actionTable.count(make_pair(I.second, a))) {
                 of << I.second << " " << a << " "
-                    << actionTable[make_pair(I.second, a)].first << " "
-                    << actionTable[make_pair(I.second, a)].second << endl;
+                   << actionTable[make_pair(I.second, a)].first << " "
+                   << actionTable[make_pair(I.second, a)].second << endl;
             }
         }
         if (actionTable.count(make_pair(I.second, "$"))) {
             of << I.second << " "
-                << "$"
-                << " " << actionTable[make_pair(I.second, "$")].first << " "
-                << actionTable[make_pair(I.second, "$")].second << endl;
+               << "$"
+               << " " << actionTable[make_pair(I.second, "$")].first << " "
+               << actionTable[make_pair(I.second, "$")].second << endl;
         }
         for (auto A : Nonterminal) {
             if (Goto.count(make_pair(I.second, A))) {
                 of << I.second << " " << A << " "
-                    << Goto[make_pair(I.second, A)] << " -1" << endl;
+                   << Goto[make_pair(I.second, A)] << " -1" << endl;
             }
         }
     }
@@ -376,39 +363,38 @@ struct TokenItem {
     TokenItem() {}
     TokenItem(string raw, string type, string parserSymbol, int row, int column)
         : raw(raw),
-        type(type),
-        parserSymbol(parserSymbol),
-        row(row),
-        column(column) {}
+          type(type),
+          parserSymbol(parserSymbol),
+          row(row),
+          column(column) {}
     void Load(std::tuple<std::string, int, int, std::string> i) {
         auto [_raw, _row, _column, _type] = i;
         if (_raw == "")
-            *this = { "", "", "$", 0, 0 };
+            *this = {"", "", "$", 0, 0};
         else {
             string _parserSymbol;
             if (_type == "keyword" || _type == "punc") {
                 if (_raw == ":=")
                     _parserSymbol = "assignOP";
-                else if (_raw == "<>" || _raw == ">" ||
-                    _raw == "<" || _raw == ">=" || _raw == "<=")
+                else if (_raw == "<>" || _raw == ">" || _raw == "<" ||
+                         _raw == ">=" || _raw == "<=")
                     _parserSymbol = "relOP";
                 else if (_raw == "*" || _raw == "/" || _raw == "div" ||
-                    _raw == "mod" || _raw == "and")
+                         _raw == "mod" || _raw == "and")
                     _parserSymbol = "mulOP";
                 else
                     _parserSymbol = _raw;
-            }
-            else if (_type == "identify")
+            } else if (_type == "identify")
                 _parserSymbol = "ID";
             else if (_type == "intVal" || _type == "realVal" ||
-                _type == "stringVal")
+                     _type == "stringVal")
                 _parserSymbol = _type;
             else
                 _parserSymbol = _raw;
-            *this = { _raw, _type, _parserSymbol, _row, _column };
+            *this = {_raw, _type, _parserSymbol, _row, _column};
         }
         std::cerr << raw << ' ' << type << ' ' << parserSymbol << ' ' << row
-            << ' ' << column << '\n';
+                  << ' ' << column << '\n';
     }
 };
 
@@ -434,8 +420,7 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                 auto ptr = dynamic_cast<UnaryExprAST*>(node);
                 if (ptr->op == "-") flag = -1;
                 number = dynamic_cast<NumberExprAST*>(ptr->expr);
-            }
-            else
+            } else
                 number = dynamic_cast<NumberExprAST*>(node);
             assert(number);
             if (number->const_type == CONSTANT_INT)
@@ -446,8 +431,7 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
         auto UpdateProperties = [&](GrammarTreeNode* node) {
             if (node->type == "S") {  // S -> ProgramStruct
                 node->prop = cast<S>(node->son[0]->prop);
-            }
-            else if (node->type == "ProgramStruct") {
+            } else if (node->type == "ProgramStruct") {
                 auto M = cast<ProgramBody>(node->son[2]->prop);
                 std::vector<VariableDeclAST*> vars;
                 for (auto i : M["var"])
@@ -461,126 +445,107 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                 node->prop = new std::remove_pointer<ProgramStruct>::type(
                     vars, types, functions,
                     cast<BlockAST*>((M["body"]).front()));
-            }
-            else if (node->type == "ProgramHead") {
+            } else if (node->type == "ProgramHead") {
                 node->prop = nullptr;
-            }
-            else if (node->type ==
-                "ProgramBody") {  // ProgramBody -> Component
-                                  // CompoundStatement @
+            } else if (node->type ==
+                       "ProgramBody") {  // ProgramBody -> Component
+                                         // CompoundStatement @
                 auto M = cast<ProgramBody>(node->son[0]->prop);
                 M["body"].push_back(
                     cast<CompoundStatement>(node->son[1]->prop));
                 node->prop = M;
-            }
-            else if (node->type == "Component") {
+            } else if (node->type == "Component") {
                 Component prop;
                 if (node->son.empty()) {
                     // Do nothing.
-                }
-                else if (node->son[0]->raw ==
-                    "const") {  // Component -> const ConstDeclaration ;
-                                // Component
+                } else if (node->son[0]->raw ==
+                           "const") {  // Component -> const ConstDeclaration ;
+                                       // Component
                     prop = cast<Component>(node->son[3]->prop);
                     for (auto i : cast<ConstDeclaration>(node->son[1]->prop))
                         prop["var"].push_back(i);
-                }
-                else if (node->son[0]->raw ==
-                    "type") {  // Component -> type TypeDeclaration ;
-                               // Component
+                } else if (node->son[0]->raw ==
+                           "type") {  // Component -> type TypeDeclaration ;
+                                      // Component
                     prop = cast<Component>(node->son[3]->prop);
                     auto list = cast<TypeDeclaration>(node->son[1]->prop);
                     for (auto iter = list.rbegin(); iter != list.rend(); ++iter)
                         prop["type"].insert(prop["type"].begin(), *iter);
-                }
-                else if (node->son[0]->raw ==
-                    "var") {  // Component -> var VarDeclaration ;
-                              // Component
+                } else if (node->son[0]->raw ==
+                           "var") {  // Component -> var VarDeclaration ;
+                                     // Component
                     prop = cast<Component>(node->son[3]->prop);
                     for (auto i : cast<VarDeclaration>(node->son[1]->prop))
                         prop["var"].push_back(i);
-                }
-                else if (node->son[0]->type ==
-                    "Subprogram") {  // Component -> Subprogram ;
-                                     // Component
+                } else if (node->son[0]->type ==
+                           "Subprogram") {  // Component -> Subprogram ;
+                                            // Component
                     prop = cast<Component>(node->son[2]->prop);
                     prop["function"].insert(prop["function"].begin(),
-                        node->son[0]->prop);
+                                            node->son[0]->prop);
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "IDList") {
+            } else if (node->type == "IDList") {
                 IDList prop;
                 if (node->son.size() == 1) {  // IDList -> ID
-                    prop = IDList{ node->son[0]->raw };
-                }
-                else {  // IDList -> IDList , ID
+                    prop = IDList{node->son[0]->raw};
+                } else {  // IDList -> IDList , ID
                     prop = cast<IDList>(node->son[0]->prop);
                     prop.push_back(node->son[2]->raw);
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "ConstDeclaration") {
+            } else if (node->type == "ConstDeclaration") {
                 ConstDeclaration prop;
                 if (node->son.size() ==
                     3) {  // ConstDeclaration -> ID = ConstValue
                     prop.push_back(new VariableDeclAST(
                         new VariableExprAST(node->son[0]->raw), nullptr, false,
                         true, evalConst(cast<ConstValue>(node->son[2]->prop))));
-                }
-                else {  // ConstDeclaration -> ConstDeclaration ; ID =
-                       // ConstValue
+                } else {  // ConstDeclaration -> ConstDeclaration ; ID =
+                          // ConstValue
                     prop = cast<ConstDeclaration>(node->son[0]->prop);
                     prop.push_back(new VariableDeclAST(
                         new VariableExprAST(node->son[2]->raw), nullptr, false,
                         true, evalConst(cast<ConstValue>(node->son[4]->prop))));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "ConstValue") {
+            } else if (node->type == "ConstValue") {
                 ConstValue prop;
                 if (node->son[0]->raw == "+") {  // ConstValue -> + Num
                     prop = new UnaryExprAST("+",
-                        cast<ExprAST*>(node->son[1]->prop));
-                }
-                else if (node->son[0]->raw == "-") {  // ConstValue -> - Num
+                                            cast<ExprAST*>(node->son[1]->prop));
+                } else if (node->son[0]->raw == "-") {  // ConstValue -> - Num
                     prop = new UnaryExprAST("-",
-                        cast<ExprAST*>(node->son[1]->prop));
-                }
-                else if (node->son.size() == 1) {  // ConstValue -> Value
+                                            cast<ExprAST*>(node->son[1]->prop));
+                } else if (node->son.size() == 1) {  // ConstValue -> Value
                     prop = cast<Value>(node->son[0]->prop);
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "TypeDeclaration") {  // new
+            } else if (node->type == "TypeDeclaration") {  // new
                 TypeDeclaration prop;
                 if (node->son.size() ==
                     3) {  // TypeDeclaration -> ID = ActualType
                     prop.push_back(
                         new TypeDefAST(new BasicTypeAST(node->son[0]->raw),
-                            cast<ActualType>(node->son[2]->prop)));
-                }
-                else {  // TypeDeclaration -> TypeDeclaration ; ID =
-                       // ActualType
+                                       cast<ActualType>(node->son[2]->prop)));
+                } else {  // TypeDeclaration -> TypeDeclaration ; ID =
+                          // ActualType
                     prop = cast<TypeDeclaration>(node->son[0]->prop);
                     prop.push_back(
                         new TypeDefAST(new BasicTypeAST(node->son[2]->raw),
-                            cast<ActualType>(node->son[4]->prop)));
+                                       cast<ActualType>(node->son[4]->prop)));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "ActualType") {
+            } else if (node->type == "ActualType") {
                 ActualType prop;
                 if (node->son.size() == 1) {  // ActualType -> Type
                     prop = cast<Type>(node->son[0]->prop);
-                }
-                else {  // ActualType -> record VarDeclaration ; end
+                } else {  // ActualType -> record VarDeclaration ; end
                     prop = new StructDeclAST(
                         rand_name(), cast<VarDeclaration>(node->son[1]->prop));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "VarDeclaration") {
+            } else if (node->type == "VarDeclaration") {
                 VarDeclaration prop;
                 if (node->son.size() == 3) {  // VarDeclaration -> IDList : Type
                     for (std::string id : cast<IDList>(node->son[0]->prop)) {
@@ -588,9 +553,8 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                             new VariableExprAST(id),
                             cast<Type>(node->son[2]->prop), false));
                     }
-                }
-                else {  // VarDeclaration -> VarDeclaration ; IDList :
-                       // ActualType
+                } else {  // VarDeclaration -> VarDeclaration ; IDList :
+                          // ActualType
                     prop = cast<VarDeclaration>(node->son[0]->prop);
                     for (std::string id : cast<IDList>(node->son[2]->prop)) {
                         prop.push_back(new VariableDeclAST(
@@ -599,8 +563,7 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                     }
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "Type") {
+            } else if (node->type == "Type") {
                 Type prop;
                 if (node->son[0]->raw ==
                     "array") {  // Type -> array [ Period ] of BasicType
@@ -610,44 +573,37 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                     for (auto [L, R] : range) {
                         prop = new ArrayTypeDeclAST(prop, L, R);
                     }
-                }
-                else if (node->son[0]->type ==
-                    "BasicType") {  // Type -> BasicType
+                } else if (node->son[0]->type ==
+                           "BasicType") {  // Type -> BasicType
                     prop = cast<BasicType>(node->son[0]->prop);
-                }
-                else {  // Type -> ^ BasicType
+                } else {  // Type -> ^ BasicType
                     prop = new PointerTypeDeclAST(
                         cast<BasicType>(node->son[1]->prop));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "BasicType") {
+            } else if (node->type == "BasicType") {
                 BasicType prop = new BasicTypeAST(node->son[0]->raw);
                 node->prop = prop;
-            }
-            else if (node->type == "Period") {
+            } else if (node->type == "Period") {
                 Period prop;
                 if (node->son.size() == 3) {  // Period -> Digits .. Digits
-                    prop = Period{ make_pair(cast<Digits>(node->son[0]->prop),
-                                            cast<Digits>(node->son[2]->prop)) };
-                }
-                else {  // Period -> Period , Digits .. Digits
+                    prop = Period{make_pair(cast<Digits>(node->son[0]->prop),
+                                            cast<Digits>(node->son[2]->prop))};
+                } else {  // Period -> Period , Digits .. Digits
                     prop = cast<Period>(node->son[0]->prop);
                     prop.emplace_back(cast<Digits>(node->son[2]->prop),
-                        cast<Digits>(node->son[4]->prop));
+                                      cast<Digits>(node->son[4]->prop));
                 }
                 node->prop = prop;
-            }
-            else if (node->type ==
-                "Subprogram") {  // Subprogram -> SubprogramHead ;
-                                 // SubprogramBody
+            } else if (node->type ==
+                       "Subprogram") {  // Subprogram -> SubprogramHead ;
+                                        // SubprogramBody
                 auto [parameter, body] =
                     cast<SubprogramBody>(node->son[2]->prop);
                 Subprogram prop = new FunctionAST(
                     cast<SubprogramHead>(node->son[0]->prop), parameter, body);
                 node->prop = prop;
-            }
-            else if (node->type == "SubprogramHead") {
+            } else if (node->type == "SubprogramHead") {
                 SubprogramHead prop;
                 if (node->son.size() ==
                     3) {  // SubprogramHead -> procedure ID FormalParameter
@@ -655,50 +611,42 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                         node->son[1]->raw,
                         cast<FormalParameter>(node->son[2]->prop),
                         new BasicTypeAST("void"));
-                }
-                else {  // SubprogramHead -> function ID FormalParameter :
-                       // BasicType
+                } else {  // SubprogramHead -> function ID FormalParameter :
+                          // BasicType
                     prop = new FunctionSignatureAST(
                         node->son[1]->raw,
                         cast<FormalParameter>(node->son[2]->prop),
                         cast<BasicType>(node->son[4]->prop));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "FormalParameter") {
+            } else if (node->type == "FormalParameter") {
                 FormalParameter prop;
                 if (node->son.size() <= 2) {
                     prop = FormalParameter();
-                }
-                else {  // FormalParameter -> ( ParameterList )
+                } else {  // FormalParameter -> ( ParameterList )
                     prop = cast<ParameterList>(node->son[1]->prop);
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "ParameterList") {
+            } else if (node->type == "ParameterList") {
                 ParameterList prop;
                 if (node->son.size() == 1) {  // ParameterList -> Parameter
                     prop = cast<ParameterList>(node->son[0]->prop);
-                }
-                else {  // ParameterList -> ParameterList ; Parameter
+                } else {  // ParameterList -> ParameterList ; Parameter
                     prop = cast<ParameterList>(node->son[0]->prop);
                     for (auto i : cast<Parameter>(node->son[2]->prop))
                         prop.push_back(i);
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "Parameter") {
+            } else if (node->type == "Parameter") {
                 // Parameter -> VarParameter
                 // Parameter -> ValueParameter
                 node->prop = cast<Parameter>(node->son[0]->prop);
-            }
-            else if (node->type == "VarParameter") {
+            } else if (node->type == "VarParameter") {
                 // VarParameter -> var ValueParameter
                 VarParameter prop = cast<ValueParameter>(node->son[1]->prop);
                 for (auto& ptr : prop) ptr->isRef = true;
                 node->prop = prop;
-            }
-            else if (node->type == "ValueParameter") {
+            } else if (node->type == "ValueParameter") {
                 // ValueParameter -> IDList : BasicType
                 ValueParameter prop;
                 std::vector<VariableDeclAST*> list;
@@ -708,14 +656,12 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                         cast<BasicType>(node->son[2]->prop), false));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "SubprogramBody") {
+            } else if (node->type == "SubprogramBody") {
                 // SubprogramBody -> SubComponent CompoundStatement
                 node->prop =
                     SubprogramBody(cast<SubComponent>(node->son[0]->prop),
-                        cast<CompoundStatement>(node->son[1]->prop));
-            }
-            else if (node->type == "SubComponent") {
+                                   cast<CompoundStatement>(node->son[1]->prop));
+            } else if (node->type == "SubComponent") {
                 SubComponent prop;
                 if (node->son.size() == 0)
                     node->prop = {};
@@ -725,52 +671,44 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                     prop = cast<SubComponent>(node->son[3]->prop);
                     if (node->son[0]->raw == "const") {
                         for (auto i :
-                            cast<ConstDeclaration>(node->son[1]->prop))
+                             cast<ConstDeclaration>(node->son[1]->prop))
                             prop.insert(prop.begin(), i);
-                    }
-                    else {
+                    } else {
                         for (auto i : cast<VarDeclaration>(node->son[1]->prop))
                             prop.insert(prop.begin(), i);
                     }
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "CompoundStatement") {
+            } else if (node->type == "CompoundStatement") {
                 // CompoundStatement -> begin StatementList end
                 node->prop =
                     new BlockAST(cast<StatementList>(node->son[1]->prop));
-            }
-            else if (node->type == "StatementList") {
+            } else if (node->type == "StatementList") {
                 StatementList prop;
                 if (node->son.size() == 1) {  // StatementList -> Statement
                     auto statement = cast<Statement>(node->son[0]->prop);
                     if (!statement)
                         prop = StatementList{};
                     else
-                        prop = StatementList{ statement };
-                }
-                else {  // StatementList -> StatementList ; Statement
+                        prop = StatementList{statement};
+                } else {  // StatementList -> StatementList ; Statement
                     prop = cast<StatementList>(node->son[0]->prop);
                     auto statement = cast<Statement>(node->son[2]->prop);
                     if (statement) prop.push_back(statement);
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "Statement") {
+            } else if (node->type == "Statement") {
                 Statement prop;
                 if (node->son.empty()) {
                     prop = nullptr;
-                }
-                else if (node->son[0]->type == "ComposedVariable") {
+                } else if (node->son[0]->type == "ComposedVariable") {
                     // Statement -> ComposedVariable assignOP Expression
                     prop = new BinaryExprAST(
                         node->son[1]->raw, cast<ExprAST*>(node->son[0]->prop),
                         cast<ExprAST*>(node->son[2]->prop));
-                }
-                else if (node->son[0]->type == "ProcedureCall(ARG)") {
+                } else if (node->son[0]->type == "ProcedureCall(ARG)") {
                     prop = cast<Statement>(node->son[0]->prop);
-                }
-                else if (node->son[0]->raw == "if") {
+                } else if (node->son[0]->raw == "if") {
                     if (node->son[3]->type == "CompoundStatement") {
                         // Statement -> if Expression then CompoundStatement
                         // ElsePart
@@ -778,19 +716,17 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                             cast<Expression>(node->son[1]->prop),
                             cast<CompoundStatement>(node->son[3]->prop),
                             cast<ElsePart>(node->son[4]->prop));
-                    }
-                    else {
+                    } else {
                         // Statement -> if Expression then Statement ElsePart
                         auto statement = cast<Statement>(node->son[3]->prop);
-                        auto statementlist = StatementList{ statement };
+                        auto statementlist = StatementList{statement};
                         prop = new IfStatementAST(
                             cast<Expression>(node->son[1]->prop),
                             new std::remove_pointer<CompoundStatement>::type(
                                 statementlist),
                             cast<ElsePart>(node->son[4]->prop));
                     }
-                }
-                else if (node->son[0]->raw == "for") {
+                } else if (node->son[0]->raw == "for") {
                     // Statement -> for ID assignOP Expression to Expression do
                     // CompoundStatement
                     if (node->son[7]->type == "CompoundStatement") {
@@ -799,12 +735,11 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                             cast<Expression>(node->son[3]->prop),
                             cast<Expression>(node->son[5]->prop),
                             cast<CompoundStatement>(node->son[7]->prop));
-                    }
-                    else {
+                    } else {
                         // Statement -> for ID assignOP Expression to Expression
                         // do Statement
                         auto statement = cast<Statement>(node->son[7]->prop);
-                        auto statementlist = StatementList{ statement };
+                        auto statementlist = StatementList{statement};
                         prop = new ForStatementAST(
                             new VariableExprAST(node->son[1]->raw),
                             cast<Expression>(node->son[3]->prop),
@@ -812,18 +747,16 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                             new std::remove_pointer<CompoundStatement>::type(
                                 statementlist));
                     }
-                }
-                else if (node->son[0]->raw == "while") {
+                } else if (node->son[0]->raw == "while") {
                     if (node->son[3]->type == "CompoundStatement") {
                         // Statement -> while Expression do CompoundStatement
                         prop = new WhileStatementAST(
                             cast<ExprAST*>(node->son[1]->prop),
                             cast<CompoundStatement>(node->son[3]->prop));
-                    }
-                    else {
+                    } else {
                         // Statement -> while Expression do Statement
                         auto statement = cast<Statement>(node->son[3]->prop);
-                        auto statementlist = StatementList{ statement };
+                        auto statementlist = StatementList{statement};
                         prop = new WhileStatementAST(
                             cast<ExprAST*>(node->son[1]->prop),
                             new std::remove_pointer<CompoundStatement>::type(
@@ -831,59 +764,54 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                     }
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "Variable") {  // Variable -> ID IDVarpart
+            } else if (node->type == "Variable") {  // Variable -> ID IDVarpart
                 Variable prop = new VariableExprAST(node->son[0]->raw);
                 auto part = cast<IDVarpart>(node->son[1]->prop);
                 for (auto expr : part) {
                     prop = new BinaryExprAST("[]", prop, expr);
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "IDVarpart") {
+            } else if (node->type == "IDVarpart") {
                 IDVarpart prop;
                 if (node->son.size() == 0)
                     prop = IDVarpart();
                 else  // IDVarpart -> [ ExpressionList ]
                     prop = cast<IDVarpart>(node->son[1]->prop);
                 node->prop = prop;
-            }
-            else if (node->type == "ProcedureCall(ARG)") {
+            } else if (node->type == "ProcedureCall(ARG)") {
                 ProcedureCall prop;
                 if (node->son.size() ==
                     4) {  // ProcedureCall(ARG) -> ID ( ExpressionList )
                     prop = new CallExprAST(
                         node->son[0]->raw,
                         cast<ExpressionList>(node->son[2]->prop));
-                }
-                else {  // ProcedureCall(ARG) -> ID ( )
+                } else {  // ProcedureCall(ARG) -> ID ( )
                     prop = new CallExprAST(node->son[0]->raw, {});
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "ElsePart") {
+            } else if (node->type == "ElsePart") {
                 ElsePart prop;
                 if (node->son.size() >
                     0) {  // ElsePart -> else CompoundStatement
-                    prop = cast<ElsePart>(node->son[1]->prop);
-                }
-                else {
+                    if (node->son[1]->type == "CompoundStatement")
+                        prop = cast<ElsePart>(node->son[1]->prop);
+                    else
+                        prop =
+                            new BlockAST({cast<Statement>(node->son[1]->prop)});
+                } else {
                     prop = new BlockAST({});
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "ExpressionList") {
+            } else if (node->type == "ExpressionList") {
                 ExpressionList prop;
                 if (node->son.size() == 1) {  // ExpressionList -> Expression
-                    prop = ExpressionList{ cast<Expression>(node->son[0]->prop) };
-                }
-                else {  // ExpressionList -> ExpressionList , Expression
+                    prop = ExpressionList{cast<Expression>(node->son[0]->prop)};
+                } else {  // ExpressionList -> ExpressionList , Expression
                     prop = cast<ExpressionList>(node->son[0]->prop);
                     prop.push_back(cast<Expression>(node->son[2]->prop));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "Expression") {
+            } else if (node->type == "Expression") {
                 /*
                     Expression -> SimpleExpression relOP SimpleExpression
                     Expression -> SimpleExpression = SimpleExpression
@@ -896,34 +824,29 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                     prop = new BinaryExprAST(
                         node->son[1]->raw, cast<ExprAST*>(node->son[0]->prop),
                         cast<ExprAST*>(node->son[2]->prop));
-                }
-                else if (node->son.size() == 2) {
+                } else if (node->son.size() == 2) {
                     prop = new UnaryExprAST("^",
-                        cast<ExprAST*>(node->son[0]->prop));
-                }
-                else {
+                                            cast<ExprAST*>(node->son[0]->prop));
+                } else {
                     if (node->son[0]->parserSymbol == "stringVal") {
                         prop = new StringExprAST(node->son[0]->raw);
-                    }
-                    else {  // Expression -> SimpleExpression
+                    } else {  // Expression -> SimpleExpression
                         prop = cast<Expression>(node->son[0]->prop);
                     }
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "SimpleExpression") {
+            } else if (node->type == "SimpleExpression") {
                 SimpleExpression prop;
                 if (node->son.size() == 1)  // SimpleExpression -> Term
                     prop = cast<SimpleExpression>(node->son[0]->prop);
                 else {  // SimpleExpression -> SimpleExpression addOP Term
                     prop =
                         new BinaryExprAST(cast<std::string>(node->son[1]->prop),
-                            cast<ExprAST*>(node->son[0]->prop),
-                            cast<ExprAST*>(node->son[2]->prop));
+                                          cast<ExprAST*>(node->son[0]->prop),
+                                          cast<ExprAST*>(node->son[2]->prop));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "Term") {
+            } else if (node->type == "Term") {
                 Term prop = nullptr;
                 if (node->son.size() == 1)  // Term -> Factor
                     prop = cast<Term>(node->son[0]->prop);
@@ -933,87 +856,69 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                         cast<ExprAST*>(node->son[2]->prop));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "Factor") {
+            } else if (node->type == "Factor") {
                 Factor prop = nullptr;
-                if (node->son[0]->type == "Value") { //Factor -> Value
+                if (node->son[0]->type == "Value") {  // Factor -> Value
                     prop = cast<Value>(node->son[0]->prop);
-                }
-                else if (node->son[0]->type == "Num") {  // Factor -> Num
+                } else if (node->son[0]->type == "Num") {  // Factor -> Num
                     prop = cast<Factor>(node->son[0]->prop);
-                }
-                else if (node->son[0]->type ==
-                    "ComposedVariable") {  // Factor -> ComposedVariable
+                } else if (node->son[0]->type ==
+                           "ComposedVariable") {  // Factor -> ComposedVariable
                     prop = cast<Factor>(node->son[0]->prop);
-                }
-                else if (node->son[1]->type == "Num") {
+                } else if (node->son[1]->type == "Num") {
                     // Factor -> + Num
                     // Factor -> - Num
                     prop = new UnaryExprAST(node->son[0]->raw,
-                        cast<ExprAST*>(node->son[1]->prop));
-                }
-                else if (node->son[1]->type == "Factor") {
+                                            cast<ExprAST*>(node->son[1]->prop));
+                } else if (node->son[1]->type == "Factor") {
                     // Factor -> not Factor
                     // Factor -> uminus Factor
                     prop = new UnaryExprAST(node->son[0]->raw,
-                        cast<ExprAST*>(node->son[1]->prop));
-                }
-                else
+                                            cast<ExprAST*>(node->son[1]->prop));
+                } else
                     abort();
                 node->prop = prop;
-            }
-            else if (node->type == "ComposedVariable") {
+            } else if (node->type == "ComposedVariable") {
                 ComposedVariable prop = nullptr;
                 if (node->son[0]->type == "Variable") {
                     prop = cast<ComposedVariable>(node->son[0]->prop);
-                }
-                else if (node->son[0]->type == "ProcedureCall(ARG)") {
+                } else if (node->son[0]->type == "ProcedureCall(ARG)") {
                     prop = cast<ComposedVariable>(node->son[0]->prop);
-                }
-                else if (node->son[1]->type ==
-                    "Expression") {  // ( Expression )
+                } else if (node->son[1]->type ==
+                           "Expression") {  // ( Expression )
                     prop = cast<ComposedVariable>(node->son[1]->prop);
-                }
-                else {
+                } else {
                     prop = new BinaryExprAST(
                         ".", cast<ExprAST*>(node->son[0]->prop),
                         new StringExprAST(node->son[2]->raw));
                 }
                 node->prop = prop;
-            }
-            else if (node->type == "Num") {
+            } else if (node->type == "Num") {
                 Num prop;
                 if (node->son[0]->parserSymbol == "intVal") {  // Num -> intVal
                     prop = new NumberExprAST(std::stoi(node->son[0]->raw));
-                }
-                else if (node->son[0]->parserSymbol == "realVal") {
+                } else if (node->son[0]->parserSymbol == "realVal") {
                     prop = new NumberExprAST(std::stod(node->son[0]->raw));
-                }
-                else
+                } else
                     abort();
                 node->prop = prop;
-            }
-            else if (node->type == "Digits") {
+            } else if (node->type == "Digits") {
                 node->prop = new NumberExprAST(std::stoi(node->son[0]->raw));
                 assert(node->prop.type() == typeid(Digits));
-            }
-            else if (node->type == "addOP") {
+            } else if (node->type == "addOP") {
                 node->prop = node->son[0]->raw;
                 assert(node->son[0]->raw == "+" || node->son[0]->raw == "-" ||
-                    node->son[0]->raw == "or");
+                       node->son[0]->raw == "or");
                 assert(node->prop.type() == typeid(addOP));
-            }
-            else if (node->type == "Value") {
+            } else if (node->type == "Value") {
                 Value prop;
-                if (node->son[0]->type == "Num") { //Value -> Num
+                if (node->son[0]->type == "Num") {  // Value -> Num
                     prop = cast<Value>(node->son[0]->prop);
-                }
-                else { //Value -> stringVal
+                } else {  // Value -> stringVal
                     prop = new StringExprAST(node->son[0]->raw);
                 }
                 node->prop = prop;
-            }
-            else
+            } else
                 abort();
             // cerr << node->type << endl;
             assert(node->prop.has_value());  //每个结点都必有一个属性
@@ -1037,7 +942,8 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
         UpdateProperties(newNode);
         unlinkedNodes.push_back(newNode);
         newNode->Report();
-        std::cerr << "report = " << newNode->type << '\n';
+        if (newNode->type == "Statement")
+            std::cerr << "report = " << newNode->type << '\n';
     };
     std::cerr << "start analyse" << endl;
     states.push_back(0);
@@ -1047,14 +953,13 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
     tq.pop();
     for (;;) {
         curState = *states.rbegin();
-       //std::cerr << curState << '\n';
+        // std::cerr << curState << '\n';
         // for (auto x : symbols) std::cerr << x << " ";
         // std::cerr << endl;
         // std::cerr << " str: " << N.raw << " type: " << N.type << endl;
         // std::cerr << "row:" << N.row << " column: " << N.column << " type: "
         // << N.parserSymbol << endl;
-        if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0) 
-            throw;
+        if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0) throw;
         pair<ACTION, int> act =
             actionTable[make_pair(curState, N.parserSymbol)];
         if (act.first == Shift) {
@@ -1067,13 +972,11 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
             N.Load(tq.front());
             tq.pop();
 
-        }
-        else if (act.first == Reduce) {
+        } else if (act.first == Reduce) {
             Expr prod = Production_content[act.second];
             DoReduce(prod);
-        }
-        else if (act.first == ACC) {
-            DoReduce({ "S", {"ProgramStruct"} });
+        } else if (act.first == ACC) {
+            DoReduce({"S", {"ProgramStruct"}});
             cout << "ACCEPT!" << endl;
             break;
         }
@@ -1093,7 +996,7 @@ GlobalAST* parser_work(TokenQueue tq) {
     init();
     get_first();
     generate_table();
-    tq.push({ "", 0, 0, "" });
+    tq.push({"", 0, 0, ""});
     auto root = Analyse(tq);
     check_grammar_tree(0, 0);
     return NodeProperties::cast<GlobalAST*>(root->prop);
