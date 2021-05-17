@@ -152,8 +152,8 @@ struct Item {
     std::vector<std::string> previous, next;
     Item() {}
     Item(std::string lhs, std::vector<std::string> previous,
-         std::vector<std::string> next, std::string LookAhead)
-        : lhs(lhs), previous(previous), next(next), look_ahead(LookAhead) {}
+         std::vector<std::string> next, std::string look_ahead)
+        : lhs(lhs), previous(previous), next(next), look_ahead(look_ahead) {}
     bool operator<(const Item other) const {
         if (lhs != other.lhs) {
             return lhs < other.lhs;
@@ -249,7 +249,7 @@ void get_items() {
                     // 	itemout<<". ";
                     // 	for(auto str:x.next) itemout<<str<<" ";
                     // 	itemout<<", ";
-                    // 	itemout<<x.LookAhead<<endl;
+                    // 	itemout<<x.look_ahead<<endl;
                     // }
                 }
             }
@@ -280,27 +280,27 @@ void load_table() {
         FATAL(std::cerr << "analyse_table.txt not found." << std::endl;)
         abort();
     }
-    int I,id;
-	std::string a,data;
-	while(!inf.eof()){
-		inf>>I>>a>>data>>id;
-		if(id == -1) {
-			goto_table[std::make_pair(I,a)]=stoi(data);
-		} else if(id == -2) {
-			parser_err_table[std::make_pair(I,a)]=data;
-		} else {
-			enum ACTION ACT;
-			if(stoi(data) == 1) 
+    int I, id;
+    std::string a, data;
+    while (!inf.eof()) {
+        inf >> I >> a >> data >> id;
+        if (id == -1) {
+            goto_table[std::make_pair(I, a)] = stoi(data);
+        } else if (id == -2) {
+            parser_err_table[std::make_pair(I, a)] = data;
+        } else {
+            enum ACTION ACT;
+            if (stoi(data) == 1)
                 ACT = SHIFT;
-			else if(stoi(data) == 2) 
+            else if (stoi(data) == 2)
                 ACT = REDUCE;
-			else if(stoi(data) == 3) 
+            else if (stoi(data) == 3)
                 ACT = ACC;
-			else 
+            else
                 assert(0);
-			action_table[std::make_pair(I,a)]=std::make_pair(ACT,id);
-		}
-	}
+            action_table[std::make_pair(I, a)] = std::make_pair(ACT, id);
+        }
+    }
 }
 void generate_table() {
     if (table_exist) {
@@ -331,19 +331,19 @@ void generate_table() {
             if (GoIA.empty()) continue;
             goto_table[make_pair(I.second, A)] = item_set[GoIA];
         }
-		bool flg = false;
-        for(auto it : I.first) {
-        	if (it.LookAhead == ";") flg = true;
-        	if (!it.next.empty()){
-        		if(*it.next.begin() == ";") flg = true;
-        	}
+        bool flg = false;
+        for (auto it : I.first) {
+            if (it.look_ahead == ";") flg = true;
+            if (!it.next.empty()) {
+                if (*it.next.begin() == ";") flg = true;
+            }
         }
-        if(flg) {
-        	for(auto x:terminal) {
-        		if (action_table.count(std::make_pair(I.second, x)) == 0) {
-        			parser_err_table[std::make_pair(I.second, x)] = ";";
-        		}
-        	}
+        if (flg) {
+            for (auto x : terminal) {
+                if (action_table.count(std::make_pair(I.second, x)) == 0) {
+                    parser_err_table[std::make_pair(I.second, x)] = ";";
+                }
+            }
         }
     }
     std::ofstream of("analyse_table.txt");
@@ -358,10 +358,12 @@ void generate_table() {
                    << action_table[std::make_pair(I.second, a)].first << " "
                    << action_table[std::make_pair(I.second, a)].second
                    << std::endl;
-            }else{
-				if(parser_err_table.count(std::make_pair(I.second,a)))
-					of<<I.second<<" "<<a<<" "<<parser_err_table[make_pair(I.second,a)]<<" -2"<<endl;
-			}
+            } else {
+                if (parser_err_table.count(std::make_pair(I.second, a)))
+                    of << I.second << " " << a << " "
+                       << parser_err_table[make_pair(I.second, a)] << " -2"
+                       << std::endl;
+            }
         }
         if (action_table.count(std::make_pair(I.second, "$"))) {
             of << I.second << " "
@@ -983,13 +985,18 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
         // std::cerr << " str: " << N.raw << " type: " << N.type << endl;
         // std::cerr << "row:" << N.row << " column: " << N.column << " type: "
         // << N.parserSymbol << endl;
-        if(action_table.count(std::make_pair(cur_state,n.parser_symbol)) == 0){
-			if(parser_err_table.count(std::make_pair(cur_state,n.parser_symbol))){
-				std::cout<<"Error: Expect "<<parser_err_table[std::make_pair(cur_state,n.parser_symbol)]
-                    <<"  but "<<n.parser_symbol<<" found."<<std::endl;
-			}
-			throw;
-		}
+        if (action_table.count(std::make_pair(cur_state, n.parser_symbol)) ==
+            0) {
+            if (parser_err_table.count(
+                    std::make_pair(cur_state, n.parser_symbol))) {
+                std::cout << "Error: Expect "
+                          << parser_err_table[std::make_pair(cur_state,
+                                                             n.parser_symbol)]
+                          << "  but " << n.parser_symbol << " found."
+                          << std::endl;
+            }
+            throw;
+        }
         std::pair<ACTION, int> act =
             action_table[make_pair(cur_state, n.parser_symbol)];
         if (act.first == SHIFT) {
