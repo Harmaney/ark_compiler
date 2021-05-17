@@ -1,5 +1,12 @@
 program
 var
+<<<<<<< HEAD
 char
+=======
+record
+string
+integer
+end
+>>>>>>> 2546fbf27f801270f1f21b41a804935fb5751e57
 begin
 end

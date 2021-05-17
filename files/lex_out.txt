@@ -4,6 +4,7 @@ Hello 1 9 identify
 var 2 1 keyword
 i 2 5 identify
 : 2 6 punc
+<<<<<<< HEAD
 char 2 7 keyword
 ; 2 11 punc
 begin 3 1 keyword
@@ -18,3 +19,42 @@ i 5 8 identify
 ; 5 10 punc
 end 6 1 keyword
 . 6 4 punc
+=======
+record 2 7 keyword
+name 3 5 identify
+: 3 9 punc
+string 3 10 keyword
+; 3 16 punc
+age 4 5 identify
+: 4 8 punc
+integer 4 9 keyword
+; 4 16 punc
+end 5 1 keyword
+; 5 4 punc
+begin 6 1 keyword
+i 7 5 identify
+. 7 6 punc
+name 7 7 identify
+:= 7 11 punc
+123 7 12 stringVal
+; 7 18 punc
+i 8 5 identify
+. 8 6 punc
+age 8 7 identify
+:= 8 10 punc
+2 8 12 intVal
+; 8 13 punc
+write 9 5 identify
+( 9 10 punc
+i 9 11 identify
+. 9 12 punc
+name 9 13 identify
+, 9 17 punc
+i 9 18 identify
+. 9 19 punc
+age 9 20 identify
+) 9 23 punc
+; 9 24 punc
+end 10 1 keyword
+. 10 4 punc
+>>>>>>> 2546fbf27f801270f1f21b41a804935fb5751e57

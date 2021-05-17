@@ -6,6 +6,7 @@ enum ASTKind {
     AST_TYPE_DEF,
     AST_NUMBER_EXPR,
     AST_STRING_EXPR,
+    AST_CHAR_EXPR,
     AST_VARIABLE_EXPR,
     AST_BINARY_EXPR,
     AST_UNARY_EXPR,
@@ -22,11 +23,12 @@ enum ASTKind {
     AST_IF_STATEMENT,
 };
 
-#define TYPE_BASIC_DOUBLE "double"
+#define TYPE_BASIC_DOUBLE "real"
 #define TYPE_BASIC_INT "integer"
 #define TYPE_BASIC_LONGINT "longint"
 #define TYPE_BASIC_INT64 "int64"
 // in fact this is somehow not basic
+#define TYPE_BASIC_CHAR "char"
 #define TYPE_BASIC_STRING "string"
 #define TYPE_BASIC_VOID "void"
 
