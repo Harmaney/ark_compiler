@@ -3,8 +3,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "logger.h"
 #include "err.h"
+#include "logger.h"
 
 void LOG_WALK(AST *ast) {
     //    WALK_AST<<"ARRIVE "<<ast<<std::endl;
@@ -172,10 +172,13 @@ void BlockAST::accept(ASTDispatcher &dispatcher) {
 
 void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    if (this->varType) this->varType->accept(dispatcher);
-    else if (this->initVal) this->initVal->accept(dispatcher);
-    else{
-        throw TypeErrorException("missing type for variable "+this->sig->name,"<>","<?>",0,0);
+    if (this->varType)
+        this->varType->accept(dispatcher);
+    else if (this->initVal)
+        this->initVal->accept(dispatcher);
+    else {
+        throw TypeErrorException("missing type for variable " + this->sig->name,
+                                 "<>", "<?>", 0, 0);
     }
 
     TRACE(std::cerr << "into variable ast" << std::endl;)
@@ -239,7 +242,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
         {}, this->mainBlock));
     // add return 0 to mainBlock
     this->mainBlock->exprs.push_back(new ReturnAST(new NumberExprAST(0)));
-
+    this->mainBlock->extraData["IS_MAIN"] = 1;
     for (auto func : functions) {
         func->accept(dispatcher);
     }
@@ -285,14 +288,14 @@ void _SymbolTable::insert_type(std::string sig, SymbolDescriptor *var) {
     refType[sig] = var;
 }
 ArrayTypeDescriptor *_SymbolTable::create_array_type(SymbolDescriptor *item,
-                                                     int sz,int beg) {
+                                                     int sz, int beg) {
     if (this->hasArrayType.count(std::make_pair(item, sz))) {
         return static_cast<ArrayTypeDescriptor *>(
             this->searchType(this->hasArrayType[std::make_pair(item, sz)]));
     }
     auto slot = getSlot();
     ArrayTypeDescriptor *arrayDescriptor =
-        new ArrayTypeDescriptor(slot, item, sz,beg);
+        new ArrayTypeDescriptor(slot, item, sz, beg);
     this->insert_type(slot, arrayDescriptor);
     return arrayDescriptor;
 }
@@ -401,9 +404,9 @@ void SymbolTable::insertFunction(std::string sig,
 }
 
 ArrayTypeDescriptor *SymbolTable::create_array_type(SymbolDescriptor *item,
-                                                    int sz,int beg) {
+                                                    int sz, int beg) {
     // array type are seen as global type
-    return root->create_array_type(item, sz,beg);
+    return root->create_array_type(item, sz, beg);
 }
 
 PointerTypeDescriptor *SymbolTable::create_pointer_type(

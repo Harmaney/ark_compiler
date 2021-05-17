@@ -28,13 +28,16 @@ std::string mapVariableType(SymbolDescriptor *type) {
     }
 }
 // std
+
+std::map<std::string, std::string> read_write_overloads_code;
+
 void init_read_write() {
     static const std::vector<std::pair<std::string, std::string>> basic_type = {
         {"lf", TYPE_BASIC_DOUBLE},
         {"d", TYPE_BASIC_INT},
         {"d", TYPE_BASIC_LONGINT},
         {"lld", TYPE_BASIC_INT64},
-        {"c", TYPE_BASIC_CHAR}};
+        {"s", TYPE_BASIC_STRING}};
     std::function<void(std::string, int, std::string, std::string, std::string,
                        std::string, std::vector<VariableDescriptor *>)>
         dfs_all = [&](std::string func, int lev, std::string funcSuffix,
@@ -42,15 +45,13 @@ void init_read_write() {
                       std::string idList,
                       std::vector<VariableDescriptor *> args) {
             if (lev == 0) {
-                if (func == "write")
-                    CodeCollector::push_back("void " + func + funcSuffix + "(" +
-                                             argList + ") { printf(\"" +
-                                             formatString + "\"" + idList +
-                                             "); }");
-                else
-                    CodeCollector::push_back(
-                        "void " + func + funcSuffix + "(" + argList +
-                        ") { scanf(\"" + formatString + "\"" + idList + "); }");
+                read_write_overloads_code[func + funcSuffix] =
+                    func == "write" ? "void " + func + funcSuffix + "(" +
+                                          argList + ") { printf(\"" +
+                                          formatString + "\"" + idList + "); }"
+                                    : "void " + func + funcSuffix + "(" +
+                                          argList + ") { scanf(\"" +
+                                          formatString + "\"" + idList + "); }";
                 SymbolTable::insertFunction(
                     func,
                     new FunctionDescriptor(
@@ -65,10 +66,11 @@ void init_read_write() {
                                mapVariableType(SymbolTable::lookforType(type)) +
                                (func == "read" ? "* " : "") + " " + varName;
                     _formatString = formatString + "%" + format;
-                    _idList = idList + ", " /* +
-                               (func == "write" || type == TYPE_BASIC_STRING ?
-                               "" : "&")*/
-                              + varName;
+                    _idList =
+                        idList + ", " +
+                        (func == "write" || type == TYPE_BASIC_STRING ? ""
+                                                                      : "&") +
+                        varName;
                     _args.push_back(new VariableDescriptor(
                         varName, SymbolTable::lookforType(type),
                         (func == "read"), false));
@@ -92,7 +94,7 @@ bool isPossibleToLevelUp(SymbolDescriptor *src, SymbolDescriptor *target) {
 
     bool checked = false;
     for (auto ty : level) {
-        if (src == ty)checked = true;
+        if (src == ty) checked = true;
         if (checked && target == ty) return true;
     }
     return false;
@@ -115,9 +117,10 @@ void ASTDispatcher::genGlobalBegin(GlobalAST *ast) {
     // TODO:
     CodeCollector::begin_section("prelude");
 
-    CodeCollector::push_back("#include <stdio.h>");
-    CodeCollector::push_back("typedef char* string;");
-    CodeCollector::push_back("int ____nouse=1;");
+    std::ifstream prel("prelude.h");
+
+    CodeCollector::push_back(std::string((std::istreambuf_iterator<char>(prel)),
+                                         (std::istreambuf_iterator<char>())));
 
     init_read_write();
 
@@ -138,7 +141,8 @@ void ASTDispatcher::genArrayTypeDecl(ArrayTypeDeclAST *ast) {
     }
 
     auto descriptor = SymbolTable::create_array_type(
-        ast->itemAST->_descriptor, ast->rangeR->val_int - ast->rangeL->val_int,ast->rangeL->val_int);
+        ast->itemAST->_descriptor, ast->rangeR->val_int - ast->rangeL->val_int,
+        ast->rangeL->val_int);
 
     // this is wrong when using custom type
     // to fix this, you should think about how to resolve typedef in struct too
@@ -225,7 +229,12 @@ void ASTDispatcher::genStringExpr(StringExprAST *ast) {
 
     CodeCollector::begin_section("global_define");
     CodeCollector::src() << mapVariableType(t->varType) << " " << t->name
-                         << " = \"" << ast->val << "\";";
+                         << ";";
+    CodeCollector::push_back();
+    CodeCollector::end_section();
+
+    CodeCollector::begin_section("init_string");
+    CodeCollector::src() << t->name << "= new_string_(\"" << ast->val << "\");";
     CodeCollector::push_back();
     CodeCollector::end_section();
     ast->value = t;
@@ -278,7 +287,7 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
 
     if (ast->op == ":=") {
         if (lhs->varType != rhs->varType &&
-            isPossibleToLevelUp(rhs->varType, lhs->varType)==false) {
+            isPossibleToLevelUp(rhs->varType, lhs->varType) == false) {
             throw TypeErrorException("type does not match between `=`",
                                      rhs->varType->name, lhs->varType->name, 0,
                                      0);
@@ -287,13 +296,21 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
             throw TypeErrorException("try using `=` on right value",
                                      "right val", "left val", 0, 0);
         }
-        putVariableExpr(lhs);
-        CodeCollector::src() << "=";
-        putVariableExpr(rhs);
+        if (lhs->varType->name == "string") {
+            assert(rhs->varType->name == "string");
+            CodeCollector::src() << "assign_string_(&";
+            putVariableExpr(lhs);
+            CodeCollector::src() << ", ";
+            putVariableExpr(rhs);
+            CodeCollector::src() << ")";
+        } else {
+            putVariableExpr(lhs);
+            CodeCollector::src() << "=";
+            putVariableExpr(rhs);
+            // TODO: pascal 的 = 是否有返回值？
+        }
         CodeCollector::src() << ";";
         CodeCollector::push_back();
-        // TODO: pascal 的 = 是否有返回值？
-
     } else if (ast->op == "[]") {
         if (lhs->varType->type != DESCRIPTOR_ARRAY) {
             throw TypeErrorException("try to use operator [] on invalid type",
@@ -303,12 +320,12 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
 
         auto array = static_cast<ArrayTypeDescriptor *>(lhs->varType);
 
-        VariableDescriptor *realid=
+        VariableDescriptor *realid =
             SymbolTable::createVariable(rhs->varType, false, false);
         putVariableDecl(realid);
         CodeCollector::src() << "=";
         putVariableExpr(realid);
-        CodeCollector::src()<<"-"<<array->beg<<";";
+        CodeCollector::src() << "-" << array->beg << ";";
         CodeCollector::push_back();
 
         VariableDescriptor *t =
@@ -384,14 +401,26 @@ void ASTDispatcher::genBinaryExpr(BinaryExprAST *ast) {
             putVariableDecl(t);
             CodeCollector::src() << ";";
             CodeCollector::push_back();
-
-            putVariableExpr(t);
-            CodeCollector::src() << "=";
-            putVariableExpr(lhs);
-            CodeCollector::src() << ast->op;
-            putVariableExpr(rhs);
-            CodeCollector::src() << ";";
-            CodeCollector::push_back();
+            if (lhs->varType->name == "string") {
+                assert(rhs->varType->name == "string");
+                assert(ast->op == "+");
+                CodeCollector::src() << "assign_string(&";
+                putVariableExpr(t);
+                CodeCollector::src() << ",add_string_(";
+                putVariableExpr(lhs);
+                CodeCollector::src() << ",";
+                putVariableExpr(rhs);
+                CodeCollector::src() << "));";
+                CodeCollector::push_back();
+            } else {
+                putVariableExpr(t);
+                CodeCollector::src() << "=";
+                putVariableExpr(lhs);
+                CodeCollector::src() << ast->op;
+                putVariableExpr(rhs);
+                CodeCollector::src() << ";";
+                CodeCollector::push_back();
+            }
             ast->value = t;
         } else {
             throw UndefinedBehaviorException("unknown operator " + ast->op, 0,
@@ -460,7 +489,14 @@ void ASTDispatcher::genCallExpr(CallExprAST *ast) {
     }
     FunctionDescriptor *descriptor =
         static_cast<FunctionDescriptor *>(raw_descriptor);
-
+    // special for read_write
+    auto itrn_name = descriptor->name;
+    if (read_write_overloads_code.count(itrn_name)) {
+        CodeCollector::begin_section("prelude");
+        CodeCollector::push_back(read_write_overloads_code[itrn_name]);
+        CodeCollector::end_section();
+        read_write_overloads_code.erase(itrn_name);
+    }
     if (descriptor->args.size() != ast->args.size()) {
         throw TypeErrorException("args not matched for function " + ast->callee,
                                  std::to_string(ast->args.size()),
@@ -701,6 +737,8 @@ void ASTDispatcher::genFunction(FunctionAST *ast) {
 
 void ASTDispatcher::genBlockBegin(BlockAST *ast) {
     CodeCollector::push_back("{");
+    if (ast->extraData.count("IS_MAIN"))
+        CodeCollector::push_back("init_string_();");
 }
 
 void ASTDispatcher::genBlockEnd(BlockAST *ast) {

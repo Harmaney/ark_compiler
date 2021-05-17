@@ -1,8 +1,8 @@
 #pragma once
-#include <sstream>
-#include <string>
 #include <ostream>
+#include <sstream>
 #include <stack>
+#include <string>
 #include <vector>
 
 #include "data.h"
@@ -36,54 +36,53 @@ class GlobalAST;
 class FunctionSignatureAST;
 class FunctionAST;
 
-
 struct VariableDescriptor;
 
-class ADispatcher{
-public:
-    virtual void genGlobalBegin(GlobalAST *ast)=0;
-    virtual void genGlobalEnd(GlobalAST *ast)=0;
+class ADispatcher {
+   public:
+    virtual void genGlobalBegin(GlobalAST *ast) = 0;
+    virtual void genGlobalEnd(GlobalAST *ast) = 0;
 
-    virtual void genArrayTypeDecl(ArrayTypeDeclAST *ast)=0;
-    virtual void genBasicType(BasicTypeAST *ast)=0;
-    virtual void genPointerTypeDecl(PointerTypeDeclAST *ast)=0;
-    virtual void genTypeDef(TypeDefAST *ast)=0;
+    virtual void genArrayTypeDecl(ArrayTypeDeclAST *ast) = 0;
+    virtual void genBasicType(BasicTypeAST *ast) = 0;
+    virtual void genPointerTypeDecl(PointerTypeDeclAST *ast) = 0;
+    virtual void genTypeDef(TypeDefAST *ast) = 0;
 
-    virtual void genNumberExpr(NumberExprAST *ast)=0;
-    virtual void genStringExpr(StringExprAST *ast)=0;
-    virtual void genCharExpr(CharExprAST *ast)=0;
-    virtual void genVariableExpr(VariableExprAST *ast)=0;
-    virtual void genReturn(ReturnAST *ast)=0;
-    virtual void genUnaryExpr(UnaryExprAST *ast)=0;
-    virtual void genBinaryExpr(BinaryExprAST *ast)=0;
-    virtual void genCallExpr(CallExprAST *ast)=0;
+    virtual void genNumberExpr(NumberExprAST *ast) = 0;
+    virtual void genStringExpr(StringExprAST *ast) = 0;
+    virtual void genCharExpr(CharExprAST *ast) = 0;
+    virtual void genVariableExpr(VariableExprAST *ast) = 0;
+    virtual void genReturn(ReturnAST *ast) = 0;
+    virtual void genUnaryExpr(UnaryExprAST *ast) = 0;
+    virtual void genBinaryExpr(BinaryExprAST *ast) = 0;
+    virtual void genCallExpr(CallExprAST *ast) = 0;
 
     /// 只生产if，不包含block
-    virtual void genIfStatementBegin(IfStatementAST *ast)=0;
-    virtual void genIfStatementElse(IfStatementAST *ast)=0;
-    virtual void genIfStatementEnd(IfStatementAST *ast)=0;
+    virtual void genIfStatementBegin(IfStatementAST *ast) = 0;
+    virtual void genIfStatementElse(IfStatementAST *ast) = 0;
+    virtual void genIfStatementEnd(IfStatementAST *ast) = 0;
     /// 只生产while，不包含block
-    virtual void genWhileStatementBegin(WhileStatementAST *ast)=0;
-    virtual void genWhileStatementEnd(WhileStatementAST *ast)=0;
+    virtual void genWhileStatementBegin(WhileStatementAST *ast) = 0;
+    virtual void genWhileStatementEnd(WhileStatementAST *ast) = 0;
     /// 只生产for，不包含block
-    virtual void genForStatementBegin(ForStatementAST *ast)=0;
-    virtual void genForStatementEnd(ForStatementAST *ast)=0;
+    virtual void genForStatementBegin(ForStatementAST *ast) = 0;
+    virtual void genForStatementEnd(ForStatementAST *ast) = 0;
 
-    virtual void genFunction(FunctionAST *ast)=0;
-    virtual void genFunctionSignature(FunctionSignatureAST *ast)=0;
+    virtual void genFunction(FunctionAST *ast) = 0;
+    virtual void genFunctionSignature(FunctionSignatureAST *ast) = 0;
 
-    virtual void genStruct(StructDeclAST *ast)=0;
+    virtual void genStruct(StructDeclAST *ast) = 0;
 
-    virtual void genBlockBegin(BlockAST *ast)=0;
-    virtual void genBlockEnd(BlockAST *ast)=0;
+    virtual void genBlockBegin(BlockAST *ast) = 0;
+    virtual void genBlockEnd(BlockAST *ast) = 0;
 
-    virtual void genVariableDecl(VariableDeclAST *ast)=0;
+    virtual void genVariableDecl(VariableDeclAST *ast) = 0;
 };
 
 /// 输出代码的 visitor
 ///
 /// 访问的规则**不在此定义**，而是在 data 里。
-class ASTDispatcher: public ADispatcher {
+class ASTDispatcher : public ADispatcher {
    public:
     void genGlobalBegin(GlobalAST *ast) override;
     void genGlobalEnd(GlobalAST *ast) override;
@@ -91,7 +90,7 @@ class ASTDispatcher: public ADispatcher {
     void genArrayTypeDecl(ArrayTypeDeclAST *ast) override;
     void genBasicType(BasicTypeAST *ast) override;
     void genPointerTypeDecl(PointerTypeDeclAST *ast) override;
-    void genTypeDef(TypeDefAST *ast)override;
+    void genTypeDef(TypeDefAST *ast) override;
 
     void genNumberExpr(NumberExprAST *ast) override;
     void genStringExpr(StringExprAST *ast) override;
@@ -124,9 +123,7 @@ class ASTDispatcher: public ADispatcher {
     void genVariableDecl(VariableDeclAST *ast) override;
 };
 
-enum PlaceHolder{
-    PLACE_VOID,PLACE_BEGIN=1,PLACE_END=2
-};
+enum PlaceHolder { PLACE_VOID, PLACE_BEGIN = 1, PLACE_END = 2 };
 
 /// 直接存储代码
 ///
@@ -135,7 +132,7 @@ enum PlaceHolder{
 class CodeCollector {
    private:
     static std::vector<std::string> section_order;
-    static std::map<std::string, std::vector<std::string>*> codes;
+    static std::map<std::string, std::vector<std::string> *> codes;
 
     static std::vector<std::string> *cur_section;
     static std::stack<std::string> cur_section_name;
@@ -143,7 +140,7 @@ class CodeCollector {
     static std::stringstream ss;
 
    public:
-   /// 开启新的代码段
+    /// 开启新的代码段
     static void begin_section(std::string section_name = std::string());
     /// 当前行的生成
     static std::stringstream &src();
@@ -156,11 +153,11 @@ class CodeCollector {
     /// 将代码压入段首
     static void push_front();
     /// 结束段并压入全局
-    static void end_section(PlaceHolder place=PLACE_END);
+    static void end_section(PlaceHolder place = PLACE_END);
 
     /// 重排段序列
     static void rearrange_section(std::vector<std::string> order);
-    static void rearrange_section(std::string section,int newPos);
+    static void rearrange_section(std::string section, int newPos);
     /// 清空段
     static void clear();
     /// 输出代码
@@ -170,10 +167,11 @@ class CodeCollector {
 
 /////////////////////////////////////
 
-class VisualDispatcher:public ADispatcher{
+class VisualDispatcher : public ADispatcher {
     std::ostream &log;
-    public:
-    VisualDispatcher(std::ostream &log):log(log){}
+
+   public:
+    VisualDispatcher(std::ostream &log) : log(log) {}
     void genGlobalBegin(GlobalAST *ast) override;
     void genGlobalEnd(GlobalAST *ast) override;
 

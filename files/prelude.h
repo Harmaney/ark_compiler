@@ -2,30 +2,24 @@
 #include "stdlib.h"
 #include "string.h"
 typedef char* string;
+int ____nouse = 1;
 
-void assign(string* a, string b) {
+void assign_string_(string* a, string b) {
     free(*a);
     char* p = malloc(strlen(b) + 1);
     strcpy(p, b);
     *a = p;
 }
 
-string add(string a, string b) {
+string add_string_(string a, string b) {
     char* c = malloc(strlen(a) + strlen(b) + 1);
     strcpy(c, a);
     strcpy(c + strlen(a), b);
     return c;
 }
 
-string new_string(const char* s) {
+string new_string_(const char* s) {
     string p = malloc(strlen(s) + 1);
     strcpy(p, s);
     return p;
-}
-string b = new_string("abcdef");
-int main() {
-    string a = new_string("abcdef"), b = new_string("def");
-    assign(&a, add(a, b));
-    printf("%s", a);
-    return 0;
 }
