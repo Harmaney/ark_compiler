@@ -5,10 +5,10 @@
 
 #include "logger.h"
 
-void LOG_WALK(AST *ast){
-    WALK_AST<<"ARRIVE "<<ast<<std::endl;
+void LOG_WALK(AST *ast) {
+    //    WALK_AST<<"ARRIVE "<<ast<<std::endl;
+    genOutputer.push_back({{"ARRIVE", (uint64_t)ast}});
 }
-
 
 void ExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
@@ -99,8 +99,7 @@ void UnaryExprAST::accept(ASTDispatcher &dispatcher) {
 
 void ReturnAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    if(this->expr)
-        this->expr->accept(dispatcher);
+    if (this->expr) this->expr->accept(dispatcher);
 
     dispatcher.genReturn(this);
 }
@@ -224,8 +223,8 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
 
     // convert mainBlock into main function
     this->functions.push_back(new FunctionAST(
-        new FunctionSignatureAST("main", {}, new BasicTypeAST(TYPE_BASIC_INT)),{},
-        this->mainBlock));
+        new FunctionSignatureAST("main", {}, new BasicTypeAST(TYPE_BASIC_INT)),
+        {}, this->mainBlock));
     // add return 0 to mainBlock
     this->mainBlock->exprs.push_back(new ReturnAST(new NumberExprAST(0)));
 
@@ -248,8 +247,7 @@ void FunctionAST::accept(ASTDispatcher &dispatcher) {
     // }
 
     // put all variable declaration into block
-    this->body->exprs.insert(this->body->exprs.begin(),
-                             this->varDecls.begin(),
+    this->body->exprs.insert(this->body->exprs.begin(), this->varDecls.begin(),
                              this->varDecls.end());
 
     dispatcher.genFunction(this);
@@ -336,7 +334,7 @@ void SymbolTable::exit() {
 
 VariableDescriptor *SymbolTable::createVariable(std::string sig,
                                                 SymbolDescriptor *type,
-                                                bool isRef,bool isConst) {
+                                                bool isRef, bool isConst) {
     current->insert_variable(sig,
                              new VariableDescriptor(sig, type, isRef, isConst));
     return current->searchVariable(sig);
@@ -350,7 +348,7 @@ VariableDescriptor *SymbolTable::createVariableG(std::string sig,
 }
 
 VariableDescriptor *SymbolTable::createVariable(SymbolDescriptor *type,
-                                                bool isRef,bool isConst) {
+                                                bool isRef, bool isConst) {
     std::string sig = current->getSlot();
     current->insert_variable(sig,
                              new VariableDescriptor(sig, type, isRef, isConst));
@@ -378,17 +376,17 @@ void SymbolTable::insertType(std::string sig, SymbolDescriptor *descriptor) {
     current->insert_type(sig, descriptor);
 }
 
-void SymbolTable::insertFunction(std::string sig,FunctionDescriptor *descriptor){
-    std::vector<SymbolDescriptor*> symbols;
-    for(auto arg:descriptor->args){
+void SymbolTable::insertFunction(std::string sig,
+                                 FunctionDescriptor *descriptor) {
+    std::vector<SymbolDescriptor *> symbols;
+    for (auto arg : descriptor->args) {
         symbols.push_back(arg->varType);
     }
-    auto name=get_internal_function_name(sig,symbols);
-    descriptor->name=name;
-    std::cerr<<"???? "<<name<<" "<<descriptor->name<<std::endl;
-    insertType(name,descriptor);
+    auto name = get_internal_function_name(sig, symbols);
+    descriptor->name = name;
+    std::cerr << "???? " << name << " " << descriptor->name << std::endl;
+    insertType(name, descriptor);
 }
-
 
 ArrayTypeDescriptor *SymbolTable::create_array_type(SymbolDescriptor *item,
                                                     int sz) {
@@ -410,18 +408,20 @@ SymbolDescriptor *SymbolTable::lookforType(std::string sig) {
     return NULL;
 }
 
-FunctionDescriptor* SymbolTable::lookforFunction(std::string sig,std::vector<SymbolDescriptor*> args){
-    auto name=get_internal_function_name(sig,args);
-    return static_cast<FunctionDescriptor*>(lookforType(name));
+FunctionDescriptor *SymbolTable::lookforFunction(
+    std::string sig, std::vector<SymbolDescriptor *> args) {
+    auto name = get_internal_function_name(sig, args);
+    return static_cast<FunctionDescriptor *>(lookforType(name));
 }
 
-std::string get_internal_function_name(std::string name,std::vector<SymbolDescriptor *> args){
+std::string get_internal_function_name(std::string name,
+                                       std::vector<SymbolDescriptor *> args) {
     std::stringstream ss;
-    ss<<name;
-    for(auto arg:args){
-        ss<<"_"<<arg->name;
+    ss << name;
+    for (auto arg : args) {
+        ss << "_" << arg->name;
     }
-    //ss<<"__"<<res->name;
+    // ss<<"__"<<res->name;
     return ss.str();
 }
 

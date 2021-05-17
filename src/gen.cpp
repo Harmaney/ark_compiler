@@ -738,7 +738,9 @@ void CodeCollector::push_front(std::string str) {
 }
 
 void CodeCollector::push_back() {
-    WALK_AST << cur_section_name.top() << " " << ss.str() << std::endl;
+    // WALK_AST << cur_section_name.top() << " " << ss.str() << std::endl;
+    genOutputer.push_back(
+        {{"GEN", {{"TO", cur_section_name.top()}, {"CODE", ss.str()}}}});
     cur_section->push_back(ss.str());
     ss.str(std::string());
 }

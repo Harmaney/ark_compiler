@@ -71,6 +71,6 @@ Json Serialize(const std::vector<P*>& vec, const T&... arg) {
     return ret;
 }
 
-extern Json parserOutputer;
+extern Json lexOutputer, parserOutputer, genOutputer;
 
 #endif
