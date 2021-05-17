@@ -1,10 +1,10 @@
 program Hello;
 var i:record
     name:string;
-    age:int64;
+    age:integer;
 end;
 begin
     i.name:='123';
     i.age:=2;
-    writeln(i.name,i.age);
+    write(i.name,i.age);
 end.

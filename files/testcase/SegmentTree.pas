@@ -102,7 +102,7 @@ begin
         begin
             read(x);
             read(y);
-            writeln(query(1,n,1,x,y));
+            write(query(1,n,1,x,y));
         end;
     end;
 end.
