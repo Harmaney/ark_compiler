@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     std::cerr << "finished!\n";
 
     std::ofstream info("info.json");
-    info << ((Json){
+    info << (Json{
                  {"code", src_code},
                  {"lex", lex_info},
                  {"parser", parser_info},
