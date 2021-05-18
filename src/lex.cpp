@@ -358,7 +358,15 @@ TokenQueue lex_work(std::string all_chars) {
                 break;
             case 15: //&
                 switch (now_char) {
-                    number add_end break;                     
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                        add_end break;                     
                     default:
                         std::stringstream ss;
                         ss << std::oct << remain_token;
@@ -375,7 +383,9 @@ TokenQueue lex_work(std::string all_chars) {
                 break;
             case 16: //%
                 switch (now_char) {
-                    number add_end break;
+                    case '0':
+                    case '1':
+                        add_end break;
                     default:
                         std::reverse(remain_token.begin(),remain_token.end());
                         int ans = 0;
