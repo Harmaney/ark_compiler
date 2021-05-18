@@ -70,8 +70,8 @@ void init() {
     //	}
 
     //	for(auto str:Nonterminal) cout<<str<<endl;
-    //	cout<<"Terminal\n";
-    //	for(auto str:Terminal) cout<<str<<endl;
+    //	cout<<"terminal\n";
+    //	for(auto str:terminal) cout<<str<<endl;
 }
 template <typename T>
 bool merge(const std::set<T>& A, std::set<T>& B) {
@@ -119,7 +119,7 @@ void get_first() {
         }
     }
 
-    //	for(auto str:Terminal){
+    //	for(auto str:terminal){
     //		cout<<str<<":";
     //		for(auto x:First[str]) cout<<x<<" ";
     //		cout<<endl;
@@ -264,7 +264,7 @@ std::map<std::pair<int, std::string>, std::string> parser_err_table;
 void add_action(std::pair<ACTION, int> act, std::pair<int, std::string> pos) {
     if (action_table.count(pos)) {
         if (action_table[pos] != act) {
-            // if (actionTable[pos].first == Shift) return;
+            // if (actionTable[pos].first == SHIFT) return;
             /*std::cerr << "???" << endl;
             cerr << actionTable[pos].first << " " << actionTable[pos].second
                 << endl;
@@ -291,9 +291,9 @@ void load_table() {
 		} else {
 			enum ACTION ACT;
 			if(stoi(data) == 1) 
-                ACT = Shift;
+                ACT = SHIFT;
 			else if(stoi(data) == 2) 
-                ACT = Reduce;
+                ACT = REDUCE;
 			else if(stoi(data) == 3) 
                 ACT = ACC;
 			else 
@@ -301,6 +301,7 @@ void load_table() {
 			action_table[std::make_pair(I,a)]=std::make_pair(ACT,id);
 		}
 	}
+}
 void generate_table() {
     if (table_exist) {
         load_table();
@@ -338,9 +339,9 @@ void generate_table() {
         	}
         }
         if(flg) {
-        	for(auto x:Terminal) {
-        		if (actionTable.count(make_pair(I.second, x)) == 0) {
-        			parser_err_table[make_pair(I.second, x)] = ";";
+        	for(auto x:terminal) {
+        		if (action_table.count(std::make_pair(I.second, x)) == 0) {
+        			parser_err_table[std::make_pair(I.second, x)] = ";";
         		}
         	}
         }
@@ -982,16 +983,16 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
         // std::cerr << " str: " << N.raw << " type: " << N.type << endl;
         // std::cerr << "row:" << N.row << " column: " << N.column << " type: "
         // << N.parserSymbol << endl;
-        if(actionTable.count(std::make_pair(curState,N.parserSymbol)) == 0){
-			if(parser_err_table.count(std::make_pair(curState,N.parserSymbol))){
-				cout<<"Error:"<<parser_err_table[std::make_pair(curState,N.parserSymbol)]
-                    <<" expected, but"<<N.parserSymbol<<" found."<<endl;
+        if(action_table.count(std::make_pair(cur_state,n.parser_symbol)) == 0){
+			if(parser_err_table.count(std::make_pair(cur_state,n.parser_symbol))){
+				std::cout<<"Error:"<<parser_err_table[std::make_pair(cur_state,n.parser_symbol)]
+                    <<" expected, but"<<n.parser_symbol<<" found."<<std::endl;
 			}
 			throw;
 		}
         std::pair<ACTION, int> act =
-            actionTable[make_pair(curState, N.parserSymbol)];
-        if (act.first == Shift) {
+            action_table[make_pair(cur_state, n.parser_symbol)];
+        if (act.first == SHIFT) {
             states.push_back(act.second);
             symbols.push_back(n.parser_symbol);
             unlinked_nodes.push_back(new GrammarTreeNode(

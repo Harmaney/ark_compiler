@@ -73,7 +73,6 @@ ExpressionList -> ExpressionList , Expression @
 ExpressionList -> Expression @
 Expression -> SimpleExpression relOP SimpleExpression @
 Expression -> SimpleExpression = SimpleExpression @
-Expression -> stringVal @
 Expression -> SimpleExpression @
 Expression -> Expression ^ @
 SimpleExpression -> SimpleExpression addOP Term @
