@@ -134,6 +134,7 @@ void BlockAST::accept(ASTDispatcher& dispatcher) {
     SymbolTable::enter();
 
     for (auto expr : exprs) {
+        try{
         switch (expr->type) {
         case AST_BINARY_EXPR:
             static_cast<BinaryExprAST*>(expr)->accept(dispatcher);
@@ -168,6 +169,9 @@ void BlockAST::accept(ASTDispatcher& dispatcher) {
         default:
             throw std::invalid_argument("unknown type of AST in Block");
             break;
+        }
+        }catch(const CompilerErrorException &e){
+            term_print.error()<<e.what()<<std::endl;
         }
     }
 
@@ -429,6 +433,30 @@ SymbolDescriptor* SymbolTable::lookfor_type(std::string sig) {
         table = table->parent;
     }
     return NULL;
+}
+
+
+FunctionDescriptor* levelup_lookfor_function(std::string sig, std::vector<SymbolDescriptor*> args,int idx){
+    if(SymbolTable::lookfor_function(sig,args)){
+        return SymbolTable::lookfor_function(sig,args);
+    }
+    if(idx>=args.size())return nullptr;
+    std::vector<SymbolDescriptor *> level;
+    level.push_back(SymbolTable::lookfor_type(TYPE_BASIC_INT));
+    level.push_back(SymbolTable::lookfor_type(TYPE_BASIC_LONGINT));
+    level.push_back(SymbolTable::lookfor_type(TYPE_BASIC_INT64));
+
+    bool canrep=false;
+    for(auto dp:level){
+        if(dp==args[idx])canrep=true;
+        auto old=args[idx];
+        args[idx]=dp;
+        auto res=levelup_lookfor_function(sig,args,idx+1);
+        if(res)return res;
+        args[idx]=old;
+    }
+
+    return nullptr;
 }
 
 FunctionDescriptor* SymbolTable::lookfor_function(

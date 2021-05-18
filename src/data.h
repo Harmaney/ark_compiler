@@ -109,6 +109,10 @@ class AST {
     virtual void accept(ASTDispatcher& dispatcher) = 0;
     void set_row(int row) { extraData["row"] = row; }
     void assign(AST* other) { extraData["row"] = other->extraData["row"]; }
+    int get_row() {
+        if (extraData.count("row")) return std::any_cast<int>(extraData["row"]);
+        return 0;
+    }
     void assign(std::any other);
 };
 
@@ -516,3 +520,6 @@ class TagTable {
     static void init();
     static std::string* create_tag_G();
 };
+
+FunctionDescriptor* levelup_lookfor_function(
+    std::string sig, std::vector<SymbolDescriptor*> args, int idx = 0);

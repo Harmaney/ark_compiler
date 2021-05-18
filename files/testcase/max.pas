@@ -5,5 +5,5 @@ begin
     read(j);
     if i<=j then k:=j
     else k:=i;
-    write(k);
+    write(k)
 end.
