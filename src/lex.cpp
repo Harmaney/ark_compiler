@@ -4,7 +4,6 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 #include "logger.h"
 #define letter \
@@ -145,15 +144,6 @@ TokenQueue lex_work(std::string all_chars) {
                     case '"':
                         add_end present_state = 13;
                         break;
-                    case '$':
-                        present_state = 14;
-                        break;
-                    case '&':
-                        present_state = 15;
-                        break;
-                    case '%':
-                        present_state = 16;
-                        break;
                     default:
                         add_end i++;
                         add_and_reset i--;
@@ -243,12 +233,9 @@ TokenQueue lex_work(std::string all_chars) {
                     case '*':
                         present_state = 9;
                         break;
-                    return_char
-                        // error
-                        break;
-                        // null_char
-                        //     // error
-                        //     break;
+                        return_char
+                            // error
+                            break;
                 }
                 break;
             case 9:  //{ *
@@ -275,6 +262,7 @@ TokenQueue lex_work(std::string all_chars) {
                     case '\'':
                         add_end add_and_reset break;
                         return_char
+                            // error
                             term_print.fatal()<<"String Error";
                             break;
                     default:
@@ -319,90 +307,11 @@ TokenQueue lex_work(std::string all_chars) {
                     case '\"':
                         add_end add_and_reset break;
                         return_char
+                            // error
                             term_print.fatal()<<"Annotation Error";
                             break;
                     default:
                         add_end break;
-                }
-                break;
-            case 14: //$
-                switch (now_char) {
-                    number
-                    case 'a':
-                    case 'A':
-                    case 'b':
-                    case 'B':
-                    case 'c':
-                    case 'd':
-                    case 'e':
-                    case 'f':
-                    case 'C':
-                    case 'D':
-                    case 'E':
-                    case 'F':
-                        add_end break;
-                    default:
-                        std::stringstream ss;
-                        ss << std::hex << remain_token;
-                        int val;
-                        ss >> val;
-                        remain_token.clear();
-                        std::stringstream st;
-                        st << val;
-                        st >> remain_token;
-                        add_and_reset;
-                        i--;
-                        break;
-                        
-                }
-                break;
-            case 15: //&
-                switch (now_char) {
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                        add_end break;                     
-                    default:
-                        std::stringstream ss;
-                        ss << std::oct << remain_token;
-                        int val;
-                        ss >> val;
-                        remain_token.clear();
-                        std::stringstream st;
-                        st << val;
-                        st >> remain_token;
-                        add_and_reset;
-                        i--;
-                        break;
-                }
-                break;
-            case 16: //%
-                switch (now_char) {
-                    case '0':
-                    case '1':
-                        add_end break;
-                    default:
-                        std::reverse(remain_token.begin(),remain_token.end());
-                        int ans = 0;
-                        int v = 1;
-                        for(auto vv : remain_token){
-                            if(vv == '1'){
-                                ans += v;
-                            }
-                            v *= 2;
-                        }
-                        std::stringstream ss;
-                        ss << ans;
-                        remain_token.clear();
-                        ss >> remain_token;
-                        add_and_reset;
-                        i--;
-                        break;
                 }
                 break;
         }
@@ -431,9 +340,6 @@ TokenQueue lex_work(std::string all_chars) {
 
         switch (s.type) {
             case 2:
-            case 14:
-            case 15:
-            case 16:
                 type = "intVal";
                 break;
             case 4:
