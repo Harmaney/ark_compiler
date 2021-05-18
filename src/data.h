@@ -112,9 +112,7 @@ public:
     void assign(AST* other) {
         extraData["row"] = other->extraData["row"];
     }
-    void assign(std::any other) {
-        extraData["row"] = std::any_cast<AST*>(other)->extraData["row"];
-    }
+    void assign(std::any other);
 };
 
 /// Pascal 的 Block 看起来并不是 Expr
