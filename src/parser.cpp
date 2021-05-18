@@ -1128,7 +1128,9 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
                         n.parser_symbol)]
                     << "  but " << n.parser_symbol << " found."
                     << std::endl;
+
             }
+            term_print.fatal()<<"Unknown error at line "<<n.row<<std::endl;
             throw;
         }
         std::pair<ACTION, int> act =
