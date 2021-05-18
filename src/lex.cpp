@@ -4,7 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
-#include <stringstream>
+#include <sstream>
 
 #include "logger.h"
 #define letter \
@@ -333,7 +333,7 @@ TokenQueue lex_work(std::string all_chars) {
                         ss << std::hex << remain_token;
                         int val;
                         ss >> val;
-                        remain_token.clear()
+                        remain_token.clear();
                         std::stringstream st;
                         st << val;
                         st >> remain_token;
@@ -351,7 +351,7 @@ TokenQueue lex_work(std::string all_chars) {
                         ss << std::oct << remain_token;
                         int val;
                         ss >> val;
-                        remain_token.clear()
+                        remain_token.clear();
                         std::stringstream st;
                         st << val;
                         st >> remain_token;

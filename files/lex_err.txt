@@ -1,4 +1,5 @@
 program
-const
+var
+longint
 begin
 end
