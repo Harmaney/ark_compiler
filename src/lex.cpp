@@ -327,7 +327,20 @@ TokenQueue lex_work(std::string all_chars) {
                 break;
             case 14: //$
                 switch (now_char) {
-                    number add_end break;
+                    number
+                    case 'a':
+                    case 'A':
+                    case 'b':
+                    case 'B':
+                    case 'c':
+                    case 'd':
+                    case 'e':
+                    case 'f':
+                    case 'C':
+                    case 'D':
+                    case 'E':
+                    case 'F':
+                        add_end break;
                     default:
                         std::stringstream ss;
                         ss << std::hex << remain_token;
