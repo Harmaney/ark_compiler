@@ -985,8 +985,8 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
         // << N.parserSymbol << endl;
         if(action_table.count(std::make_pair(cur_state,n.parser_symbol)) == 0){
 			if(parser_err_table.count(std::make_pair(cur_state,n.parser_symbol))){
-				std::cout<<"Error:"<<parser_err_table[std::make_pair(cur_state,n.parser_symbol)]
-                    <<" expected, but"<<n.parser_symbol<<" found."<<std::endl;
+				std::cout<<"Error: Expect "<<parser_err_table[std::make_pair(cur_state,n.parser_symbol)]
+                    <<"  but "<<n.parser_symbol<<" found."<<std::endl;
 			}
 			throw;
 		}
