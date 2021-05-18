@@ -347,9 +347,10 @@ void generate_table() {
         }
         bool flg = false;
         for (auto it : I.first) {
-            if (it.look_ahead == ";") flg = true;
             if (!it.next.empty()) {
                 if (*it.next.begin() == ";") flg = true;
+            }else {
+                if (it.look_ahead == ";") flg = true;
             }
         }
         if (flg) {
