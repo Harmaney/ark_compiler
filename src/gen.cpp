@@ -311,6 +311,10 @@ void ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
             throw TypeErrorException("try using `=` on right value",
                                      "right val", "left val", ast->get_row(), 0);
         }
+        if(lhs->isConst==true){
+            throw TypeErrorException("try using `:=` on const value",
+                                     "const value", "variable", ast->get_row(), 0);
+        }
         if (lhs->varType->name == "string") {
             assert(rhs->varType->name == "string");
             CodeCollector::src() << "assign_string_(&";
