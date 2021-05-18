@@ -408,6 +408,9 @@ TokenQueue lex_work(std::string all_chars) {
 
         switch (s.type) {
             case 2:
+            case 14:
+            case 15:
+            case 16:
                 type = "intVal";
                 break;
             case 4:
