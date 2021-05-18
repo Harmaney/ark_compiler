@@ -155,7 +155,7 @@ void ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
     }
 
     auto descriptor = SymbolTable::create_array_type(
-        ast->itemAST->_descriptor, ast->rangeR->val_int - ast->rangeL->val_int,
+        ast->itemAST->_descriptor, ast->rangeR->val_int - ast->rangeL->val_int+1,
         ast->rangeL->val_int);
 
     // this is wrong when using custom type
