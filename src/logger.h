@@ -62,9 +62,17 @@ struct TerminalPrinter {
             return dev_null;
     }
 
-    std::ostream& warn() {
+    std::ostream& error() {
         if (1 <= LOG_LEVEL)
-            return ofs << rang::style::bold << rang::fg::red << "WARN "
+            return ofs << rang::style::bold << rang::fg::yellow << "ERROR "
+                       << rang::style::reset << rang::fg::reset;
+        else
+            return dev_null;
+    }
+
+    std::ostream& warn() {
+        if (2 <= LOG_LEVEL)
+            return ofs << rang::style::bold << rang::fg::magenta << "WARN "
                        << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
@@ -72,7 +80,7 @@ struct TerminalPrinter {
 
     std::ostream& info() {
         if (3 <= LOG_LEVEL)
-            return ofs << rang::style::bold << rang::fg::red << "INFO "
+            return ofs << rang::style::bold << rang::fg::green << "INFO "
                        << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
@@ -80,15 +88,15 @@ struct TerminalPrinter {
 
     std::ostream& debug() {
         if (4 <= LOG_LEVEL)
-            return ofs << rang::style::bold << rang::fg::red << "DEBUG "
+            return ofs << rang::style::bold << rang::fg::blue << "DEBUG "
                        << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
     }
 
     std::ostream& detail() {
-        if (4 <= LOG_LEVEL)
-            return ofs << rang::style::bold << rang::fg::red << "DETAIL "
+        if (5 <= LOG_LEVEL)
+            return ofs << rang::style::bold << rang::fg::gray << "DETAIL "
                        << rang::style::reset << rang::fg::reset;
         else
             return dev_null;

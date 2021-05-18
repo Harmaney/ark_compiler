@@ -25,49 +25,31 @@ string new_string_(const char* s) {
     return p;
 }
 
-void read_integer_integer(int*  a2,int*  a1) { scanf("%d%d", a2, a1); }
-void write_integer(int a1) { printf("%d", a1); }
+void write_string(string a1) { printf("%s", a1); }
 //global_define
-int t0_0=0;
-int t0_1=0;
+string t0_0 = NULL;
+string t0_1 = NULL;
+string t0_2 = NULL;
+int t0_3=0;
 //pre_struct
 //pre_array
 //struct
 //init_string
 void init_string_() {
+t0_0= new_string_("Hello");
+t0_1= new_string_(" ");
+t0_2= new_string_("World");
 }
 //main
-int x;
-int y;
-int gcd_integer_integer(int a, int b)
-{
-int __ret;
-int t2_0;
-(t2_0)=(b)==(t0_0);
-if (t2_0)goto L0;
-{
-int t3_0;
-(t3_0)=(a)%(b);
-int t3_1;
-(t3_1)=gcd_integer_integer((b),(t3_0));
-(__ret)=(t3_1);
-}
-goto L1;
-L0: ____nouse=1;;
-{
-(__ret)=(a);
-}
-L1: ____nouse=1;;
-return __ret;
-}
 int main()
 {
 init_string_();
 int __ret;
-read_integer_integer(&(x),&(y));
-int t2_0;
-(t2_0)=gcd_integer_integer((x),(y));
-write_integer((t2_0));
-return t0_1;
+string t2_0=NULL;
+assign_string_(&(t2_0),add_string_((t0_0),(t0_1)));
+string t2_1=NULL;
+assign_string_(&(t2_1),add_string_((t2_0),(t0_2)));
+write_string((t2_1));
+return t0_3;
 return __ret;
 }
