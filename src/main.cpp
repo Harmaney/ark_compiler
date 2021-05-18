@@ -13,6 +13,7 @@ int main(int argc, char **argv) {
         std::cin >> input_pas;
     } else
         input_pas = argv[1];
+    //  input_pas="testcase/SegmentTree.pas";
     std::ifstream src_file_stream(input_pas);
     if (!src_file_stream) {
         term_print.fatal() << "file doesn't exist.\n";
