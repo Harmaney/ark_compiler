@@ -521,3 +521,5 @@ public:
     static void init();
     static std::string* create_tag_G();
 };
+
+FunctionDescriptor* levelup_lookfor_function(std::string sig, std::vector<SymbolDescriptor*> args,int idx=0);

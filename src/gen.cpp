@@ -502,7 +502,7 @@ void ASTDispatcher::gen_call_expr(CallExprAST *ast) {
             std::any_cast<VariableDescriptor *>(arg->value)->varType);
     }
     SymbolDescriptor *raw_descriptor =
-        SymbolTable::lookfor_function(ast->callee, argsimbols);
+        levelup_lookfor_function(ast->callee, argsimbols);
 
     if (!raw_descriptor || raw_descriptor->type != DESCRIPTOR_FUNCTION) {
         throw SymbolUndefinedException("try to call undefined function",
@@ -541,11 +541,11 @@ void ASTDispatcher::gen_call_expr(CallExprAST *ast) {
     CodeCollector::src() << descriptor->name << "(";
     for (int i = 0; i < ast->args.size(); i++) {
         auto d = std::any_cast<VariableDescriptor *>(ast->args[i]->value);
-        if (d->varType != descriptor->args[i]->varType) {
-            throw TypeErrorException(
-                "wrong type of arg of function " + ast->callee,
-                d->varType->name, descriptor->args[i]->varType->name, ast->get_row(), 0);
-        }
+        // if (d->varType != descriptor->args[i]->varType) {
+        //     throw TypeErrorException(
+        //         "wrong type of arg of function " + ast->callee,
+        //         d->varType->name, descriptor->args[i]->varType->name, ast->get_row(), 0);
+        // }
         // check whether the function wants ref or not
         // we use pointer to simulate this process in c
         CodeCollector::src() << (descriptor->args[i]->isRef ? "&" : "");
