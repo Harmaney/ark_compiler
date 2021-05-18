@@ -2260,7 +2260,7 @@ JSON_HEDLEY_DIAGNOSTIC_POP
     #define JSON_INTERNAL_CATCH(exception) catch(exception)
 #else
     #include <cstdlib>
-    #define JSON_THROW(exception) std::abort()
+    #define JSON_THROW(exception) std::exit(0)
     #define JSON_TRY if(true)
     #define JSON_CATCH(exception) if(false)
     #define JSON_INTERNAL_CATCH(exception) if(false)

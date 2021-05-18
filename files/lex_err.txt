@@ -1,9 +1,3 @@
 program
-var
-<<<<<<< HEAD
-integer
-=======
-longint
->>>>>>> 5f10cf89383a9ba3523ccc9962d308a806ef58a0
 begin
 end

@@ -2,8 +2,10 @@
 #define LOGGER_HPP
 #include <iostream>
 #include <sstream>
+
 #include "include/rang.hpp"
-static int LOG_LEVEL = 4;
+
+// extern int term_print.log_level;
 
 #include "include/json.hpp"
 
@@ -46,53 +48,54 @@ using DevNull = std::ostringstream;
 extern DevNull dev_null;
 
 struct TerminalPrinter {
-    std::ostream& ofs, & dev_null;
+    int log_level;
+    std::ostream &ofs, &dev_null;
     TerminalPrinter(std::ostream& ofs, std::ostream& dev_null)
-        : ofs(ofs), dev_null(dev_null) {}
+        : log_level(0), ofs(ofs), dev_null(dev_null) {}
     std::ostream& fatal() {
-        if (0 <= LOG_LEVEL)
+        if (0 <= log_level)
             return ofs << rang::style::bold << rang::fg::red << "FATAL "
-            << rang::style::reset << rang::fg::reset;
+                       << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
     }
 
     std::ostream& error() {
-        if (1 <= LOG_LEVEL)
+        if (1 <= log_level)
             return ofs << rang::style::bold << rang::fg::yellow << "ERROR "
-            << rang::style::reset << rang::fg::reset;
+                       << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
     }
 
     std::ostream& warn() {
-        if (2 <= LOG_LEVEL)
+        if (2 <= log_level)
             return ofs << rang::style::bold << rang::fg::magenta << "WARN "
-            << rang::style::reset << rang::fg::reset;
+                       << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
     }
 
     std::ostream& info() {
-        if (3 <= LOG_LEVEL)
+        if (3 <= log_level)
             return ofs << rang::style::bold << rang::fg::green << "INFO "
-            << rang::style::reset << rang::fg::reset;
+                       << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
     }
 
     std::ostream& debug() {
-        if (4 <= LOG_LEVEL)
+        if (4 <= log_level)
             return ofs << rang::style::bold << rang::fg::blue << "DEBUG "
-            << rang::style::reset << rang::fg::reset;
+                       << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
     }
 
     std::ostream& detail() {
-        if (5 <= LOG_LEVEL)
+        if (5 <= log_level)
             return ofs << rang::style::bold << rang::fg::gray << "DETAIL "
-            << rang::style::reset << rang::fg::reset;
+                       << rang::style::reset << rang::fg::reset;
         else
             return dev_null;
     }
