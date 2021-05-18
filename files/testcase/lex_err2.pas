@@ -1,5 +1,5 @@
 program Hello;
-var 1i:integer;
+var i:string;{comment}
 begin
-    write(1i);
+    i:='123hahahahahah
 end.

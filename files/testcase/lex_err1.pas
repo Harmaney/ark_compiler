@@ -1,6 +1,5 @@
 program Hello;
-var i:integer;
+var i:integer;{comment
 begin
-	1:=i;
     write(i);
 end.
