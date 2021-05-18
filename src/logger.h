@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include "include/rang.hpp"
-static int LOG_LEVEL = 4;
+static int LOG_LEVEL = 3;
 
 #include "include/json.hpp"
 
