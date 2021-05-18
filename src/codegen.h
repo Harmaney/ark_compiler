@@ -42,13 +42,13 @@ std::string code_gen_work(AST *ast) {
 
     CodeCollector::end_section();
 
-    CodeCollector::begin_section("init_string");
-    CodeCollector::push_front("void init_string_() {");
+    CodeCollector::begin_section("init_global_var");
+    CodeCollector::push_front("void init_global_var_() {");
     CodeCollector::push_back("}");
     CodeCollector::end_section();
 
     CodeCollector::rearrange_section({"prelude", "global_define", "pre_struct",
-                                      "pre_array", "struct", "init_string",
+                                      "pre_array", "struct", "init_global_var",
                                       "main"});
 
     std::ostringstream code_out;

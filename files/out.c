@@ -25,31 +25,23 @@ string new_string_(const char* s) {
     return p;
 }
 
-void write_string(string a1) { printf("%s", a1); }
+void write_integer(int a1) { printf("%d", a1); }
 //global_define
-string t0_0 = NULL;
-string t0_1 = NULL;
-string t0_2 = NULL;
-int t0_3=0;
+int t0_0=2;
+int t0_1=0;
 //pre_struct
 //pre_array
 //struct
-//init_string
-void init_string_() {
-t0_0= new_string_("Hello");
-t0_1= new_string_(" ");
-t0_2= new_string_("World");
+//init_global_var
+void init_global_var_() {
 }
 //main
+int i=2;
 int main()
 {
-init_string_();
+init_global_var_();
 int __ret;
-string t2_0=NULL;
-assign_string_(&(t2_0),add_string_((t0_0),(t0_1)));
-string t2_1=NULL;
-assign_string_(&(t2_1),add_string_((t2_0),(t0_2)));
-write_string((t2_1));
-return t0_3;
+write_integer((i));
+return t0_1;
 return __ret;
 }

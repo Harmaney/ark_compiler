@@ -22,10 +22,15 @@ string new_string(const char* s) {
     strcpy(p, s);
     return p;
 }
-string b = new_string("abcdef");
+
+struct a {};
+
+typedef struct a A;
+
 int main() {
     string a = new_string("abcdef"), b = new_string("def");
     assign(&a, add(a, b));
     printf("%s", a);
+    struct a xx;
     return 0;
 }

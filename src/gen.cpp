@@ -230,6 +230,7 @@ void ASTDispatcher::gen_number_expr(NumberExprAST *ast) {
     }
     CodeCollector::push_back();
     CodeCollector::end_section();
+
     ast->value = t;
 }
 
@@ -244,7 +245,7 @@ void ASTDispatcher::gen_string_expr(StringExprAST *ast) {
     CodeCollector::push_back();
     CodeCollector::end_section();
 
-    CodeCollector::begin_section("init_string");
+    CodeCollector::begin_section("init_global_var");
     CodeCollector::src() << t->name << "= new_string_(\"" << ast->val << "\");";
     CodeCollector::push_back();
     CodeCollector::end_section();
@@ -318,6 +319,7 @@ void ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
             put_variable_expr(lhs);
             CodeCollector::src() << "=";
             put_variable_expr(rhs);
+
             // TODO: pascal 的 = 是否有返回值？
         }
         CodeCollector::src() << ";";
@@ -750,7 +752,7 @@ void ASTDispatcher::gen_function(FunctionAST *ast) {
 void ASTDispatcher::gen_block_begin(BlockAST *ast) {
     CodeCollector::push_back("{");
     if (ast->extraData.count("IS_MAIN"))
-        CodeCollector::push_back("init_string_();");
+        CodeCollector::push_back("init_global_var_();");
 }
 
 void ASTDispatcher::gen_block_end(BlockAST *ast) {
@@ -803,10 +805,21 @@ void ASTDispatcher::gen_variable_decl(VariableDeclAST *ast) {
                                  "<>", "<?>", 0, 0);
     }
     put_variable_decl(var);
+
     if (ast->initVal) {
+        /*CodeCollector::begin_section("init_global_var");
+        put_variable_expr(var);
         CodeCollector::src() << "=";
+        ast->initVal.
         put_variable_expr(
             std::any_cast<VariableDescriptor *>(ast->initVal->value));
+        CodeCollector::src() << ";";
+        CodeCollector::push_back();
+        CodeCollector::end_section();*/
+        CodeCollector::src() << "="
+                             << (ast->initVal->const_type == CONSTANT_REAL
+                                     ? ast->initVal->val_float
+                                     : ast->initVal->val_int);
     }
     CodeCollector::src() << ";";
     CodeCollector::push_back();
