@@ -1,6 +1,9 @@
 #include "lex.h"
 
+#include <set>
 #include <vector>
+#include <fstream>
+#include <iostream>
 
 #include "logger.h"
 #define letter \
@@ -350,9 +353,9 @@ TokenQueue lex_work(std::string all_chars) {
         }
         lout << type << std::endl;
         lex_info.push_back({{"word", s.word},
-                               {"row", s.row},
-                               {"column", s.column},
-                               {"type", type}});
+                            {"row", s.row},
+                            {"column", s.column},
+                            {"type", type}});
         result.push({s.word, s.row, s.column, type});
     }
     lout.close();

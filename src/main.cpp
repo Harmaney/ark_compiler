@@ -1,5 +1,9 @@
+#include <fstream>
+#include <iostream>
+
 #include "codegen.h"
 #include "lex.h"
+#include "logger.h"
 #include "parser.h"
 
 int main(int argc, char **argv) {
@@ -11,17 +15,17 @@ int main(int argc, char **argv) {
         input_pas = argv[1];
     std::ifstream src_file_stream(input_pas);
     if (!src_file_stream) {
-        FATAL(std::cerr << "file doesn't exist.\n";)
-        return 0;
+        term_print.fatal() << "file doesn't exist.\n";
+        abort();
     }
     std::string src_code((std::istreambuf_iterator<char>(src_file_stream)),
                          (std::istreambuf_iterator<char>()));
 
-    std::cerr << "lexing...\n";
+    term_print.info() << "lexing...\n";
     auto tq = lex_work(src_code);
-    std::cerr << "parsing...\n";
+    term_print.info() << "parsing...\n";
     auto ast = parser_work(tq);
-    std::cerr << "generating...\n";
+    term_print.info() << "generating...\n";
     auto ccode = code_gen_work(ast);
 
     std::ofstream ccode_file("out.c");

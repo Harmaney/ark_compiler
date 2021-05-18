@@ -29,7 +29,7 @@ std::set<std::string> get_epsilon;
 void init() {
     std::ifstream input("../files/grammar.txt");
     if (!input) {
-        FATAL(std::cerr << "grammar.txt not found." << std::endl;)
+        term_print.fatal() << "grammar.txt not found." << std::endl;
         abort();
     }
     int mode = 0;
@@ -277,7 +277,7 @@ void add_action(std::pair<ACTION, int> act, std::pair<int, std::string> pos) {
 void load_table() {
     std::ifstream inf("../files/analyse_table.txt");
     if (!inf) {
-        FATAL(std::cerr << "analyse_table.txt not found." << std::endl;)
+        term_print.fatal() << "analyse_table.txt not found." << std::endl;
         abort();
     }
     int I, id;
@@ -971,7 +971,7 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
         unlinked_nodes.push_back(new_node);
         new_node->Report();
     };
-    DEBUG(std::cerr << "start analyse" << std::endl;)
+    term_print.debug() << "start analyse" << std::endl;
     states.push_back(0);
     symbols.push_back("");
     TokenItem n;
@@ -1014,7 +1014,7 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
             do_reduce(prod);
         } else if (act.first == ACC) {
             do_reduce({"S", {"ProgramStruct"}});
-            DEBUG(std::cout << "ACCEPT!" << std::endl;)
+            term_print.debug() << "ACCEPT!" << std::endl;
             break;
         }
     }

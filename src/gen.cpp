@@ -3,12 +3,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <fstream>
 #include <iostream>
 
 #include "data.h"
 #include "err.h"
 #include "logger.h"
 #include "stdsupport.h"
+
 std::string map_variable_type(SymbolDescriptor *type) {
     if (type->name == TYPE_BASIC_DOUBLE) {
         return "double";
@@ -55,9 +57,9 @@ void init_read_write() {
                               preMalloc + "scanf(\"" + formatString + "\"" +
                               idList + "); }";
                 SymbolTable::insert_function(
-                    func,
-                    new FunctionDescriptor(
-                        func, args, SymbolTable::lookfor_type(TYPE_BASIC_VOID)));
+                    func, new FunctionDescriptor(
+                              func, args,
+                              SymbolTable::lookfor_type(TYPE_BASIC_VOID)));
             } else {
                 for (auto [format, type] : basic_type) {
                     std::string _funcSuffix, _argList, _formatString, _idList,
@@ -155,7 +157,7 @@ void ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
 
     // this is wrong when using custom type
     // to fix this, you should think about how to resolve typedef in struct too
-    DEBUG(std::cerr << "generate typedef" << std::endl;)
+    term_print.debug() << "generate typedef" << std::endl;
     CodeCollector::begin_section("pre_array");
     CodeCollector::src() << "typedef "
                          << map_variable_type(descriptor->itemDescriptor) << " "
@@ -517,7 +519,7 @@ void ASTDispatcher::gen_call_expr(CallExprAST *ast) {
     if (descriptor->resultDescriptor !=
         SymbolTable::lookfor_type(TYPE_BASIC_VOID)) {
         auto ret = SymbolTable::create_variable(descriptor->resultDescriptor,
-                                               false, false);
+                                                false, false);
         ast->value = ret;
         put_variable_decl(ret);
         CodeCollector::src() << ";";
@@ -678,7 +680,7 @@ void ASTDispatcher::gen_while_statement_end(WhileStatementAST *ast) {
 }
 
 void ASTDispatcher::gen_function_signature(FunctionSignatureAST *ast) {
-    WARN(std::cerr << "todo: function sig end" << std::endl;)
+    term_print.warn() << "todo: function sig end" << std::endl;
 }
 
 void ASTDispatcher::gen_function(FunctionAST *ast) {
@@ -723,7 +725,7 @@ void ASTDispatcher::gen_function(FunctionAST *ast) {
     SymbolTable::enter();
     for (auto arg : ast->sig->args) {
         SymbolTable::create_variable(arg->sig->name, arg->_varType, arg->isRef,
-                                    false);
+                                     false);
     }
     // used for pascal's strange return
     if (ast->sig->_resultType != SymbolTable::lookfor_type(TYPE_BASIC_VOID)) {
@@ -790,12 +792,12 @@ void ASTDispatcher::gen_variable_decl(VariableDeclAST *ast) {
     if (ast->varType) {
         ast->_varType = ast->varType->_descriptor;
         var = SymbolTable::create_variable(ast->sig->name, ast->_varType,
-                                          ast->isRef, ast->isConst);
+                                           ast->isRef, ast->isConst);
     } else if (ast->initVal) {
         ast->_varType =
             std::any_cast<VariableDescriptor *>(ast->initVal->value)->varType;
         var = SymbolTable::create_variable(ast->sig->name, ast->_varType,
-                                          ast->isRef, ast->isConst);
+                                           ast->isRef, ast->isConst);
     } else {
         throw TypeErrorException("missing type for variable " + ast->sig->name,
                                  "<>", "<?>", 0, 0);
@@ -881,10 +883,10 @@ void CodeCollector::end_section(PlaceHolder place) {
 
 void CodeCollector::output() {
     for (auto sid : section_order) {
-        DEBUG(std::cerr << "// section " << sid << std::endl;)
+        term_print.debug() << "// section " << sid << std::endl;
         if (codes.count(sid))
             for (auto str : *codes[sid]) {
-                DEBUG(std::cerr << str << std::endl;)
+                term_print.debug() << str << std::endl;
             }
     }
 }
@@ -909,8 +911,8 @@ void CodeCollector::rearrange_section(std::string section, int newPos) {
             std::find(section_order.begin(), section_order.end(), section));
         section_order.insert(section_order.begin() + newPos, section);
     } else {
-        WARN(std::cerr << "rearranging section `" << section
-                       << "` failed: no such section" << std::endl;)
+        term_print.warn() << "rearranging section `" << section
+                          << "` failed: no such section" << std::endl;
     }
 }
 

@@ -64,30 +64,30 @@ void PointerTypeDeclAST::accept(ASTDispatcher &dispatcher) {
 
 void NumberExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    TRACE(std::cerr << "into number ast" << std::endl;)
+    term_print.detail() << "into number ast" << std::endl;
     dispatcher.gen_number_expr(this);
-    TRACE(std::cerr << "out number ast" << std::endl;)
+    term_print.detail() << "out number ast" << std::endl;
 }
 
 void StringExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    TRACE(std::cerr << "into string ast" << std::endl;)
+    term_print.detail() << "into string ast" << std::endl;
     dispatcher.gen_string_expr(this);
-    TRACE(std::cerr << "out string ast" << std::endl;)
+    term_print.detail() << "out string ast" << std::endl;
 }
 
 void CharExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    TRACE(std::cerr << "into char ast" << std::endl;)
+    term_print.detail() << "into char ast" << std::endl;
     dispatcher.gen_char_expr(this);
-    TRACE(std::cerr << "out char ast" << std::endl;)
+    term_print.detail() << "out char ast" << std::endl;
 }
 
 void VariableExprAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    TRACE(std::cerr << "into variable ast" << std::endl;)
+    term_print.detail() << "into variable ast" << std::endl;
     dispatcher.gen_variable_expr(this);
-    TRACE(std::cerr << "out variable ast" << std::endl;)
+    term_print.detail() << "out variable ast" << std::endl;
 }
 
 void BinaryExprAST::accept(ASTDispatcher &dispatcher) {
@@ -118,9 +118,9 @@ void CallExprAST::accept(ASTDispatcher &dispatcher) {
         arg->accept(dispatcher);
     }
 
-    TRACE(std::cerr << "into cell ast" << std::endl;)
+    term_print.detail() << "into cell ast" << std::endl;
     dispatcher.gen_call_expr(this);
-    TRACE(std::cerr << "out cell ast" << std::endl;)
+    term_print.detail() << "out cell ast" << std::endl;
 }
 
 void BlockAST::accept(ASTDispatcher &dispatcher) {
@@ -181,9 +181,9 @@ void VariableDeclAST::accept(ASTDispatcher &dispatcher) {
                                  "<>", "<?>", 0, 0);
     }
 
-    TRACE(std::cerr << "into variable ast" << std::endl;)
+    term_print.detail() << "into variable ast" << std::endl;
     dispatcher.gen_variable_decl(this);
-    TRACE(std::cerr << "out variable ast" << std::endl;)
+    term_print.detail() << "out variable ast" << std::endl;
 }
 
 void ForStatementAST::accept(ASTDispatcher &dispatcher) {
@@ -192,18 +192,18 @@ void ForStatementAST::accept(ASTDispatcher &dispatcher) {
     this->rangeL->accept(dispatcher);
     this->rangeR->accept(dispatcher);
 
-    TRACE(std::cerr << "into for ast" << std::endl;)
+    term_print.detail() << "into for ast" << std::endl;
     dispatcher.gen_for_statement_begin(this);
     this->body->accept(dispatcher);
     dispatcher.gen_for_statement_end(this);
-    TRACE(std::cerr << "into for ast" << std::endl;)
+    term_print.detail() << "into for ast" << std::endl;
 }
 
 void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    TRACE(std::cerr << "into condition of while" << std::endl;)
+    term_print.detail() << "into condition of while" << std::endl;
     this->condition->accept(dispatcher);
-    TRACE(std::cerr << "out condition of while" << std::endl;)
+    term_print.detail() << "out condition of while" << std::endl;
 
     dispatcher.gen_while_statement_begin(this);
     this->body->accept(dispatcher);
@@ -215,7 +215,7 @@ void WhileStatementAST::accept(ASTDispatcher &dispatcher) {
 
 void IfStatementAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    TRACE(std::cerr << "into if ast" << std::endl;)
+    term_print.detail() << "into if ast" << std::endl;
     this->condition->accept(dispatcher);
     dispatcher.gen_if_statement_begin(this);
     this->body_false->accept(dispatcher);
@@ -224,12 +224,12 @@ void IfStatementAST::accept(ASTDispatcher &dispatcher) {
     dispatcher.gen_if_statement_end(this);
 
     // TODO: body and else if
-    TRACE(std::cerr << "out if ast" << std::endl;)
+    term_print.detail() << "out if ast" << std::endl;
 }
 
 void GlobalAST::accept(ASTDispatcher &dispatcher) {
     LOG_WALK(this);
-    TRACE(std::cerr << "into global ast" << std::endl;)
+    term_print.detail() << "into global ast" << std::endl;
     dispatcher.gen_global_begin(this);
 
     for (auto var : this->vars) {
@@ -248,7 +248,7 @@ void GlobalAST::accept(ASTDispatcher &dispatcher) {
     }
 
     dispatcher.gen_global_end(this);
-    TRACE(std::cerr << "out global ast" << std::endl;)
+    term_print.detail() << "out global ast" << std::endl;
 }
 
 void FunctionAST::accept(ASTDispatcher &dispatcher) {
@@ -387,7 +387,7 @@ VariableDescriptor *SymbolTable::lookfor_variable(std::string sig) {
 }
 
 void SymbolTable::insert_type(std::string sig, SymbolDescriptor *descriptor) {
-    DEBUG(std::cerr << "insert type " << sig << std::endl;)
+    term_print.debug() << "insert type " << sig << std::endl;
     current->insert_type(sig, descriptor);
 }
 
@@ -399,7 +399,8 @@ void SymbolTable::insert_function(std::string sig,
     }
     auto name = get_internal_function_name(sig, symbols);
     descriptor->name = name;
-    DEBUG(std::cerr << "???? " << name << " " << descriptor->name << std::endl;)
+    term_print.debug() << "???? " << name << " " << descriptor->name
+                       << std::endl;
     insert_type(name, descriptor);
 }
 

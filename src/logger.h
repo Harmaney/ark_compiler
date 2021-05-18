@@ -1,39 +1,11 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
+#include <iostream>
 
-static int LOG_LEVEL = 0;
+#include "include/rang.hpp"
+static int LOG_LEVEL = 4;
 
-// FATAL    ERROR   WARN    INFO    DEBUG   TRACE
-// 0        1       2       3       4       5
-
-#define TRACE(a)          \
-    if (5 <= LOG_LEVEL) { \
-        a                 \
-    }
-#define DEBUG(a)          \
-    if (4 <= LOG_LEVEL) { \
-        a                 \
-    }
-#define INFO(a)           \
-    if (3 <= LOG_LEVEL) { \
-        a                 \
-    }
-#define WARN(a)           \
-    if (2 <= LOG_LEVEL) { \
-        a                 \
-    }
-#define ERROR(a)          \
-    if (1 <= LOG_LEVEL) { \
-        a                 \
-    }
-#define FATAL(a)          \
-    if (0 <= LOG_LEVEL) { \
-        a                 \
-    }
-
-#include <bits/stdc++.h>
-
-#include "json.hpp"
+#include "include/json.hpp"
 
 using Json = nlohmann::json;
 
@@ -69,4 +41,59 @@ Json Serialize(const std::vector<P*>& vec, const T&... arg) {
 
 extern Json lex_info, parser_info, gen_info;
 
+struct DevNull : std::ostream {
+    template <class T>
+    std::ostream& operator<<(T const& x) {
+        return *this;
+    }
+};
+
+extern DevNull dev_null;
+
+struct TerminalPrinter {
+    std::ostream &ofs, &dev_null;
+    TerminalPrinter(std::ostream& ofs, std::ostream& dev_null)
+        : ofs(ofs), dev_null(dev_null) {}
+    std::ostream& fatal() {
+        if (0 <= LOG_LEVEL)
+            return ofs << rang::style::bold << rang::fg::red << "FATAL "
+                       << rang::style::reset << rang::fg::reset;
+        else
+            return dev_null;
+    }
+
+    std::ostream& warn() {
+        if (1 <= LOG_LEVEL)
+            return ofs << rang::style::bold << rang::fg::red << "WARN "
+                       << rang::style::reset << rang::fg::reset;
+        else
+            return dev_null;
+    }
+
+    std::ostream& info() {
+        if (3 <= LOG_LEVEL)
+            return ofs << rang::style::bold << rang::fg::red << "INFO "
+                       << rang::style::reset << rang::fg::reset;
+        else
+            return dev_null;
+    }
+
+    std::ostream& debug() {
+        if (4 <= LOG_LEVEL)
+            return ofs << rang::style::bold << rang::fg::red << "DEBUG "
+                       << rang::style::reset << rang::fg::reset;
+        else
+            return dev_null;
+    }
+
+    std::ostream& detail() {
+        if (4 <= LOG_LEVEL)
+            return ofs << rang::style::bold << rang::fg::red << "DETAIL "
+                       << rang::style::reset << rang::fg::reset;
+        else
+            return dev_null;
+    }
+};
+
+extern TerminalPrinter term_print;
 #endif
