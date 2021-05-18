@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <stringstream>
 
 #include "logger.h"
 #define letter \
@@ -144,6 +145,15 @@ TokenQueue lex_work(std::string all_chars) {
                     case '"':
                         add_end present_state = 13;
                         break;
+                    case '$':
+                        present_state = 14;
+                        break;
+                    case '&':
+                        present_state = 15;
+                        break;
+                    case '%':
+                        present_state = 16;
+                        break;
                     default:
                         add_end i++;
                         add_and_reset i--;
@@ -233,9 +243,12 @@ TokenQueue lex_work(std::string all_chars) {
                     case '*':
                         present_state = 9;
                         break;
-                        null_char
-                            // error
-                            break;
+                    return_char
+                        // error
+                        break;
+                        // null_char
+                        //     // error
+                        //     break;
                 }
                 break;
             case 9:  //{ *
@@ -262,7 +275,7 @@ TokenQueue lex_work(std::string all_chars) {
                     case '\'':
                         add_end add_and_reset break;
                         return_char
-                            // error
+                            term_print.fatal()<<"String Error";
                             break;
                     default:
                         add_end break;
@@ -306,17 +319,79 @@ TokenQueue lex_work(std::string all_chars) {
                     case '\"':
                         add_end add_and_reset break;
                         return_char
-                            // error
+                            term_print.fatal()<<"Annotation Error";
                             break;
                     default:
                         add_end break;
+                }
+                break;
+            case 14: //$
+                switch (now_char) {
+                    number add_end break;
+                    default:
+                        std::stringstream ss;
+                        ss << std::hex << remain_token;
+                        int val;
+                        ss >> val;
+                        remain_token.clear()
+                        std::stringstream st;
+                        st << val;
+                        st >> remain_token;
+                        add_and_reset;
+                        i--;
+                        break;
+                        
+                }
+                break;
+            case 15: //&
+                switch (now_char) {
+                    number add_end break;                     
+                    default:
+                        std::stringstream ss;
+                        ss << std::oct << remain_token;
+                        int val;
+                        ss >> val;
+                        remain_token.clear()
+                        std::stringstream st;
+                        st << val;
+                        st >> remain_token;
+                        add_and_reset;
+                        i--;
+                        break;
+                }
+                break;
+            case 16: //%
+                switch (now_char) {
+                    number add_end break;
+                    default:
+                        std::reverse(remain_token.begin(),remain_token.end());
+                        int ans = 0;
+                        int v = 1;
+                        for(auto vv : remain_token){
+                            if(vv == '1'){
+                                ans += v;
+                            }
+                            v *= 2;
+                        }
+                        std::stringstream ss;
+                        ss << ans;
+                        remain_token.clear();
+                        ss >> remain_token;
+                        add_and_reset;
+                        i--;
+                        break;
                 }
                 break;
         }
     }
     std::ofstream lout("../files/lex_out.txt");
     std::ofstream lerr("../files/lex_err.txt");
-
+    if (present_state == 8){
+        term_print.fatal()<<"Annotation Error";
+    }
+    if (present_state == 11){
+        term_print.fatal()<<"String Error";
+    }
     TokenQueue result;
     for (auto s : token_stream) {
         if (s.type == 11) {
