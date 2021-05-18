@@ -27,7 +27,7 @@ std::map<std::string, std::set<std::string>> first;
 std::map<std::string, std::set<std::vector<std::string>>> rhs_set;
 std::set<std::string> get_epsilon;
 void init() {
-    std::ifstream input("../files/grammar.txt");
+    std::ifstream input("./dependencies/grammar.txt");
     if (!input) {
         term_print.fatal() << "grammar.txt not found." << std::endl;
         exit(0);
@@ -275,7 +275,7 @@ void add_action(std::pair<ACTION, int> act, std::pair<int, std::string> pos) {
     action_table[pos] = act;
 }
 void load_table() {
-    std::ifstream inf("../files/analyse_table.txt");
+    std::ifstream inf("./dependencies/analyse_table.txt");
     if (!inf) {
         term_print.fatal() << "analyse_table.txt not found." << std::endl;
         exit(0);
@@ -347,11 +347,7 @@ void generate_table() {
             }
         }
     }
-    std::ofstream of("analyse_table.txt");
-    if (!of) {
-        std::cerr << "找不到文件analyse_table.txt" << std::endl;
-        exit(0);
-    }
+    std::ofstream of("./dependencies/analyse_table.txt");
     for (auto I : item_set) {
         for (auto a : terminal) {
             if (action_table.count(std::make_pair(I.second, a))) {

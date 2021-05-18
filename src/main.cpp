@@ -7,9 +7,9 @@
 #include "parser.h"
 
 int main(int argc, char **argv) {
-    std::string input_pas, out_c;
+    std::string input_pas, out_c = "out.c";
     if (argc == 1) {
-        std::cerr << "Usage: p2c input.pas [-o out.c] [-l LOG_LEVEL].\n";
+        std::cerr << "Usage: p2c input.pas [-o out.c] [-l LOG_LEVEL(0-5)].\n";
         exit(0);
     } else
         input_pas = argv[1];
@@ -54,6 +54,6 @@ int main(int argc, char **argv) {
                 .dump();
     ccode_file.flush();
     ccode_file.close();
-    system("gcc out.c -std=c99 -o out");
+    system(("gcc " + out_c + " -std=c99 -o out").c_str());
     return 0;
 }

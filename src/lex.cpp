@@ -89,7 +89,11 @@
 std::set<std::string> key_words;
 
 void load_key_words() {
-    std::ifstream input("../files/keywords.txt");
+    std::ifstream input("./dependencies/keywords.txt");
+    if (!input) {
+        term_print.fatal() << "keywords.txt not found.\n";
+        exit(0);
+    }
     std::string word;
     while (input >> word) key_words.insert(word);
 }
