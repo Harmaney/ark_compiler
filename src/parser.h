@@ -156,13 +156,13 @@ inline std::vector<std::pair<NumberExprAST*, NumberExprAST*>> cast(
 }
 };  // namespace NodeProperties
 
-struct GrammarTreeNode {
+struct AnalyseTreeNode {
     std::string raw, type, parserSymbol;
     int row, column;
     std::any prop;
 
-    std::vector<GrammarTreeNode*> son;
-    GrammarTreeNode(std::string raw, std::string type, std::string parserSymbol,
+    std::vector<AnalyseTreeNode*> son;
+    AnalyseTreeNode(std::string raw, std::string type, std::string parserSymbol,
                     int row, int column)
         : raw(raw),
           type(type),
