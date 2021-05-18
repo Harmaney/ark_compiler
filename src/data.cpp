@@ -134,6 +134,7 @@ void BlockAST::accept(ASTDispatcher& dispatcher) {
     SymbolTable::enter();
 
     for (auto expr : exprs) {
+        try{
         switch (expr->type) {
         case AST_BINARY_EXPR:
             static_cast<BinaryExprAST*>(expr)->accept(dispatcher);
@@ -168,6 +169,9 @@ void BlockAST::accept(ASTDispatcher& dispatcher) {
         default:
             throw std::invalid_argument("unknown type of AST in Block");
             break;
+        }
+        }catch(const CompilerErrorException &e){
+            term_print.error()<<e.what()<<std::endl;
         }
     }
 

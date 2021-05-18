@@ -112,6 +112,10 @@ public:
     void assign(AST* other) {
         extraData["row"] = other->extraData["row"];
     }
+    int get_row(){
+        if(extraData.count("row"))return std::any_cast<int>(extraData["row"]);
+        return 0;
+    }
     void assign(std::any other);
 };
 
