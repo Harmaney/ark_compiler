@@ -1,0 +1,1258 @@
+{
+  "code": "program Hello;\nvar a,b:integer;\nbegin\n    read(a,b);\n    write(a+b);\nend.",
+  "gen": [
+    {
+      "ARRIVE": 94002926084832
+    },
+    {
+      "ARRIVE": 94002926002928
+    },
+    {
+      "ARRIVE": 94002925994688
+    },
+    {
+      "GEN": {
+        "CODE": "int a;",
+        "TO": "main"
+      }
+    },
+    {
+      "ARRIVE": 94002926003296
+    },
+    {
+      "ARRIVE": 94002925994688
+    },
+    {
+      "GEN": {
+        "CODE": "int b;",
+        "TO": "main"
+      }
+    },
+    {
+      "ARRIVE": 94002926090544
+    },
+    {
+      "ARRIVE": 94002926309104
+    },
+    {
+      "GEN": {
+        "CODE": "int main()",
+        "TO": "main"
+      }
+    },
+    {
+      "ARRIVE": 94002926072560
+    },
+    {
+      "ARRIVE": 94002926093488
+    },
+    {
+      "ARRIVE": 94002926309104
+    },
+    {
+      "GEN": {
+        "CODE": "int __ret;",
+        "TO": "main"
+      }
+    },
+    {
+      "ARRIVE": 94002926038608
+    },
+    {
+      "ARRIVE": 94002926005984
+    },
+    {
+      "ARRIVE": 94002926016960
+    },
+    {
+      "GEN": {
+        "CODE": "read_integer_integer(&(a),&(b));",
+        "TO": "main"
+      }
+    },
+    {
+      "ARRIVE": 94002926071568
+    },
+    {
+      "ARRIVE": 94002923607248
+    },
+    {
+      "ARRIVE": 94002926029968
+    },
+    {
+      "ARRIVE": 94002926049584
+    },
+    {
+      "GEN": {
+        "CODE": "int t2_0;",
+        "TO": "main"
+      }
+    },
+    {
+      "GEN": {
+        "CODE": "(t2_0)=(a)+(b);",
+        "TO": "main"
+      }
+    },
+    {
+      "GEN": {
+        "CODE": "write_integer((t2_0));",
+        "TO": "main"
+      }
+    },
+    {
+      "ARRIVE": 94002926091472
+    },
+    {
+      "ARRIVE": 94002926091104
+    },
+    {
+      "GEN": {
+        "CODE": "long long t0_0=0;",
+        "TO": "global_define"
+      }
+    },
+    {
+      "GEN": {
+        "CODE": "return t0_0;",
+        "TO": "main"
+      }
+    },
+    {
+      "ARRIVE": 94002926089520
+    },
+    {
+      "ARRIVE": 94002926094144
+    },
+    {
+      "GEN": {
+        "CODE": "return __ret;",
+        "TO": "main"
+      }
+    }
+  ],
+  "lex": [
+    {
+      "column": 1,
+      "row": 1,
+      "type": "keyword",
+      "word": "program"
+    },
+    {
+      "column": 9,
+      "row": 1,
+      "type": "identify",
+      "word": "Hello"
+    },
+    {
+      "column": 14,
+      "row": 1,
+      "type": "punc",
+      "word": ";"
+    },
+    {
+      "column": 1,
+      "row": 2,
+      "type": "keyword",
+      "word": "var"
+    },
+    {
+      "column": 5,
+      "row": 2,
+      "type": "identify",
+      "word": "a"
+    },
+    {
+      "column": 6,
+      "row": 2,
+      "type": "punc",
+      "word": ","
+    },
+    {
+      "column": 7,
+      "row": 2,
+      "type": "identify",
+      "word": "b"
+    },
+    {
+      "column": 8,
+      "row": 2,
+      "type": "punc",
+      "word": ":"
+    },
+    {
+      "column": 9,
+      "row": 2,
+      "type": "keyword",
+      "word": "integer"
+    },
+    {
+      "column": 16,
+      "row": 2,
+      "type": "punc",
+      "word": ";"
+    },
+    {
+      "column": 1,
+      "row": 3,
+      "type": "keyword",
+      "word": "begin"
+    },
+    {
+      "column": 5,
+      "row": 4,
+      "type": "identify",
+      "word": "read"
+    },
+    {
+      "column": 9,
+      "row": 4,
+      "type": "punc",
+      "word": "("
+    },
+    {
+      "column": 10,
+      "row": 4,
+      "type": "identify",
+      "word": "a"
+    },
+    {
+      "column": 11,
+      "row": 4,
+      "type": "punc",
+      "word": ","
+    },
+    {
+      "column": 12,
+      "row": 4,
+      "type": "identify",
+      "word": "b"
+    },
+    {
+      "column": 13,
+      "row": 4,
+      "type": "punc",
+      "word": ")"
+    },
+    {
+      "column": 14,
+      "row": 4,
+      "type": "punc",
+      "word": ";"
+    },
+    {
+      "column": 5,
+      "row": 5,
+      "type": "identify",
+      "word": "write"
+    },
+    {
+      "column": 10,
+      "row": 5,
+      "type": "punc",
+      "word": "("
+    },
+    {
+      "column": 11,
+      "row": 5,
+      "type": "identify",
+      "word": "a"
+    },
+    {
+      "column": 12,
+      "row": 5,
+      "type": "punc",
+      "word": "+"
+    },
+    {
+      "column": 13,
+      "row": 5,
+      "type": "identify",
+      "word": "b"
+    },
+    {
+      "column": 14,
+      "row": 5,
+      "type": "punc",
+      "word": ")"
+    },
+    {
+      "column": 15,
+      "row": 5,
+      "type": "punc",
+      "word": ";"
+    },
+    {
+      "column": 1,
+      "row": 6,
+      "type": "keyword",
+      "word": "end"
+    },
+    {
+      "column": 4,
+      "row": 6,
+      "type": "punc",
+      "word": "."
+    }
+  ],
+  "parser": [
+    {
+      "ID": 94002923685232,
+      "column": 1,
+      "parserSymbol": "program",
+      "raw": "program",
+      "row": 1,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002923688192,
+      "column": 9,
+      "parserSymbol": "ID",
+      "raw": "Hello",
+      "row": 1,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002923689328,
+      "column": 0,
+      "parserSymbol": "ProgramHead",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002923685232,
+        94002923688192
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002923690480,
+      "column": 14,
+      "parserSymbol": ";",
+      "raw": ";",
+      "row": 1,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002923691520,
+      "column": 1,
+      "parserSymbol": "var",
+      "raw": "var",
+      "row": 2,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002923692608,
+      "column": 5,
+      "parserSymbol": "ID",
+      "raw": "a",
+      "row": 2,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002925991376,
+      "column": 0,
+      "parserSymbol": "IDList",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002923692608
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002925992688,
+      "column": 6,
+      "parserSymbol": ",",
+      "raw": ",",
+      "row": 2,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002925993616,
+      "column": 7,
+      "parserSymbol": "ID",
+      "raw": "b",
+      "row": 2,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002925994912,
+      "column": 0,
+      "parserSymbol": "IDList",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002925991376,
+        94002925992688,
+        94002925993616
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002925996176,
+      "column": 8,
+      "parserSymbol": ":",
+      "raw": ":",
+      "row": 2,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002925997200,
+      "column": 9,
+      "parserSymbol": "integer",
+      "raw": "integer",
+      "row": 2,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002925994688,
+      "type": "BasicTypeAST:integer"
+    },
+    {
+      "ID": 94002925998272,
+      "column": 0,
+      "parserSymbol": "BasicType",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002925997200
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002925999856,
+      "column": 0,
+      "parserSymbol": "Type",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002925998272
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926000992,
+      "column": 0,
+      "parserSymbol": "ActualType",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002925999856
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002923688064,
+      "type": "VariableExprAST:a"
+    },
+    {
+      "ID": 94002926002928,
+      "son": [
+        94002923688064,
+        94002925994688
+      ],
+      "type": "VariableDeclAST"
+    },
+    {
+      "ID": 94002926003104,
+      "type": "VariableExprAST:b"
+    },
+    {
+      "ID": 94002926003296,
+      "son": [
+        94002926003104,
+        94002925994688
+      ],
+      "type": "VariableDeclAST"
+    },
+    {
+      "ID": 94002926002240,
+      "column": 0,
+      "parserSymbol": "VarDeclaration",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002925994912,
+        94002925996176,
+        94002926000992
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926006112,
+      "column": 16,
+      "parserSymbol": ";",
+      "raw": ";",
+      "row": 2,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926007136,
+      "column": 0,
+      "parserSymbol": "Component",
+      "raw": "",
+      "row": 0,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926008272,
+      "column": 0,
+      "parserSymbol": "Component",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002923691520,
+        94002926002240,
+        94002926006112,
+        94002926007136
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926009648,
+      "column": 1,
+      "parserSymbol": "begin",
+      "raw": "begin",
+      "row": 3,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926010672,
+      "column": 5,
+      "parserSymbol": "ID",
+      "raw": "read",
+      "row": 4,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926011744,
+      "column": 9,
+      "parserSymbol": "(",
+      "raw": "(",
+      "row": 4,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926012816,
+      "column": 10,
+      "parserSymbol": "ID",
+      "raw": "a",
+      "row": 4,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926014416,
+      "column": 0,
+      "parserSymbol": "IDVarpart",
+      "raw": "",
+      "row": 0,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926005984,
+      "type": "VariableExprAST:a"
+    },
+    {
+      "ID": 94002926015472,
+      "column": 0,
+      "parserSymbol": "Variable",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926012816,
+        94002926014416
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926017088,
+      "column": 0,
+      "parserSymbol": "ComposedVariable",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926015472
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926018560,
+      "column": 0,
+      "parserSymbol": "Factor",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926017088
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926020512,
+      "column": 0,
+      "parserSymbol": "Term",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926018560
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926021760,
+      "column": 0,
+      "parserSymbol": "SimpleExpression",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926020512
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926022928,
+      "column": 0,
+      "parserSymbol": "Expression",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926021760
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926024192,
+      "column": 0,
+      "parserSymbol": "ExpressionList",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926022928
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926025328,
+      "column": 11,
+      "parserSymbol": ",",
+      "raw": ",",
+      "row": 4,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926026304,
+      "column": 12,
+      "parserSymbol": "ID",
+      "raw": "b",
+      "row": 4,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926027376,
+      "column": 0,
+      "parserSymbol": "IDVarpart",
+      "raw": "",
+      "row": 0,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926016960,
+      "type": "VariableExprAST:b"
+    },
+    {
+      "ID": 94002926028480,
+      "column": 0,
+      "parserSymbol": "Variable",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926026304,
+        94002926027376
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926030096,
+      "column": 0,
+      "parserSymbol": "ComposedVariable",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926028480
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926031568,
+      "column": 0,
+      "parserSymbol": "Factor",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926030096
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926032640,
+      "column": 0,
+      "parserSymbol": "Term",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926031568
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926033712,
+      "column": 0,
+      "parserSymbol": "SimpleExpression",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926032640
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926035072,
+      "column": 0,
+      "parserSymbol": "Expression",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926033712
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926036144,
+      "column": 0,
+      "parserSymbol": "ExpressionList",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926024192,
+        94002926025328,
+        94002926035072
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926037280,
+      "column": 13,
+      "parserSymbol": ")",
+      "raw": ")",
+      "row": 4,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926038608,
+      "son": [
+        94002926005984,
+        94002926016960
+      ],
+      "type": "CallExprAST:read"
+    },
+    {
+      "ID": 94002926038448,
+      "column": 0,
+      "parserSymbol": "ProcedureCall(ARG)",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926010672,
+        94002926011744,
+        94002926036144,
+        94002926037280
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926040544,
+      "column": 0,
+      "parserSymbol": "Statement",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926038448
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926041664,
+      "column": 0,
+      "parserSymbol": "StatementList",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926040544
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926042800,
+      "column": 14,
+      "parserSymbol": ";",
+      "raw": ";",
+      "row": 4,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926043776,
+      "column": 5,
+      "parserSymbol": "ID",
+      "raw": "write",
+      "row": 5,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926044848,
+      "column": 10,
+      "parserSymbol": "(",
+      "raw": "(",
+      "row": 5,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926045920,
+      "column": 11,
+      "parserSymbol": "ID",
+      "raw": "a",
+      "row": 5,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926046992,
+      "column": 0,
+      "parserSymbol": "IDVarpart",
+      "raw": "",
+      "row": 0,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926029968,
+      "type": "VariableExprAST:a"
+    },
+    {
+      "ID": 94002926048096,
+      "column": 0,
+      "parserSymbol": "Variable",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926045920,
+        94002926046992
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926049712,
+      "column": 0,
+      "parserSymbol": "ComposedVariable",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926048096
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926051184,
+      "column": 0,
+      "parserSymbol": "Factor",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926049712
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926052256,
+      "column": 0,
+      "parserSymbol": "Term",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926051184
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926053328,
+      "column": 0,
+      "parserSymbol": "SimpleExpression",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926052256
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926054688,
+      "column": 12,
+      "parserSymbol": "+",
+      "raw": "+",
+      "row": 5,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926057696,
+      "column": 0,
+      "parserSymbol": "addOP",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926054688
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926058912,
+      "column": 13,
+      "parserSymbol": "ID",
+      "raw": "b",
+      "row": 5,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926059888,
+      "column": 0,
+      "parserSymbol": "IDVarpart",
+      "raw": "",
+      "row": 0,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926049584,
+      "type": "VariableExprAST:b"
+    },
+    {
+      "ID": 94002926060992,
+      "column": 0,
+      "parserSymbol": "Variable",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926058912,
+        94002926059888
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926062608,
+      "column": 0,
+      "parserSymbol": "ComposedVariable",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926060992
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926064080,
+      "column": 0,
+      "parserSymbol": "Factor",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926062608
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926065152,
+      "column": 0,
+      "parserSymbol": "Term",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926064080
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002923607248,
+      "son": [
+        94002926029968,
+        94002926049584
+      ],
+      "type": "BinaryExprAST:+"
+    },
+    {
+      "ID": 94002926066224,
+      "column": 0,
+      "parserSymbol": "SimpleExpression",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926053328,
+        94002926057696,
+        94002926065152
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926068096,
+      "column": 0,
+      "parserSymbol": "Expression",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926066224
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926069184,
+      "column": 0,
+      "parserSymbol": "ExpressionList",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926068096
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926070288,
+      "column": 14,
+      "parserSymbol": ")",
+      "raw": ")",
+      "row": 5,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926071568,
+      "son": [
+        94002923607248
+      ],
+      "type": "CallExprAST:write"
+    },
+    {
+      "ID": 94002926071408,
+      "column": 0,
+      "parserSymbol": "ProcedureCall(ARG)",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926043776,
+        94002926044848,
+        94002926069184,
+        94002926070288
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926073488,
+      "column": 0,
+      "parserSymbol": "Statement",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926071408
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926074608,
+      "column": 0,
+      "parserSymbol": "StatementList",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926041664,
+        94002926042800,
+        94002926073488
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926075744,
+      "column": 15,
+      "parserSymbol": ";",
+      "raw": ";",
+      "row": 5,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926076768,
+      "column": 0,
+      "parserSymbol": "Statement",
+      "raw": "",
+      "row": 0,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926077840,
+      "column": 0,
+      "parserSymbol": "StatementList",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926074608,
+        94002926075744,
+        94002926076768
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926079136,
+      "column": 1,
+      "parserSymbol": "end",
+      "raw": "end",
+      "row": 6,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926072560,
+      "son": [
+        94002926038608,
+        94002926071568
+      ],
+      "type": "BlockAST"
+    },
+    {
+      "ID": 94002926080160,
+      "column": 0,
+      "parserSymbol": "CompoundStatement",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926009648,
+        94002926077840,
+        94002926079136
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926082224,
+      "column": 0,
+      "parserSymbol": "ProgramBody",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926008272,
+        94002926080160
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926083584,
+      "column": 4,
+      "parserSymbol": ".",
+      "raw": ".",
+      "row": 6,
+      "son": [],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926084832,
+      "son": [
+        94002926002928,
+        94002926003296,
+        94002926072560
+      ],
+      "type": "Global"
+    },
+    {
+      "ID": 94002926084672,
+      "column": 0,
+      "parserSymbol": "ProgramStruct",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002923689328,
+        94002923690480,
+        94002926082224,
+        94002926083584
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926086512,
+      "column": 0,
+      "parserSymbol": "S",
+      "raw": "",
+      "row": 0,
+      "son": [
+        94002926084672
+      ],
+      "type": "grammar"
+    },
+    {
+      "ID": 94002926309104,
+      "type": "BasicTypeAST:integer"
+    },
+    {
+      "ID": 94002926089856,
+      "son": [
+        94002926309104
+      ],
+      "type": "FunctionSignatureAST:main"
+    },
+    {
+      "ID": 94002926090544,
+      "son": [
+        94002926089856,
+        94002926072560
+      ],
+      "type": "FunctionAST"
+    },
+    {
+      "ID": 94002926091104,
+      "type": "NumberExprAST:0"
+    },
+    {
+      "ID": 94002926062480,
+      "type": "VariableExprAST:__ret"
+    },
+    {
+      "ID": 94002926093488,
+      "son": [
+        94002926062480,
+        94002926309104
+      ],
+      "type": "VariableDeclAST"
+    },
+    {
+      "ID": 94002926094144,
+      "type": "VariableExprAST:__ret"
+    }
+  ]
+}

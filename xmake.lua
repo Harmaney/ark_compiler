@@ -5,7 +5,7 @@ set_languages("c++17")
 set_warnings("all")
 
 
-target("ark")
+target("p2c")
     -- add_cxxflags("-fsanitize=undefined")
     -- set_toolset("cxx","clang")
     -- set_toolset("ld", "clang++")
