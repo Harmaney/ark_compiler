@@ -261,6 +261,7 @@ void get_items() {
 enum ACTION { Shift = 1, Reduce, ACC };
 map<pair<int, string>, pair<ACTION, int>> actionTable;
 map<pair<int, string>, int> Goto;
+map<pair<int, string>, string> ParserErr;
 void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
     if (actionTable.count(pos)) {
         if (actionTable[pos] != act) {
@@ -280,25 +281,23 @@ void LoadTable() {
         cerr << "找不到文件analyse_table.txt" << endl;
         abort();
     }
-    int I, id, ACT_id;
-    string a;
-    while (!inf.eof()) {
-        inf >> I >> a >> ACT_id >> id;
-        if (id == -1) {
-            Goto[make_pair(I, a)] = ACT_id;
-        } else {
-            enum ACTION ACT;
-            if (ACT_id == 1)
-                ACT = Shift;
-            else if (ACT_id == 2)
-                ACT = Reduce;
-            else if (ACT_id == 3)
-                ACT = ACC;
-            else
-                assert(0);
-            actionTable[make_pair(I, a)] = make_pair(ACT, id);
-        }
-    }
+    int I,id;
+	string a,data;
+	while(!inf.eof()){
+		inf>>I>>a>>data>>id;
+		if(id == -1) {
+			Goto[make_pair(I,a)]=stoi(data);
+		} else if(id == -2) {
+			ParserErr[make_pair(I,a)]=data;
+		} else {
+			enum ACTION ACT;
+			if(stoi(data) == 1) ACT = Shift;
+			else if(stoi(data) == 2) ACT = Reduce;
+			else if(stoi(data) == 3) ACT = ACC;
+			else assert(0);
+			actionTable[make_pair(I,a)]=make_pair(ACT,id);
+		}
+	}
 }
 void generate_table() {
     if (table_exist) {
@@ -328,6 +327,20 @@ void generate_table() {
             if (GoIA.empty()) continue;
             Goto[make_pair(I.second, A)] = Item_set[GoIA];
         }
+		bool flg = false;
+        for(auto it : I.first) {
+        	if (it.LookAhead == ";") flg = true;
+        	if (!it.next.empty()){
+        		if(*it.next.begin() == ";") flg = true;
+        	}
+        }
+        if(flg) {
+        	for(auto x:Terminal) {
+        		if (actionTable.count(make_pair(I.second, x)) == 0) {
+        			ParserErr[make_pair(I.second, x)] = ";";
+        		}
+        	}
+        }
     }
     ofstream of("analyse_table.txt");
     if (!of) {
@@ -340,7 +353,10 @@ void generate_table() {
                 of << I.second << " " << a << " "
                    << actionTable[make_pair(I.second, a)].first << " "
                    << actionTable[make_pair(I.second, a)].second << endl;
-            }
+            }else{
+				if(ParserErr.count(make_pair(I.second,a)))
+					of<<I.second<<" "<<a<<" "<<ParserErr[make_pair(I.second,a)]<<" -2"<<endl;
+			}
         }
         if (actionTable.count(make_pair(I.second, "$"))) {
             of << I.second << " "
@@ -942,7 +958,12 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
         // std::cerr << " str: " << N.raw << " type: " << N.type << endl;
         // std::cerr << "row:" << N.row << " column: " << N.column << " type: "
         // << N.parserSymbol << endl;
-        if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0) throw;
+        if(actionTable.count(make_pair(curState,N.parserSymbol)) == 0){
+			if(ParserErr.count(make_pair(curState,N.parserSymbol))){
+				cout<<"Error:"<<ParserErr[make_pair(curState,N.parserSymbol)]<<" expected, but"<<N.parserSymbol<<" found."<<endl;
+			}
+			throw;
+		}
         pair<ACTION, int> act =
             actionTable[make_pair(curState, N.parserSymbol)];
         if (act.first == Shift) {
