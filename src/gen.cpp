@@ -113,6 +113,9 @@ bool is_possible_to_level_up(SymbolDescriptor *src, SymbolDescriptor *target) {
 
 void put_variable_decl(VariableDescriptor *var) {
     // TODO: handle different type
+    if(var->varType->type==DESCRIPTOR_STRUCT){
+        CodeCollector::src()<<"struct ";
+    }
     CodeCollector::src() << map_variable_type(var->varType);
     if (var->isRef) CodeCollector::src() << "*";
     CodeCollector::src() << " " << var->name;
@@ -203,7 +206,7 @@ void ASTDispatcher::gen_number_expr(NumberExprAST *ast) {
     switch (ast->const_type) {
         case CONSTANT_INT:
             t = SymbolTable::create_variable_G(
-                SymbolTable::lookfor_type(TYPE_BASIC_INT), false);
+                SymbolTable::lookfor_type(TYPE_BASIC_INT64), false);
             t->isLeftVar = false;
             break;
         case CONSTANT_REAL:
@@ -584,7 +587,7 @@ void ASTDispatcher::gen_for_statement_begin(ForStatementAST *ast) {
             SymbolTable::lookfor_type(TYPE_BASIC_INT64) &&
         is_possible_to_level_up(
             std::any_cast<VariableDescriptor *>(ast->rangeL->value)->varType,
-            SymbolTable::lookfor_type(TYPE_BASIC_INT64))) {
+            SymbolTable::lookfor_type(TYPE_BASIC_INT64))==false) {
         throw TypeErrorException(
             "left range of `for` is not an integer",
             std::any_cast<VariableDescriptor *>(ast->rangeL->value)
@@ -595,7 +598,7 @@ void ASTDispatcher::gen_for_statement_begin(ForStatementAST *ast) {
             SymbolTable::lookfor_type(TYPE_BASIC_INT64) &&
         is_possible_to_level_up(
             std::any_cast<VariableDescriptor *>(ast->rangeR->value)->varType,
-            SymbolTable::lookfor_type(TYPE_BASIC_INT64))) {
+            SymbolTable::lookfor_type(TYPE_BASIC_INT64))==false) {
         throw TypeErrorException(
             "right range of `for` is not an integer",
             std::any_cast<VariableDescriptor *>(ast->rangeL->value)

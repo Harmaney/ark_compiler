@@ -1,7 +1,7 @@
 program Hello;
 var i:record
     name:string;
-    age:integer;
+    age:int64;
 end;
 begin
     i.name:='123';
