@@ -1,10 +1,7 @@
-#include <bits/stdc++.h>
-using namespace std;
-
+#include <queue>
+#include <string>
 using TokenQueue = std::queue<std::tuple<std::string, int, int, std::string>>;
-
-string load_file(string file_name);
 
 void load_key_words();
 
-TokenQueue lex_work(string file_name);
+TokenQueue lex_work(std::string file_name);

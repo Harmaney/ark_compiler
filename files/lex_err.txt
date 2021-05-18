@@ -1,4 +1,14 @@
 program
-const
+var
+integer
+function
+integer
+integer
+begin
+if
+then
+else
+mod
+end
 begin
 end

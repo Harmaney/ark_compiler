@@ -14,30 +14,29 @@
 #include "logger.h"
 #define inset(y, x) x.find(y) != x.end()
 #define table_exist 1
-using namespace std;
-string fjcS;
-set<string> Terminal, Nonterminal;
-typedef pair<string, vector<string>> Expr;
-vector<Expr> Productions;
-map<int, Expr> Production_content;
-map<Expr, int> Production_ID;
-int Production_num = 0;
-vector<string> empty_vec;
-map<string, set<string>> First;
-map<string, set<vector<string>>> RHS_set;
-set<string> Get_epsilon;
-std::default_random_engine rng(2018210789);
+
+std::string fjcS;
+std::set<std::string> terminal, non_terminal;
+typedef std::pair<std::string, std::vector<std::string>> Expr;
+std::vector<Expr> productions;
+std::map<int, Expr> production_content;
+std::map<Expr, int> production_ID;
+int production_num = 0;
+std::vector<std::string> empty_vec;
+std::map<std::string, std::set<std::string>> first;
+std::map<std::string, std::set<std::vector<std::string>>> RHS_set;
+std::set<std::string> get_epsilon;
 void init() {
-    ifstream input("../files/grammar.txt");
+    std::ifstream input("../files/grammar.txt");
     if (!input) {
-        cerr << "找不到grammar.txt" << endl;
+        std::cerr << "找不到grammar.txt" << std::endl;
         abort();
     }
     int mode = 0;
-    string LHS;
-    vector<string> RHS;
+    std::string LHS;
+    std::vector<std::string> RHS;
     while (!input.eof()) {
-        string str;
+        std::string str;
         input >> str;
         if (str.empty()) continue;
         if (str == "->")
@@ -46,20 +45,20 @@ void init() {
             RHS_set[LHS].insert(RHS);
 
             Expr prod = make_pair(LHS, RHS);
-            Productions.push_back(prod);
-            Production_ID[prod] = ++Production_num;
-            Production_content[Production_num] = prod;
+            productions.push_back(prod);
+            production_ID[prod] = ++production_num;
+            production_content[production_num] = prod;
 
-            if (RHS.empty()) Get_epsilon.insert(LHS);
+            if (RHS.empty()) get_epsilon.insert(LHS);
             RHS.clear();
             if (str == "@") mode = 0;
         } else if (mode == 0) {
-            LHS = str, Nonterminal.insert(str);
+            LHS = str, non_terminal.insert(str);
             if (fjcS.empty()) fjcS = LHS;
         } else
-            RHS.push_back(str), Terminal.insert(str);
+            RHS.push_back(str), terminal.insert(str);
     }
-    for (auto str : Nonterminal) Terminal.erase(str);
+    for (auto str : non_terminal) terminal.erase(str);
 
     //	for(auto str:Nonterminal){
     //		cout<<str<<"->";
@@ -75,7 +74,7 @@ void init() {
     //	for(auto str:Terminal) cout<<str<<endl;
 }
 template <typename T>
-bool merge(const set<T>& A, set<T>& B) {
+bool merge(const std::set<T>& A, std::set<T>& B) {
     bool flg = false;
     for (auto x : A) {
         if (B.find(x) == B.end()) {
@@ -85,17 +84,17 @@ bool merge(const set<T>& A, set<T>& B) {
     }
     return flg;
 }
-set<string> get_first(vector<string> strlist) {
-    set<string> res;
-    vector<string>::iterator it = strlist.begin();
-    string Head = *it;
+std::set<std::string> get_first(std::vector<std::string> strlist) {
+    std::set<std::string> res;
+    std::vector<std::string>::iterator it = strlist.begin();
+    std::string Head = *it;
     while (1) {
-        merge(First[Head], res);
-        if (inset(Head, Terminal)) break;
-        if (inset(Head, Get_epsilon)) {
+        merge(first[Head], res);
+        if (inset(Head, terminal)) break;
+        if (inset(Head, get_epsilon)) {
             it++;
             if (it == strlist.end()) {
-                merge(First[""], res);
+                merge(first[""], res);
                 break;
             } else {
                 Head = *it;
@@ -106,16 +105,16 @@ set<string> get_first(vector<string> strlist) {
     return res;
 }
 void get_first() {
-    for (auto x : Terminal) First[x].insert(x);
-    First["$"].insert("$");
-    First[""].insert("");
+    for (auto x : terminal) first[x].insert(x);
+    first["$"].insert("$");
+    first[""].insert("");
     bool changed = true;
     while (changed) {
         changed = false;
-        for (auto LHS : Nonterminal) {
+        for (auto LHS : non_terminal) {
             for (auto RHS : RHS_set[LHS]) {
                 if (RHS.empty()) continue;
-                changed |= merge(get_first(RHS), First[LHS]);
+                changed |= merge(get_first(RHS), first[LHS]);
             }
         }
     }
@@ -134,13 +133,13 @@ void get_first() {
 }
 // typedef tuple<string,vector<string>,vector<string>,string>
 // Item;//0A->1a.2Bb,3x
-bool operator<(vector<string> A, vector<string> B) {
+bool operator<(std::vector<std::string> A, std::vector<std::string> B) {
     for (int i = 0; i < A.size() && i < B.size(); i++) {
         if (A[i] != B[i]) return A[i] < B[i];
     }
     if (A.size() != B.size()) return A.size() < B.size();
 }
-bool operator==(vector<string> A, vector<string> B) {
+bool operator==(std::vector<std::string> A, std::vector<std::string> B) {
     if (A.size() != B.size()) return false;
     for (int i = 0; i < A.size() && i < B.size(); i++) {
         if (A[i] != B[i]) return false;
@@ -148,12 +147,12 @@ bool operator==(vector<string> A, vector<string> B) {
     return true;
 }
 struct Item {
-    string LHS;
-    string LookAhead;
-    vector<string> previous, next;
+    std::string LHS;
+    std::string LookAhead;
+    std::vector<std::string> previous, next;
     Item() {}
-    Item(string LHS, vector<string> previous, vector<string> next,
-         string LookAhead)
+    Item(std::string LHS, std::vector<std::string> previous,
+         std::vector<std::string> next, std::string LookAhead)
         : LHS(LHS), previous(previous), next(next), LookAhead(LookAhead) {}
     bool operator<(const Item other) const {
         if (LHS != other.LHS) {
@@ -177,27 +176,27 @@ struct Item {
         return true;
     }
 };
-map<set<Item>, int> Item_set;
-map<int, set<Item>> Item_content;
+std::map<std::set<Item>, int> Item_set;
+std::map<int, std::set<Item>> Item_content;
 int item_num = 0;
-set<Item> get_closure(Item I) {
-    set<Item> J;
+std::set<Item> get_closure(Item I) {
+    std::set<Item> J;
     J.insert(I);
     bool changed = true;
     do {
         changed = false;
-        set<Item> J_new;
-        set<Item> J_add;
+        std::set<Item> J_new;
+        std::set<Item> J_add;
         merge(J, J_new);
         for (auto item : J_new) {
-            vector<string> next = item.next;
+            std::vector<std::string> next = item.next;
             if (next.empty()) continue;
-            string B = *next.begin();  // B
-            vector<string> temp = next;
+            std::string B = *next.begin();  // B
+            std::vector<std::string> temp = next;
             temp.erase(temp.begin());
             temp.push_back(item.LookAhead);  // temp = bx
 
-            set<string> bx_first = get_first(temp);
+            std::set<std::string> bx_first = get_first(temp);
 
             for (auto RHS : RHS_set[B]) {
                 for (auto str : bx_first) {
@@ -210,8 +209,8 @@ set<Item> get_closure(Item I) {
     } while (changed);
     return J;
 }
-set<Item> GO(set<Item> I, string X) {
-    set<Item> J;
+std::set<Item> GO(std::set<Item> I, std::string X) {
+    std::set<Item> J;
     for (auto item : I) {
         // A->a.Bb,x
         if (item.next.empty()) continue;
@@ -228,9 +227,9 @@ void get_items() {
         get_closure(Item(fjcS, empty_vec, *RHS_set[fjcS].begin(), "$"));
     Item_set[get_closure(Item(fjcS, empty_vec, *RHS_set[fjcS].begin(), "$"))] =
         item_num++;
-    set<string> Sign;
-    merge(Terminal, Sign);
-    merge(Nonterminal, Sign);
+    std::set<std::string> Sign;
+    merge(terminal, Sign);
+    merge(non_terminal, Sign);
     // ofstream itemout("item.txt");
     bool changed = true;
     do {
@@ -238,7 +237,7 @@ void get_items() {
         for (auto I : Item_set) {
             for (auto X : Sign) {
                 if (X.empty()) continue;
-                set<Item> Goix = GO(I.first, X);
+                std::set<Item> Goix = GO(I.first, X);
                 if (!Goix.empty() && Item_set.count(Goix) == 0) {
                     Item_content[item_num] = Goix;
                     Item_set[Goix] = item_num++;
@@ -258,12 +257,12 @@ void get_items() {
     } while (changed);
     printf("%d\n", item_num);
 }
-enum ACTION { Shift = 1, Reduce, ACC };
-map<pair<int, string>, pair<ACTION, int>> actionTable;
-map<pair<int, string>, int> Goto;
-void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
-    if (actionTable.count(pos)) {
-        if (actionTable[pos] != act) {
+enum ACTION { SHIFT = 1, REDUCE, ACC };
+std::map<std::pair<int, std::string>, std::pair<ACTION, int>> action_table;
+std::map<std::pair<int, std::string>, int> goto_table;
+void add_action(std::pair<ACTION, int> act, std::pair<int, std::string> pos) {
+    if (action_table.count(pos)) {
+        if (action_table[pos] != act) {
             // if (actionTable[pos].first == Shift) return;
             /*std::cerr << "???" << endl;
             cerr << actionTable[pos].first << " " << actionTable[pos].second
@@ -272,129 +271,133 @@ void AddAction(pair<ACTION, int> act, pair<int, string> pos) {
             cerr << pos.first << " " << pos.second << endl;*/
         }
     }
-    actionTable[pos] = act;
+    action_table[pos] = act;
 }
-void LoadTable() {
-    ifstream inf("../files/analyse_table.txt");
+void load_table() {
+    std::ifstream inf("../files/analyse_table.txt");
     if (!inf) {
-        cerr << "找不到文件analyse_table.txt" << endl;
+        std::cerr << "找不到文件analyse_table.txt" << std::endl;
         abort();
     }
     int I, id, ACT_id;
-    string a;
+    std::string a;
     while (!inf.eof()) {
         inf >> I >> a >> ACT_id >> id;
         if (id == -1) {
-            Goto[make_pair(I, a)] = ACT_id;
+            goto_table[std::make_pair(I, a)] = ACT_id;
         } else {
             enum ACTION ACT;
             if (ACT_id == 1)
-                ACT = Shift;
+                ACT = SHIFT;
             else if (ACT_id == 2)
-                ACT = Reduce;
+                ACT = REDUCE;
             else if (ACT_id == 3)
                 ACT = ACC;
             else
                 assert(0);
-            actionTable[make_pair(I, a)] = make_pair(ACT, id);
+            action_table[make_pair(I, a)] = std::make_pair(ACT, id);
         }
     }
 }
 void generate_table() {
     if (table_exist) {
-        LoadTable();
+        load_table();
         return;
     }
     std::cerr << "generating table\n";
     get_items();
     for (auto I : Item_set) {
         for (auto it : I.first) {
-            vector<string> next = it.next;
+            std::vector<std::string> next = it.next;
             if (!next.empty()) {
-                AddAction(
-                    make_pair(Shift, Item_set[GO(I.first, *next.begin())]),
-                    make_pair(I.second, *next.begin()));
+                add_action(
+                    std::make_pair(SHIFT, Item_set[GO(I.first, *next.begin())]),
+                    std::make_pair(I.second, *next.begin()));
             } else if (it.LHS != fjcS) {
-                AddAction(
-                    make_pair(Reduce,
-                              Production_ID[make_pair(it.LHS, it.previous)]),
-                    make_pair(I.second, it.LookAhead));
+                add_action(
+                    std::make_pair(
+                        REDUCE, production_ID[make_pair(it.LHS, it.previous)]),
+                    std::make_pair(I.second, it.LookAhead));
             } else {
-                AddAction(make_pair(ACC, 0), make_pair(I.second, it.LookAhead));
+                add_action(std::make_pair(ACC, 0),
+                           std::make_pair(I.second, it.LookAhead));
             }
         }
-        for (auto A : Nonterminal) {
-            set<Item> GoIA = GO(I.first, A);
+        for (auto A : non_terminal) {
+            std::set<Item> GoIA = GO(I.first, A);
             if (GoIA.empty()) continue;
-            Goto[make_pair(I.second, A)] = Item_set[GoIA];
+            goto_table[make_pair(I.second, A)] = Item_set[GoIA];
         }
     }
-    ofstream of("analyse_table.txt");
+    std::ofstream of("analyse_table.txt");
     if (!of) {
-        cerr << "找不到文件analyse_table.txt" << endl;
+        std::cerr << "找不到文件analyse_table.txt" << std::endl;
         abort();
     }
     for (auto I : Item_set) {
-        for (auto a : Terminal) {
-            if (actionTable.count(make_pair(I.second, a))) {
+        for (auto a : terminal) {
+            if (action_table.count(std::make_pair(I.second, a))) {
                 of << I.second << " " << a << " "
-                   << actionTable[make_pair(I.second, a)].first << " "
-                   << actionTable[make_pair(I.second, a)].second << endl;
+                   << action_table[std::make_pair(I.second, a)].first << " "
+                   << action_table[std::make_pair(I.second, a)].second
+                   << std::endl;
             }
         }
-        if (actionTable.count(make_pair(I.second, "$"))) {
+        if (action_table.count(std::make_pair(I.second, "$"))) {
             of << I.second << " "
                << "$"
-               << " " << actionTable[make_pair(I.second, "$")].first << " "
-               << actionTable[make_pair(I.second, "$")].second << endl;
+               << " " << action_table[std::make_pair(I.second, "$")].first
+               << " " << action_table[std::make_pair(I.second, "$")].second
+               << std::endl;
         }
-        for (auto A : Nonterminal) {
-            if (Goto.count(make_pair(I.second, A))) {
+        for (auto A : non_terminal) {
+            if (goto_table.count(std::make_pair(I.second, A))) {
                 of << I.second << " " << A << " "
-                   << Goto[make_pair(I.second, A)] << " -1" << endl;
+                   << goto_table[std::make_pair(I.second, A)] << " -1"
+                   << std::endl;
             }
         }
     }
-    cout << "table ready" << endl;
+    std::cout << "table ready" << std::endl;
 }
+
 struct TokenItem {
-    string raw, type, parserSymbol;
+    std::string raw, type, parser_symbol;
     int row, column;
     TokenItem() {}
-    TokenItem(string raw, string type, string parserSymbol, int row, int column)
+    TokenItem(std::string raw, std::string type, std::string parser_symbol,
+              int row, int column)
         : raw(raw),
           type(type),
-          parserSymbol(parserSymbol),
+          parser_symbol(parser_symbol),
           row(row),
           column(column) {}
-    void Load(std::tuple<std::string, int, int, std::string> i) {
+    void load(std::tuple<std::string, int, int, std::string> i) {
         auto [_raw, _row, _column, _type] = i;
         if (_raw == "")
             *this = {"", "", "$", 0, 0};
         else {
-            string _parserSymbol;
+            std::string _parser_symbol;
             if (_type == "keyword" || _type == "punc") {
                 if (_raw == ":=")
-                    _parserSymbol = "assignOP";
-                else if (_raw == "=" || _raw == "<>" || _raw == ">" ||
-                         _raw == "<" || _raw == ">=" || _raw == "<=")
-                    _parserSymbol = "relOP";
+                    _parser_symbol = "assignOP";
+                else if (_raw == "<>" || _raw == ">" || _raw == "<" ||
+                         _raw == ">=" || _raw == "<=")
+                    _parser_symbol = "relOP";
                 else if (_raw == "*" || _raw == "/" || _raw == "div" ||
                          _raw == "mod" || _raw == "and")
-                    _parserSymbol = "mulOP";
+                    _parser_symbol = "mulOP";
                 else
-                    _parserSymbol = _raw;
+                    _parser_symbol = _raw;
             } else if (_type == "identify")
-                _parserSymbol = "ID";
+                _parser_symbol = "ID";
             else if (_type == "intVal" || _type == "realVal" ||
                      _type == "stringVal")
-                _parserSymbol = _type;
+                _parser_symbol = _type;
             else
-                _parserSymbol = _raw;
-            *this = {_raw, _type, _parserSymbol, _row, _column};
+                _parser_symbol = _raw;
+            *this = {_raw, _type, _parser_symbol, _row, _column};
         }
-        std::cerr << raw << ' ' << type << ' ' << parserSymbol << ' ' << row
-                  << ' ' << column << '\n';
     }
 };
 
@@ -404,16 +407,17 @@ std::string rand_name() {
     index += 1;
     return ret;
 }
-GrammarTreeNode* Analyse(TokenQueue& tq) {
+
+GrammarTreeNode* analyse(TokenQueue& tq) {
     using namespace NodeProperties;
 
     //记录下来每个node->prop的类型
-    vector<GrammarTreeNode*> unlinkedNodes;
-    int curState;
-    vector<int> states;
-    vector<string> symbols;
-    auto DoReduce = [&](Expr expr) {
-        auto evalConst = [&](AST* node) {
+    std::vector<GrammarTreeNode*> unlinked_nodes;
+    int cur_state;
+    std::vector<int> states;
+    std::vector<std::string> symbols;
+    auto do_reduce = [&](Expr expr) {
+        auto eval_const = [&](AST* node) {
             int flag = 1;
             NumberExprAST* number;
             if (typeid(node) == typeid(UnaryExprAST*)) {
@@ -428,7 +432,7 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
             else
                 return new NumberExprAST(number->val_float * flag);
         };
-        auto UpdateProperties = [&](GrammarTreeNode* node) {
+        auto update_properties = [&](GrammarTreeNode* node) {
             if (node->type == "S") {  // S -> ProgramStruct
                 node->prop = cast<S>(node->son[0]->prop);
             } else if (node->type == "ProgramStruct") {
@@ -500,13 +504,15 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                     3) {  // ConstDeclaration -> ID = ConstValue
                     prop.push_back(new VariableDeclAST(
                         new VariableExprAST(node->son[0]->raw), nullptr, false,
-                        true, evalConst(cast<ConstValue>(node->son[2]->prop))));
+                        true,
+                        eval_const(cast<ConstValue>(node->son[2]->prop))));
                 } else {  // ConstDeclaration -> ConstDeclaration ; ID =
                           // ConstValue
                     prop = cast<ConstDeclaration>(node->son[0]->prop);
                     prop.push_back(new VariableDeclAST(
                         new VariableExprAST(node->son[2]->raw), nullptr, false,
-                        true, evalConst(cast<ConstValue>(node->son[4]->prop))));
+                        true,
+                        eval_const(cast<ConstValue>(node->son[4]->prop))));
                 }
                 node->prop = prop;
             } else if (node->type == "ConstValue") {
@@ -517,8 +523,8 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                 } else if (node->son[0]->raw == "-") {  // ConstValue -> - Num
                     prop = new UnaryExprAST("-",
                                             cast<ExprAST*>(node->son[1]->prop));
-                } else if (node->son.size() == 1) {  // ConstValue -> Num
-                    prop = cast<ConstValue>(node->son[0]->prop);
+                } else if (node->son.size() == 1) {  // ConstValue -> Value
+                    prop = cast<Value>(node->son[0]->prop);
                 }
                 node->prop = prop;
             } else if (node->type == "TypeDeclaration") {  // new
@@ -587,8 +593,9 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
             } else if (node->type == "Period") {
                 Period prop;
                 if (node->son.size() == 3) {  // Period -> Digits .. Digits
-                    prop = Period{make_pair(cast<Digits>(node->son[0]->prop),
-                                            cast<Digits>(node->son[2]->prop))};
+                    prop = Period{
+                        std::make_pair(cast<Digits>(node->son[0]->prop),
+                                       cast<Digits>(node->son[2]->prop))};
                 } else {  // Period -> Period , Digits .. Digits
                     prop = cast<Period>(node->son[0]->prop);
                     prop.emplace_back(cast<Digits>(node->son[2]->prop),
@@ -793,7 +800,11 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                 ElsePart prop;
                 if (node->son.size() >
                     0) {  // ElsePart -> else CompoundStatement
-                    prop = cast<ElsePart>(node->son[1]->prop);
+                    if (node->son[1]->type == "CompoundStatement")
+                        prop = cast<ElsePart>(node->son[1]->prop);
+                    else
+                        prop =
+                            new BlockAST({cast<Statement>(node->son[1]->prop)});
                 } else {
                     prop = new BlockAST({});
                 }
@@ -854,7 +865,9 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                 node->prop = prop;
             } else if (node->type == "Factor") {
                 Factor prop = nullptr;
-                if (node->son[0]->type == "Num") {  // Factor -> Num
+                if (node->son[0]->type == "Value") {  // Factor -> Value
+                    prop = cast<Value>(node->son[0]->prop);
+                } else if (node->son[0]->type == "Num") {  // Factor -> Num
                     prop = cast<Factor>(node->son[0]->prop);
                 } else if (node->son[0]->type ==
                            "ComposedVariable") {  // Factor -> ComposedVariable
@@ -904,69 +917,77 @@ GrammarTreeNode* Analyse(TokenQueue& tq) {
                 assert(node->son[0]->raw == "+" || node->son[0]->raw == "-" ||
                        node->son[0]->raw == "or");
                 assert(node->prop.type() == typeid(addOP));
-            }
+            } else if (node->type == "Value") {
+                Value prop;
+                if (node->son[0]->type == "Num") {  // Value -> Num
+                    prop = cast<Value>(node->son[0]->prop);
+                } else {  // Value -> stringVal
+                    prop = new StringExprAST(node->son[0]->raw);
+                }
+                node->prop = prop;
+            } else
+                abort();
             // cerr << node->type << endl;
             assert(node->prop.has_value());  //每个结点都必有一个属性
         };
-        int popNum = expr.second.size();
-        vector<GrammarTreeNode*> reducedNode;
-        for (int i = 0; i < popNum; i++) {
+        int pop_num = expr.second.size();
+        std::vector<GrammarTreeNode*> reduced_node;
+        for (int i = 0; i < pop_num; i++) {
             states.pop_back();
             symbols.pop_back();
-            reducedNode.push_back(*unlinkedNodes.rbegin());
-            unlinkedNodes.pop_back();
+            reduced_node.push_back(*unlinked_nodes.rbegin());
+            unlinked_nodes.pop_back();
         }
-        curState = *states.rbegin();
-        states.push_back(Goto[make_pair(curState, expr.first)]);
+        cur_state = *states.rbegin();
+        states.push_back(goto_table[make_pair(cur_state, expr.first)]);
         symbols.push_back(expr.first);
-        uint64_t gid = rng();
-        GrammarTreeNode* newNode =
-            new GrammarTreeNode("", expr.first, expr.first, 0, 0, gid);
-        reverse(reducedNode.begin(), reducedNode.end());
-        for (auto node : reducedNode) newNode->son.push_back(node);
-        UpdateProperties(newNode);
-        unlinkedNodes.push_back(newNode);
-        newNode->Report();
+        GrammarTreeNode* new_node =
+            new GrammarTreeNode("", expr.first, expr.first, 0, 0);
+        reverse(reduced_node.begin(), reduced_node.end());
+        for (auto node : reduced_node) new_node->son.push_back(node);
+        update_properties(new_node);
+        unlinked_nodes.push_back(new_node);
+        new_node->Report();
     };
-    std::cerr << "start analyse" << endl;
+    DEBUG(std::cerr << "start analyse" << std::endl;)
     states.push_back(0);
     symbols.push_back("");
-    TokenItem N;
-    N.Load(tq.front());
+    TokenItem n;
+    n.load(tq.front());
     tq.pop();
     for (;;) {
-        curState = *states.rbegin();
-        std::cerr << curState << '\n';
+        cur_state = *states.rbegin();
+        // std::cerr << curState << '\n';
         // for (auto x : symbols) std::cerr << x << " ";
         // std::cerr << endl;
         // std::cerr << " str: " << N.raw << " type: " << N.type << endl;
         // std::cerr << "row:" << N.row << " column: " << N.column << " type: "
         // << N.parserSymbol << endl;
-        if (actionTable.count(make_pair(curState, N.parserSymbol)) == 0) throw;
-        pair<ACTION, int> act =
-            actionTable[make_pair(curState, N.parserSymbol)];
-        if (act.first == Shift) {
+        if (action_table.count(make_pair(cur_state, n.parser_symbol)) == 0)
+            throw;
+        std::pair<ACTION, int> act =
+            action_table[make_pair(cur_state, n.parser_symbol)];
+        if (act.first == SHIFT) {
             states.push_back(act.second);
-            symbols.push_back(N.parserSymbol);
-            unlinkedNodes.push_back(new GrammarTreeNode(
-                N.raw, N.type, N.parserSymbol, N.row, N.column, rng()));
-            (*unlinkedNodes.rbegin())->Report();
-
+            symbols.push_back(n.parser_symbol);
+            unlinked_nodes.push_back(new GrammarTreeNode(
+                n.raw, n.type, n.parser_symbol, n.row, n.column));
+            (*unlinked_nodes.rbegin())->Report();
             assert(!tq.empty());
-            N.Load(tq.front());
+            n.load(tq.front());
             tq.pop();
 
-        } else if (act.first == Reduce) {
-            Expr prod = Production_content[act.second];
-            DoReduce(prod);
+        } else if (act.first == REDUCE) {
+            Expr prod = production_content[act.second];
+            do_reduce(prod);
         } else if (act.first == ACC) {
-            DoReduce({"S", {"ProgramStruct"}});
-            cout << "ACCEPT!" << endl;
+            do_reduce({"S", {"ProgramStruct"}});
+            DEBUG(std::cout << "ACCEPT!" << std::endl;)
             break;
         }
     }
-    assert(unlinkedNodes.size() == 1);
-    return *unlinkedNodes.begin();
+    assert(unlinked_nodes.size() == 1);
+    return *unlinked_nodes.begin();
 }
 
 void check_grammar_tree(uint64_t gid, int dep) {
@@ -981,7 +1002,7 @@ GlobalAST* parser_work(TokenQueue tq) {
     get_first();
     generate_table();
     tq.push({"", 0, 0, ""});
-    auto root = Analyse(tq);
+    auto root = analyse(tq);
     check_grammar_tree(0, 0);
     return NodeProperties::cast<GlobalAST*>(root->prop);
 }

@@ -9,24 +9,49 @@ void init_code_generator() {
 }
 
 void init_basic_type() {
-    SymbolTable::insertType(
+    SymbolTable::insert_type(
         TYPE_BASIC_VOID,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_VOID));
-    SymbolTable::insertType(
+    SymbolTable::insert_type(
         TYPE_BASIC_INT, new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_INT));
-    SymbolTable::insertType(
+    SymbolTable::insert_type(
         TYPE_BASIC_DOUBLE,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_DOUBLE));
-    SymbolTable::insertType(
+    SymbolTable::insert_type(
         TYPE_BASIC_STRING,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_STRING));
-    SymbolTable::insertType(
+    SymbolTable::insert_type(
         TYPE_BASIC_CHAR,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_CHAR));
-    SymbolTable::insertType(
+    SymbolTable::insert_type(
         TYPE_BASIC_LONGINT,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_LONGINT));
-        SymbolTable::insertType(
+    SymbolTable::insert_type(
         TYPE_BASIC_INT64,
         new SymbolDescriptor(DESCRIPTOR_BASIC, TYPE_BASIC_INT64));
+}
+
+std::string code_gen_work(AST *ast) {
+    init_code_generator();
+    init_basic_type();
+
+    CodeCollector::begin_section("main");
+
+    ASTDispatcher dispatcher;
+    ast->accept(dispatcher);
+
+    CodeCollector::end_section();
+
+    CodeCollector::begin_section("init_string");
+    CodeCollector::push_front("void init_string_() {");
+    CodeCollector::push_back("}");
+    CodeCollector::end_section();
+
+    CodeCollector::rearrange_section({"prelude", "global_define", "pre_struct",
+                                      "pre_array", "struct", "init_string",
+                                      "main"});
+
+    std::ostringstream code_out;
+    CodeCollector::output(code_out);
+    return code_out.str();
 }

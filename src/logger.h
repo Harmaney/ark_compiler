@@ -1,7 +1,7 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-static int LOG_LEVEL = 4;
+static int LOG_LEVEL = 0;
 
 // FATAL    ERROR   WARN    INFO    DEBUG   TRACE
 // 0        1       2       3       4       5
@@ -33,13 +33,9 @@ static int LOG_LEVEL = 4;
 
 #include <bits/stdc++.h>
 
-#include <fstream>
-
 #include "json.hpp"
 
 using Json = nlohmann::json;
-
-extern std::ofstream WALK_AST;
 
 template <typename P, typename... T>
 Json Serialize(P* ptr) {
@@ -71,6 +67,6 @@ Json Serialize(const std::vector<P*>& vec, const T&... arg) {
     return ret;
 }
 
-extern Json lexOutputer, parserOutputer, genOutputer;
+extern Json lex_info, parser_info, gen_info;
 
 #endif

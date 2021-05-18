@@ -2,13 +2,12 @@
 #include "data.h"
 #include "lex.h"
 #include "logger.h"
-using namespace std;
 
 namespace NodeProperties {
 using S = GlobalAST*;
 using ProgramStruct = GlobalAST*;
-using ProgramBody = map<std::string, std::vector<std::any>>;
-using Component = map<std::string, std::vector<std::any>>;
+using ProgramBody = std::map<std::string, std::vector<std::any>>;
+using Component = std::map<std::string, std::vector<std::any>>;
 using IDList = std::vector<std::string>;
 using ConstDeclaration = std::vector<VariableDeclAST*>;  // new
 using ConstValue = ExprAST*;
@@ -42,7 +41,8 @@ using ComposedVariable = ExprAST*;
 using Num = NumberExprAST*;
 using Digits = NumberExprAST*;
 using addOP = std::string;
-using TypeDeclaration = std::vector<TypeDefAST*>;  // new
+using TypeDeclaration = std::vector<TypeDefAST*>;
+using Value = ExprAST*;
 template <typename A>
 inline A cast(std::any arg) {
     if (typeid(A) == typeid(AST*)) {
@@ -120,8 +120,8 @@ inline std::vector<TypeDefAST*> cast(std::any arg) {  // new
     return std::any_cast<std::vector<TypeDefAST*>>(arg);
 }
 template <>
-inline map<std::string, std::vector<std::any>> cast(std::any arg) {
-    return std::any_cast<map<std::string, std::vector<std::any>>>(arg);
+inline std::map<std::string, std::vector<std::any>> cast(std::any arg) {
+    return std::any_cast<std::map<std::string, std::vector<std::any>>>(arg);
 }
 template <>
 inline std::vector<ExprAST*> cast(std::any arg) {
@@ -157,20 +157,18 @@ inline std::vector<std::pair<NumberExprAST*, NumberExprAST*>> cast(
 };  // namespace NodeProperties
 
 struct GrammarTreeNode {
-    string raw, type, parserSymbol;
+    std::string raw, type, parserSymbol;
     int row, column;
-    uint64_t ID;
     std::any prop;
 
-    vector<GrammarTreeNode*> son;
-    GrammarTreeNode(string raw, string type, string parserSymbol, int row,
-                    int column, uint64_t ID)
+    std::vector<GrammarTreeNode*> son;
+    GrammarTreeNode(std::string raw, std::string type, std::string parserSymbol,
+                    int row, int column)
         : raw(raw),
           type(type),
           parserSymbol(parserSymbol),
           row(row),
           column(column),
-          ID(ID),
           son{} {}
 
     void Report() {
@@ -179,7 +177,7 @@ struct GrammarTreeNode {
                   {"row", row},           {"column", column},
                   {"ID", (uint64_t)this}, {"son", Json::array()}};
         for (auto s : son) j["son"].push_back((uint64_t)s);
-        parserOutputer.push_back(j);
+        parser_info.push_back(j);
     }
 };
 
