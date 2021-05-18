@@ -19,5 +19,5 @@ begin
             j:=j-1;
         end;
     end;
-    writeln(f[c]);
+    write(f[c]);
 end.
