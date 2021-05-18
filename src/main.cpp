@@ -40,6 +40,8 @@ int main(int argc, char **argv) {
                  {"gen", gen_info},
              })
                 .dump();
+    ccode_file.flush();
+    ccode_file.close();
     system("gcc out.c -std=c99 -o out");
     return 0;
 }
