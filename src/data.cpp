@@ -435,6 +435,30 @@ SymbolDescriptor* SymbolTable::lookfor_type(std::string sig) {
     return NULL;
 }
 
+
+FunctionDescriptor* levelup_lookfor_function(std::string sig, std::vector<SymbolDescriptor*> args,int idx){
+    if(SymbolTable::lookfor_function(sig,args)){
+        return SymbolTable::lookfor_function(sig,args);
+    }
+    if(idx>=args.size())return nullptr;
+    std::vector<SymbolDescriptor *> level;
+    level.push_back(SymbolTable::lookfor_type(TYPE_BASIC_INT));
+    level.push_back(SymbolTable::lookfor_type(TYPE_BASIC_LONGINT));
+    level.push_back(SymbolTable::lookfor_type(TYPE_BASIC_INT64));
+
+    bool canrep=false;
+    for(auto dp:level){
+        if(dp==args[idx])canrep=true;
+        auto old=args[idx];
+        args[idx]=dp;
+        auto res=levelup_lookfor_function(sig,args,idx+1);
+        if(res)return res;
+        args[idx]=old;
+    }
+
+    return nullptr;
+}
+
 FunctionDescriptor* SymbolTable::lookfor_function(
     std::string sig, std::vector<SymbolDescriptor*> args) {
     auto name = get_internal_function_name(sig, args);
