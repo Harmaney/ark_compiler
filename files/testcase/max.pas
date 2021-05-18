@@ -4,6 +4,6 @@ begin
     read(i);
     read(j);
     if i<=j then k:=j
-    else k:=i
-    write(k)
+    else k:=i;
+    write(k);
 end.
