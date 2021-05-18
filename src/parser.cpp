@@ -447,11 +447,11 @@ std::string rand_name() {
     return ret;
 }
 
-GrammarTreeNode* analyse(TokenQueue& tq) {
+AnalyseTreeNode* analyse(TokenQueue& tq) {
     using namespace NodeProperties;
 
     //记录下来每个node->prop的类型
-    std::vector<GrammarTreeNode*> unlinked_nodes;
+    std::vector<AnalyseTreeNode*> unlinked_nodes;
     int cur_state;
     std::vector<int> states;
     std::vector<std::string> symbols;
@@ -472,7 +472,7 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
             else
                 return new NumberExprAST(number->val_float * flag);
         };
-        auto update_properties = [&](GrammarTreeNode* node) {
+        auto update_properties = [&](AnalyseTreeNode* node) {
             if (node->type == "S") {  // S -> ProgramStruct
                 node->prop = cast<S>(node->son[0]->prop);
             }
@@ -1087,7 +1087,7 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
             assert(node->prop.has_value());  //每个结点都必有一个属性
         };
         int pop_num = expr.second.size();
-        std::vector<GrammarTreeNode*> reduced_node;
+        std::vector<AnalyseTreeNode*> reduced_node;
         for (int i = 0; i < pop_num; i++) {
             states.pop_back();
             symbols.pop_back();
@@ -1097,8 +1097,8 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
         cur_state = *states.rbegin();
         states.push_back(goto_table[make_pair(cur_state, expr.first)]);
         symbols.push_back(expr.first);
-        GrammarTreeNode* new_node =
-            new GrammarTreeNode("", expr.first, expr.first, 0, 0);
+        AnalyseTreeNode* new_node =
+            new AnalyseTreeNode("", expr.first, expr.first, 0, 0);
         reverse(reduced_node.begin(), reduced_node.end());
         for (auto node : reduced_node) new_node->son.push_back(node);
         update_properties(new_node);
@@ -1138,7 +1138,7 @@ GrammarTreeNode* analyse(TokenQueue& tq) {
         if (act.first == SHIFT) {
             states.push_back(act.second);
             symbols.push_back(n.parser_symbol);
-            unlinked_nodes.push_back(new GrammarTreeNode(
+            unlinked_nodes.push_back(new AnalyseTreeNode(
                 n.raw, n.type, n.parser_symbol, n.row, n.column));
             (*unlinked_nodes.rbegin())->Report();
             assert(!tq.empty());
