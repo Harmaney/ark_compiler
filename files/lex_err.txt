@@ -1,12 +1,14 @@
 program
 var
-<<<<<<< HEAD
-char
-=======
-record
-string
 integer
+function
+integer
+integer
+begin
+if
+then
+else
+mod
 end
->>>>>>> 2546fbf27f801270f1f21b41a804935fb5751e57
 begin
 end

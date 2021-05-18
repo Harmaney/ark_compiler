@@ -1,8 +1,6 @@
 program Hello;
-var i,j:string;
+var a,b,c:string;
 begin
-	i:='a13';
-	j:='123';
-	i:=i+j;
-	write(i);
+  read(a,b,c);
+  write(a+b+c);
 end.

@@ -1,6 +1,6 @@
 #include "lex.h"
 
-#include <bits/stdc++.h>
+#include <vector>
 
 #include "logger.h"
 #define letter \
@@ -82,43 +82,30 @@
     token_stream.push_back({remain_token, rows, columns, present_state}); \
     remain_token.clear();                                                 \
     present_state = 0;
-using namespace std;
 
-string load_file(string file_name) {
-    ifstream input(file_name);
-    string result_string;
-    string each_line;
-    while (true) {
-        if (!getline(input, each_line)) break;
-        result_string += each_line + '\n';
-        each_line.clear();
-    }
-    return result_string;
-}
-
-set<string> key_words;
+std::set<std::string> key_words;
 
 void load_key_words() {
-    ifstream input("../files/keywords.txt");
-    string word;
+    std::ifstream input("../files/keywords.txt");
+    std::string word;
     while (input >> word) key_words.insert(word);
 }
 
 struct Mark {
-    string word;
+    std::string word;
     int row;
     int column;
     int type;
 };
 
-TokenQueue lex_work(string all_chars) {
+TokenQueue lex_work(std::string all_chars) {
     // init
     //    string file_name = argv[1];
     // load
     load_key_words();
     int present_state = 0;
-    vector<Mark> token_stream;
-    string remain_token;
+    std::vector<Mark> token_stream;
+    std::string remain_token;
     int rows = 1;
     int columns = 0;
     int n_columns = 0;
@@ -282,7 +269,7 @@ TokenQueue lex_work(string all_chars) {
                 switch (now_char) {
                     number add_end break;
                     default:
-                        string s1, s2, s3;
+                        std::string s1, s2, s3;
                         int st = 0;
                         for (auto c : remain_token) {
                             if (st == 0 && c == '.') {
@@ -324,12 +311,12 @@ TokenQueue lex_work(string all_chars) {
                 break;
         }
     }
-    ofstream lout("../files/lex_out.txt");
-    ofstream lerr("../files/lex_err.txt");
+    std::ofstream lout("../files/lex_out.txt");
+    std::ofstream lerr("../files/lex_err.txt");
 
     TokenQueue result;
     for (auto s : token_stream) {
-		if (s.type == 11) {
+        if (s.type == 11) {
             s.word = s.word.substr(1);
             s.word.pop_back();
         }
@@ -337,7 +324,7 @@ TokenQueue lex_work(string all_chars) {
 
         std::string type;
         if (inset(s.word, key_words)) {
-            lerr << s.word << endl;
+            lerr << s.word << std::endl;
             s.type = 100;
         }
 
@@ -361,8 +348,8 @@ TokenQueue lex_work(string all_chars) {
                 type = "punc";
                 break;
         }
-        lout << type << endl;
-        lexOutputer.push_back({{"word", s.word},
+        lout << type << std::endl;
+        lex_info.push_back({{"word", s.word},
                                {"row", s.row},
                                {"column", s.column},
                                {"type", type}});
