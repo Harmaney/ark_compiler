@@ -155,7 +155,7 @@ void ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
     }
 
     auto descriptor = SymbolTable::create_array_type(
-        ast->itemAST->_descriptor, ast->rangeR->val_int - ast->rangeL->val_int,
+        ast->itemAST->_descriptor, ast->rangeR->val_int - ast->rangeL->val_int+1,
         ast->rangeL->val_int);
 
     // this is wrong when using custom type
@@ -406,8 +406,9 @@ void ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
         if (ast->op == "and") ast->op = "&&";
         if (ast->op == "or") ast->op = "||";
         if (ast->op == "mod") ast->op = "%";
+        if(ast->op=="xor")ast->op="^";
         if (ast->op == "-" || ast->op == "+" || ast->op == "*" ||
-            ast->op == "%" || ast->op == "/" || ast->op == "==" ||
+            ast->op == "%" || ast->op=="^" || ast->op == "/" || ast->op=="<<" || ast->op==">>" || ast->op == "==" ||
             ast->op == "!=" || ast->op == "<" || ast->op == ">" ||
             ast->op == "<=" || ast->op == ">=" || ast->op == "||" ||
             ast->op == "&&") {

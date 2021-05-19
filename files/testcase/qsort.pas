@@ -43,5 +43,5 @@ begin
         write(a[i]);
         if (i <> n) then write(' ');
     end;
-    writeln();
+    write('\n');
 end.
