@@ -3,8 +3,8 @@ import Konva from 'konva';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
-import info from './info.json';
 
+let info;
 let speedRatio = 1;
 
 let standard = new Konva.Text({
@@ -22,16 +22,11 @@ const [CHR_WIDTH, CHR_HEIGHT] = [standard.width(), standard.height()]
 const WORD_LR_PAD = 5, WORD_HEIGHT = -6, CODE_PAD = 10;
 
 // first we need to create a stage
-var stage = new Konva.Stage({
-  container: 'container',   // id of container <div>
-  width: 1000,
-  height: Math.floor(info.lex[info.lex.length - 1].row * CHR_HEIGHT + 2 * CODE_PAD)
-});
+var stage, layer;
 
 // then create layer
 var layer = new Konva.Layer();
 
-stage.add(layer);
 
 
 function Perform(q) {
@@ -359,6 +354,13 @@ let buildOperations = [], genOperations = [];
 
 
 function Animations() {
+  stage = new Konva.Stage({
+    container: 'container',   // id of container <div>
+    width: 1000,
+    height: Math.floor(info.lex[info.lex.length - 1].row * CHR_HEIGHT + 2 * CODE_PAD)
+  });
+  stage.add(layer);
+
   for (let i in info.lex) {
     let e = info.lex[i];
     let [x, y] = [CODE_PAD + CHR_WIDTH * (e.column - 1), CODE_PAD + CHR_HEIGHT * (e.row - 1)]
@@ -426,6 +428,12 @@ function Animations() {
   }
 }
 
+import $ from "jquery";
+
+let cm = CodeMirror.fromTextArea(document.getElementById("pas-code"), {
+  lineNumbers: true, // 显示行号
+})
+cm.setSize("100%", "100%")
 
 
 const SEC = ["prelude", "global_define", "pre_struct",
@@ -439,8 +447,21 @@ for (let code_section of SEC) {
 document.getElementById("ccodehd").innerHTML = code_head;
 
 document.getElementById("ccode").innerHTML = code_pre;
-
-Animations();
+document.getElementById("compile").onclick = () => {
+  console.log(cm.getValue());
+  $.ajax({
+    method: 'POST', dataType: "json",
+    url: 'http://localhost:8848/compile',
+    data: { code: cm.getValue() },
+    success: (resp) => {
+      info = resp;
+      console.log(resp);
+      document.getElementById("editor").style.display = "none";
+      document.getElementById("animation").style.display = "block";
+      Animations();
+    },
+  });
+}
 
 document.getElementById("do-lex").onclick = () => {
   Perform(lexOperations);
@@ -461,4 +482,8 @@ document.getElementById("do-generate").onclick = () => {
 
 document.getElementById("speedbar").oninput = function () {
   speedRatio = Math.pow(100, (0.5 - this.value / (this.max - this.min)));
+  if (this.value == this.max)
+    speedRatio = 0.00001;
+  else if (this.value == this.min)
+    speedRatio = 10;
 }
