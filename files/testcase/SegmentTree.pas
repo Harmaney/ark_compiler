@@ -103,6 +103,7 @@ begin
             read(x);
             read(y);
             write(query(1,n,1,x,y));
+            write('\n');
         end;
     end;
 end.
