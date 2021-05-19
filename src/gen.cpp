@@ -701,7 +701,6 @@ void ASTDispatcher::gen_function_signature(FunctionSignatureAST *ast) {
 void ASTDispatcher::gen_function(FunctionAST *ast) {
     // FIX: too ugly but work
     // the reason for this is that we should inject args descriptor to its block
-    // 这段代码太裂了
 
     // add symbol for function
     // and also there is need to create new node for processing 形参
@@ -788,7 +787,6 @@ void ASTDispatcher::gen_struct(StructDeclAST *ast) {
     CodeCollector::push_back();
 
     for (auto var : ast->varDecl) {
-        // FIX: fuck this
         var->accept(*this);
         auto typeDescriptor = var->_varType;
         structD->push(var->sig->name, typeDescriptor);
