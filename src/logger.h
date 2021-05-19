@@ -51,7 +51,7 @@ struct TerminalPrinter {
     int log_level;
     std::ostream &ofs, &dev_null;
     TerminalPrinter(std::ostream& ofs, std::ostream& dev_null)
-        : log_level(0), ofs(ofs), dev_null(dev_null) {}
+        : log_level(2), ofs(ofs), dev_null(dev_null) {}
     std::ostream& fatal() {
         if (0 <= log_level)
             return ofs << rang::style::bold << rang::fg::red << "FATAL "

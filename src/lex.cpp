@@ -267,8 +267,8 @@ TokenQueue lex_work(std::string all_chars) {
                         add_end add_and_reset break;
                         return_char
                                 // error
-                                term_print.fatal()
-                            << "String Error";
+                                term_print.error()
+                            << "String Error\n";
                         break;
                     default:
                         add_end break;
@@ -313,8 +313,8 @@ TokenQueue lex_work(std::string all_chars) {
                         add_end add_and_reset break;
                         return_char
                                 // error
-                                term_print.fatal()
-                            << "Annotation Error";
+                                term_print.error()
+                            << "Annotation Error\n";
                         break;
                     default:
                         add_end break;
@@ -325,9 +325,9 @@ TokenQueue lex_work(std::string all_chars) {
     std::ofstream lout("../files/lex_out.txt");
     std::ofstream lerr("../files/lex_err.txt");
     if (present_state == 8) {
-        term_print.fatal() << "Annotation Error";
+        term_print.error() << "Annotation Error\n";
     } else if (present_state == 11) {
-        term_print.fatal() << "String Error";
+        term_print.error() << "String Error\n";
     }
     TokenQueue result;
     for (auto s : token_stream) {
