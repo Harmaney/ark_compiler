@@ -171,6 +171,7 @@ void BlockAST::accept(ASTDispatcher& dispatcher) {
             break;
         }
         }catch(const CompilerErrorException &e){
+            term_print.log_level=2;
             term_print.error()<<e.what()<<std::endl;
         }
     }
