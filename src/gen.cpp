@@ -406,8 +406,9 @@ void ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
         if (ast->op == "and") ast->op = "&&";
         if (ast->op == "or") ast->op = "||";
         if (ast->op == "mod") ast->op = "%";
+        if(ast->op=="xor")ast->op="^";
         if (ast->op == "-" || ast->op == "+" || ast->op == "*" ||
-            ast->op == "%" || ast->op == "/" || ast->op == "==" ||
+            ast->op == "%" || ast->op=="^" || ast->op == "/" || ast->op=="<<" || ast->op==">>" || ast->op == "==" ||
             ast->op == "!=" || ast->op == "<" || ast->op == ">" ||
             ast->op == "<=" || ast->op == ">=" || ast->op == "||" ||
             ast->op == "&&") {
