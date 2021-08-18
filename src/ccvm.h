@@ -2,6 +2,8 @@
 #include <vector>
 #include <sstream>
 
+#include "data.h"
+
 class TagTable {
     static int next_slot;
 
@@ -43,12 +45,12 @@ class VMBlock:VMAbstract{
 class VMBranch:VMAbstract{
     Value *cond;
     VMAbstract *ok,*no;
-    VMBranch(VMAbstract *cond,VMAbstract *ok,VMAbstract *no):cond(cond),ok(ok),no(no){}
+    VMBranch(Value *cond,VMAbstract *ok,VMAbstract *no):cond(cond),ok(ok),no(no){}
     std::string output() override{
         std::stringstream ss;
         auto notag=TagTable::create_tag_G();
         auto endtag=TagTable::create_tag_G();
-        ss<<"if("<<!<<cond->name<<") goto "<<notag<<";"<<std::endl;
+        ss<<"if(!"<<cond->name<<") goto "<<notag<<";"<<std::endl;
         ss<<ok->output()<<std::endl;
         ss<<"goto "<<endtag<<";"<<std::endl;
         ss<<notag<<":"<<std::endl;

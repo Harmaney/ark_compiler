@@ -38,7 +38,8 @@ class FunctionAST;
 
 struct VariableDescriptor;
 
-using Value=VariableDescriptor;
+
+
 class ADispatcher {
    public:
     virtual Value gen_global(GlobalAST *ast) = 0;
