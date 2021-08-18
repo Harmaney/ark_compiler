@@ -131,7 +131,6 @@ class BlockAST : public AST {
 /// Expr，具有返回值的表达式
 class ExprAST : public AST {
    public:
-    std::any value;
     ExprAST(ASTKind type) : AST(type) {}
     virtual ~ExprAST() {}
     void accept(ASTDispatcher& dispatcher) override;
@@ -513,13 +512,7 @@ class SymbolTable {
         std::string sig, std::vector<SymbolDescriptor*> args);
 };
 
-class TagTable {
-    static int next_slot;
 
-   public:
-    static void init();
-    static std::string* create_tag_G();
-};
 
 FunctionDescriptor* levelup_lookfor_function(
     std::string sig, std::vector<SymbolDescriptor*> args, int idx = 0);

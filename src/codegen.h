@@ -2,6 +2,7 @@
 #include "data.h"
 #include "gen.h"
 #include "logger.h"
+#include "ccvm.h"
 
 void init_code_generator() {
     SymbolTable::init();
