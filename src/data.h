@@ -72,6 +72,8 @@ class VariableDescriptor : public SymbolDescriptor {
           isLeftVar(isLeftVar) {}
 };
 
+using Value=VariableDescriptor;
+
 class StructDescriptor : public SymbolDescriptor {
    public:
     std::map<std::string, SymbolDescriptor*> refVar;
