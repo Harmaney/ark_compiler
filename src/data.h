@@ -72,7 +72,7 @@ class VariableDescriptor : public SymbolDescriptor {
           isLeftVar(isLeftVar) {}
 };
 
-using Value=VariableDescriptor;
+typedef VariableDescriptor Value;
 
 class StructDescriptor : public SymbolDescriptor {
    public:
