@@ -13,13 +13,13 @@
 
 Value *castValue(std::any x) { return std::any_cast<Value *>(x); }
 
-Value *ASTDispatcher::gen_global(GlobalAST *ast) {
+std::any ASTDispatcher::gen_global(GlobalAST *ast) {
     VMWhiteBlock *global_block = new VMWhiteBlock();
     code()->push_block(global_block);
     ast->mainBlock->accept(*this);
 }
 
-Value *ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
+std::any ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
     Value *rangeL = castValue(ast->rangeL->accept(*this));
     Value *rangeR = castValue(ast->rangeR->accept(*this));
     ast->itemAST->accept(*this);
@@ -44,7 +44,7 @@ Value *ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_pointer_type_decl(PointerTypeDeclAST *ast) {
+std::any ASTDispatcher::gen_pointer_type_decl(PointerTypeDeclAST *ast) {
     ast->ref->accept(*this);
     auto descriptor = symbolTable()->create_pointer_type(ast->ref->_descriptor);
 
@@ -53,7 +53,7 @@ Value *ASTDispatcher::gen_pointer_type_decl(PointerTypeDeclAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_type_def(TypeDefAST *ast) {
+std::any ASTDispatcher::gen_type_def(TypeDefAST *ast) {
     // 这看起来不太靠谱
     ast->newName->accept(*this);
     ast->oldName->accept(*this);
@@ -65,7 +65,7 @@ Value *ASTDispatcher::gen_type_def(TypeDefAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_basic_type(BasicTypeAST *ast) {
+std::any ASTDispatcher::gen_basic_type(BasicTypeAST *ast) {
     auto descriptor = symbolTable()->lookfor_type(ast->varType);
     if (descriptor == nullptr) {
         throw std::invalid_argument("undefined type " + ast->varType);
@@ -74,7 +74,7 @@ Value *ASTDispatcher::gen_basic_type(BasicTypeAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_number_expr(NumberExprAST *ast) {
+std::any ASTDispatcher::gen_number_expr(NumberExprAST *ast) {
     VariableDescriptor *t = nullptr;
 
     switch (ast->const_type) {
@@ -121,13 +121,13 @@ Value *ASTDispatcher::gen_number_expr(NumberExprAST *ast) {
     return t;
 }
 
-Value *ASTDispatcher::gen_string_expr(StringExprAST *ast) {
+std::any ASTDispatcher::gen_string_expr(StringExprAST *ast) {
     // TODO: implement this
     throw InternalErrorException("not implemented", 0, 0);
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_char_expr(CharExprAST *ast) {
+std::any ASTDispatcher::gen_char_expr(CharExprAST *ast) {
     VariableDescriptor *t = symbolTable()->create_variable_G(
         symbolTable()->lookfor_type(TYPE_BASIC_STRING), false);
     t->isLeftVar = false;
@@ -143,7 +143,7 @@ Value *ASTDispatcher::gen_char_expr(CharExprAST *ast) {
     return t;
 }
 
-Value *ASTDispatcher::gen_variable_expr(VariableExprAST *ast) {
+std::any ASTDispatcher::gen_variable_expr(VariableExprAST *ast) {
     VariableDescriptor *t = symbolTable()->lookfor_variable(ast->name);
 
     // TODO: think twice about this
@@ -158,7 +158,7 @@ Value *ASTDispatcher::gen_variable_expr(VariableExprAST *ast) {
     return t;
 }
 
-Value *ASTDispatcher::gen_return(ReturnAST *ast) {
+std::any ASTDispatcher::gen_return(ReturnAST *ast) {
     if (ast->expr != nullptr) {
         Value *t = castValue(ast->expr->accept(*this));
 
@@ -178,7 +178,7 @@ Value *ASTDispatcher::gen_return(ReturnAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
+std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
     Value *lhs = castValue(ast->LHS->accept(*this));
     Value *rhs = castValue(ast->RHS->accept(*this));
 
@@ -252,7 +252,7 @@ Value *ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
 
         code()->createVariableDecl(t);
 
-        code()->createStructAssign(t, array, child_id);
+        code()->createStructAssign(t, lhs, child_id);
         // CodeCollector::src() << t->name;
         // CodeCollector::src() << "=&(";
         // put_variable_expr(lhs);
@@ -314,7 +314,7 @@ Value *ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
     }
 }
 
-Value *ASTDispatcher::gen_unary_expr(UnaryExprAST *ast) {
+std::any ASTDispatcher::gen_unary_expr(UnaryExprAST *ast) {
     Value *var = castValue(ast->expr->accept(*this));
 
     if (ast->op == "*") {
@@ -337,12 +337,12 @@ Value *ASTDispatcher::gen_unary_expr(UnaryExprAST *ast) {
     }
 }
 
-Value *ASTDispatcher::gen_call_expr(CallExprAST *ast) {
+std::any ASTDispatcher::gen_call_expr(CallExprAST *ast) {
     // TODO: SPECIAL for exit()
 
     // check whether function exists.
     std::vector<SymbolDescriptor *> argsymbols;
-    std::vector<Value*> argValues;
+    std::vector<Value *> argValues;
     for (auto arg : ast->args) {
         auto t = castValue(arg->accept(*this));
         argsymbols.push_back(t->varType);
@@ -373,10 +373,10 @@ Value *ASTDispatcher::gen_call_expr(CallExprAST *ast) {
 
         // ast->value = ret;
 
-        code()->createFunctionCall(ret, descriptor,argValues);
+        code()->createFunctionCall(ret, descriptor, argValues);
         return ret;
     } else {
-        code()->createFunctionCall(nullptr, descriptor,argValues);
+        code()->createFunctionCall(nullptr, descriptor, argValues);
         return nullptr;
     }
 
@@ -400,7 +400,7 @@ Value *ASTDispatcher::gen_call_expr(CallExprAST *ast) {
     // CodeCollector::push_back();
 }
 
-Value *ASTDispatcher::gen_if_statement(IfStatementAST *ast) {
+std::any ASTDispatcher::gen_if_statement(IfStatementAST *ast) {
     auto blockCond = code()->createWhiteBlock();
     auto blockOk = code()->createWhiteBlock();
     auto blockNo = code()->createWhiteBlock();
@@ -420,7 +420,7 @@ Value *ASTDispatcher::gen_if_statement(IfStatementAST *ast) {
     code()->createCondBr(t, blockOk, blockNo);
 }
 
-Value *ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
+std::any ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
     auto blockInit = code()->createWhiteBlock();
     auto blockCond = code()->createWhiteBlock();
     auto blockStep = code()->createWhiteBlock();
@@ -479,7 +479,7 @@ Value *ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_while_statement(WhileStatementAST *ast) {
+std::any ASTDispatcher::gen_while_statement(WhileStatementAST *ast) {
     auto blockCond = code()->createWhiteBlock();
     auto blockBody = code()->createWhiteBlock();
 
@@ -494,7 +494,7 @@ Value *ASTDispatcher::gen_while_statement(WhileStatementAST *ast) {
     code()->createLoop(subCond, nullptr, nullptr, nullptr, blockBody);
 }
 
-Value *ASTDispatcher::gen_function(FunctionAST *ast) {
+std::any ASTDispatcher::gen_function(FunctionAST *ast) {
     // // FIX: too ugly but work
     // // the reason for this is that we should inject args descriptor to its
     // block
@@ -564,7 +564,11 @@ Value *ASTDispatcher::gen_function(FunctionAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_block(BlockAST *ast) {
+std::any ASTDispatcher::gen_function_signature(FunctionSignatureAST *ast) {
+    assert(false);
+}
+
+std::any ASTDispatcher::gen_block(BlockAST *ast) {
     VMBlock *block = code()->createBlock();
     code()->push_block(block);
     for (auto expr : ast->exprs) {
@@ -575,7 +579,7 @@ Value *ASTDispatcher::gen_block(BlockAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_struct(StructDeclAST *ast) {
+std::any ASTDispatcher::gen_struct(StructDeclAST *ast) {
     StructDescriptor *structD = new StructDescriptor(ast->sig, {});
 
     for (auto var : ast->varDecl) {
@@ -590,7 +594,7 @@ Value *ASTDispatcher::gen_struct(StructDeclAST *ast) {
     return nullptr;
 }
 
-Value *ASTDispatcher::gen_variable_decl(VariableDeclAST *ast) {
+std::any ASTDispatcher::gen_variable_decl(VariableDeclAST *ast) {
     VariableDescriptor *var = nullptr;
     if (ast->varType) {
         ast->varType->accept(*this);
