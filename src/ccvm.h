@@ -12,14 +12,6 @@
 std::string get_internal_function_name(std::string name,
                                        std::vector<SymbolDescriptor*> args);
 
-class TagTable {
-    int next_slot;
-
-   public:
-    void init();
-    std::string *create_tag_G();
-};
-
 
 class _SymbolTable {
     int next_slot;
@@ -83,9 +75,10 @@ class VMAbstract {
 
 class VMString : public VMAbstract {
     std::string str;
+    bool newLine;
 
    public:
-    VMString(std::string str) : str(str) {}
+    VMString(std::string str,bool newLine=false) : str(str),newLine(newLine) {}
     std::string output() override { return str; }
 };
 
@@ -125,6 +118,7 @@ class VMBlock : public VMWhiteBlock {
 /// 的情况下，并不会出现“回填”的情况，所以完全可以这么搞。
 class CodeCollector {
    private:
+    int next_slot;
     VMWhiteBlock *root;
     std::stack<VMWhiteBlock*> cur;
 
@@ -133,6 +127,8 @@ class CodeCollector {
     void pop_block();
     /// 将代码压入段尾
     void push_back(VMAbstract *vm);
+
+    std::string create_tag_G();
 
     VMWhiteBlock* createWhiteBlock();
     VMBlock * createBlock();
@@ -157,9 +153,10 @@ class CodeCollector {
     void createReturn();
     void createReturn(VariableDescriptor *t);
 
-    void createVarAssign(VariableDescriptor *lhs,VariableDescriptor *rhs);
-    void createArrayAssign(Value *var,Value *array,Value *index);
-    void createStructAssign(Value *var,StructDescriptor *array,std::string index);
+    void createVarAssign(VariableDescriptor *lhs,VariableDescriptor *rhs,bool fetchRef=false);
+    void createArrayAssign(Value *var,Value *array,Value *index,bool fetchRef=false);
+    void createStructAssign(Value *var,Value *struct1,std::string index,bool fetchRef=false);
+
     void createOptBinary(VariableDescriptor *res,VariableDescriptor *a,VariableDescriptor *b,std::string opt);
 
     /// 清空段
@@ -172,12 +169,10 @@ class CodeCollector {
 class VMContext {
    public:
     CodeCollector *code_collector;
-    TagTable *tag_table;
     SymbolTable *symbalTable;
 
     VMContext(){
         this->code_collector=new CodeCollector();
-        this->tag_table=new TagTable();
         this->symbalTable=new SymbolTable();
     }
 };

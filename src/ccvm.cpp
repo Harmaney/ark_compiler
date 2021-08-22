@@ -12,13 +12,6 @@ std::string get_internal_function_name(std::string name,
     // ss<<"__"<<res->name;
     return ss.str();
 }
-
-void TagTable::init() { next_slot = 0; }
-
-std::string* TagTable::create_tag_G() {
-    return new std::string("L" + std::to_string(next_slot++));
-}
-
 ////////////////////////////
 
 std::string _SymbolTable::get_slot() {
@@ -167,6 +160,11 @@ SymbolDescriptor* SymbolTable::lookfor_type(std::string sig) {
     return NULL;
 }
 
+FunctionDescriptor* SymbolTable::lookfor_function(
+    std::string sig, std::vector<SymbolDescriptor*> args) {
+    assert(false);
+}
+
 ////////////////////////////
 void CodeCollector::push_block(VMWhiteBlock* block) { cur.push(block); }
 void CodeCollector::pop_block() { cur.pop(); }
@@ -190,6 +188,13 @@ void CodeCollector::clear() {
     assert(cur.size());
     cur.top()->clear();
 }
+
+std::string CodeCollector::create_tag_G() {
+    return "L" + std::to_string(next_slot++);
+}
+
+VMWhiteBlock* CodeCollector::createWhiteBlock() { return new VMWhiteBlock(); }
+VMBlock* CodeCollector::createBlock() { return new VMBlock(); }
 
 std::string map_variable_type(SymbolDescriptor* type) {
     if (type->name == TYPE_BASIC_DOUBLE) {
@@ -233,7 +238,7 @@ void CodeCollector::createAkaType(std::string newName,
     push_back(new VMString(ss.str()));
 }
 
-void CodeCollector::createVariableDecl(Value* value) {
+std::string getVarialbeDecl(Value* value) {
     std::stringstream ss;
     // TODO: handle different type
     if (value->varType->type == DESCRIPTOR_STRUCT) {
@@ -242,7 +247,143 @@ void CodeCollector::createVariableDecl(Value* value) {
     ss << map_variable_type(value->varType);
     if (value->isRef) ss << "*";
     ss << " " << value->name;
+    return ss.str();
+}
 
-    auto span = new VMString(ss.str());
+std::string getVarialbeDecl(Value* value, std::string assign) {
+    std::stringstream ss;
+    // TODO: handle different type
+    if (value->varType->type == DESCRIPTOR_STRUCT) {
+        ss << "struct ";
+    }
+    ss << map_variable_type(value->varType);
+    if (value->isRef) ss << "*";
+    ss << " " << value->name;
+    ss << "=" << assign;
+    return ss.str();
+}
+
+std::string getVariableExpr(Value* value) { return value->name; }
+
+void CodeCollector::createVariableDecl(Value* value) {
+    auto span = new VMString(getVarialbeDecl(value));
     push_back(span);
+}
+
+void CodeCollector::createTypeDecl(StructDescriptor* structDescriptor) {
+    std::stringstream ss;
+    ss << "struct " << structDescriptor->name << "{" << std::endl;
+    for (auto item : structDescriptor->refVar) {
+        // TODO: 重新定义形参
+        ss << getVarialbeDecl(
+                  new VariableDescriptor(item.first, item.second, false, false))
+           << std::endl;
+    }
+    ss << "};";
+
+    push_back(new VMString(ss.str()));
+}
+
+void CodeCollector::createCondBr(Value* cond, VMWhiteBlock* ok,
+                                 VMWhiteBlock* no) {
+    auto tagElse = create_tag_G();
+    auto tagEnd = create_tag_G();
+    {
+        std::stringstream ss;
+        ss << "if(!" << getVariableExpr(cond) << ") goto " << tagElse << ";"
+           << std::endl;
+        push_back(new VMString(ss.str()));
+    }
+    {
+        auto block = new VMBlock();
+        block->push_back(ok);
+        push_back(block);
+
+        std::stringstream ss;
+        ss << "goto " << tagEnd << ";" << std::endl;
+        ss << tagElse << ":" << std::endl;
+        push_back(new VMString(ss.str()));
+    }
+    {
+        auto block = new VMBlock();
+        block->push_back(no);
+        push_block(block);
+        std::stringstream ss;
+        ss << tagEnd << ":" << std::endl;
+        push_back(new VMString(ss.str()));
+    }
+}
+
+void CodeCollector::createLoop(Value* cond, VMWhiteBlock* init,
+                               VMWhiteBlock* calCond, VMWhiteBlock* step,
+                               VMWhiteBlock* body) {
+    push_back(init);
+    auto tagCalCond = create_tag_G();
+    auto tagEnd = create_tag_G();
+    push_back(new VMString(tagCalCond + ":", true));
+    push_back(calCond);
+    {
+        std::stringstream ss;
+        ss << "if(!" << getVariableExpr(cond) << ") goto " << tagEnd << ";"
+           << std::endl;
+        push_back(new VMString(ss.str()));
+    }
+    push_back(body);
+    push_back(step);
+    push_back(new VMString("goto " + tagCalCond + ";", true));
+    push_back(new VMString(tagEnd + ":", true));
+}
+
+void CodeCollector::createConstDecl(VariableDescriptor* var, int value) {
+    push_back(
+        new VMString(getVarialbeDecl(var, std::to_string(value)) + ";", true));
+}
+void CodeCollector::createConstDecl(VariableDescriptor* var, double value) {
+    push_back(
+        new VMString(getVarialbeDecl(var, std::to_string(value)) + ";", true));
+}
+void CodeCollector::createConstDecl(VariableDescriptor* var, char value) {
+    push_back(
+        new VMString(getVarialbeDecl(var, std::to_string(value)) + ";", true));
+}
+
+void CodeCollector::createFunctionCall(VariableDescriptor* var,
+                                       FunctionDescriptor* function,
+                                       std::vector<VariableDescriptor*> args) {
+    push_back(new VMString("function call not implemented"));
+}
+
+void CodeCollector::createReturn() {
+    push_back(new VMString("function call not implemented"));
+}
+void CodeCollector::createReturn(VariableDescriptor* t) {
+    push_back(new VMString("function call not implemented"));
+}
+
+void CodeCollector::createVarAssign(VariableDescriptor* lhs,
+                                    VariableDescriptor* rhs, bool fetchRef) {
+    std::stringstream ss;
+    if (lhs->isRef && !fetchRef) ss << "*";
+    ss << lhs->name;
+
+    ss << "=";
+
+    if (fetchRef) ss << "&";
+    ss << getVariableExpr(rhs);
+    ss << ";";
+
+    push_back(new VMString(ss.str(), true));
+}
+void CodeCollector::createArrayAssign(Value* var, Value* array, Value* index,
+                                      bool fetchRef) {
+    push_back(new VMString("function call not implemented"));
+}
+void CodeCollector::createStructAssign(Value* var, Value* struct1,
+                                       std::string index, bool fetchRef) {
+    push_back(new VMString("function call not implemented"));
+}
+void CodeCollector::createOptBinary(VariableDescriptor* res,
+                                    VariableDescriptor* a,
+                                    VariableDescriptor* b, std::string opt) {
+    push_back(new VMString("function call not implemented"));
 }
