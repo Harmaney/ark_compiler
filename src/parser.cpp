@@ -539,13 +539,13 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                 if (node->son[0]->raw == "+") {  // ConstValue -> + Num
                     prop = new UnaryExprAST("+",
                                             cast<ExprAST*>(node->son[1]->prop));
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 } else if (node->son[0]->raw == "-") {  // ConstValue -> - Num
                     prop = new UnaryExprAST("-",
                                             cast<ExprAST*>(node->son[1]->prop));
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 } else if (node->son.size() == 1) {  // ConstValue -> Value
-                    prop = cast<Value>(node->son[0]->prop);
+                    // TODO: prop = cast<Value>(node->son[0]->prop);
                 }
                 node->prop = prop;
             } else if (node->type == "TypeDeclaration") {  // new
@@ -570,7 +570,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                 } else {  // ActualType -> record VarDeclaration ; end
                     prop = new StructDeclAST(
                         rand_name(), cast<VarDeclaration>(node->son[1]->prop));
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 }
                 node->prop = prop;
             } else if (node->type == "VarDeclaration") {
@@ -601,19 +601,19 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                     for (auto [L, R] : range) {
                         prop = new ArrayTypeDeclAST(prop, L, R);
                     }
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 } else if (node->son[0]->type ==
                            "BasicType") {  // Type -> BasicType
                     prop = cast<BasicType>(node->son[0]->prop);
                 } else {  // Type -> ^ BasicType
                     prop = new PointerTypeDeclAST(
                         cast<BasicType>(node->son[1]->prop));
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 }
                 node->prop = prop;
             } else if (node->type == "BasicType") {
                 BasicType prop = new BasicTypeAST(node->son[0]->raw);
-                prop->set_row(node->son[0]->row);
+                // TODO: prop->set_row(node->son[0]->row);
                 node->prop = prop;
             } else if (node->type == "Period") {
                 Period prop;
@@ -650,7 +650,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                         cast<FormalParameter>(node->son[2]->prop),
                         cast<BasicType>(node->son[4]->prop));
                 }
-                prop->set_row(node->son[0]->row);
+                // TODO: prop->set_row(node->son[0]->row);
                 node->prop = prop;
             } else if (node->type == "FormalParameter") {
                 FormalParameter prop;
@@ -716,7 +716,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                 // CompoundStatement -> begin StatementList end
                 CompoundStatement prop;
                 prop = new BlockAST(cast<StatementList>(node->son[1]->prop));
-                prop->set_row(node->son[0]->row);
+                // TODO: prop->set_row(node->son[0]->row);
                 node->prop = prop;
             } else if (node->type == "StatementList") {
                 StatementList prop;
@@ -741,7 +741,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                     prop = new BinaryExprAST(
                         node->son[1]->raw, cast<ExprAST*>(node->son[0]->prop),
                         cast<ExprAST*>(node->son[2]->prop));
-                    prop->set_row(node->son[1]->row);
+                    // TODO: prop->set_row(node->son[1]->row);
                 } else if (node->son[0]->type == "ProcedureCall(ARG)") {
                     prop = cast<Statement>(node->son[0]->prop);
                 } else if (node->son[0]->raw == "if") {
@@ -762,7 +762,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                                 statementlist),
                             cast<ElsePart>(node->son[4]->prop));
                     }
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 } else if (node->son[0]->raw == "for") {
                     // Statement -> for ID assignOP Expression to Expression do
                     // CompoundStatement
@@ -784,7 +784,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                             new std::remove_pointer<CompoundStatement>::type(
                                 statementlist));
                     }
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 } else if (node->son[0]->raw == "while") {
                     if (node->son[3]->type == "CompoundStatement") {
                         // Statement -> while Expression do CompoundStatement
@@ -800,7 +800,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                             new std::remove_pointer<CompoundStatement>::type(
                                 statementlist));
                     }
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 }
                 node->prop = prop;
             } else if (node->type == "Variable") {  // Variable -> ID IDVarpart
@@ -809,7 +809,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                 for (auto expr : part) {
                     prop = new BinaryExprAST("[]", prop, expr);
                 }
-                prop->set_row(node->son[0]->row);
+                // TODO: prop->set_row(node->son[0]->row);
                 node->prop = prop;
             } else if (node->type == "IDVarpart") {  // fixme
                 IDVarpart prop;
@@ -829,7 +829,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                 } else {  // ProcedureCall(ARG) -> ID ( )
                     prop = new CallExprAST(node->son[0]->raw, {});
                 }
-                prop->set_row(node->son[0]->row);
+                // TODO: prop->set_row(node->son[0]->row);
                 node->prop = prop;
             } else if (node->type == "ElsePart") {
                 ElsePart prop;
@@ -841,7 +841,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                         prop =
                             new BlockAST({cast<Statement>(node->son[1]->prop)});
                     }
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 } else {  // ElsePart ->
                     prop = new BlockAST({});
                 }
@@ -868,15 +868,15 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                     prop = new BinaryExprAST(
                         node->son[1]->raw, cast<ExprAST*>(node->son[0]->prop),
                         cast<ExprAST*>(node->son[2]->prop));
-                    prop->set_row(node->son[1]->row);
+                    // TODO: prop->set_row(node->son[1]->row);
                 } else if (node->son.size() == 2) {
                     prop = new UnaryExprAST("^",
                                             cast<ExprAST*>(node->son[0]->prop));
-                    prop->set_row(node->son[1]->row);
+                    // TODO: prop->set_row(node->son[1]->row);
                 } else {
                     if (node->son[0]->parserSymbol == "stringVal") {
                         prop = new StringExprAST(node->son[0]->raw);
-                        prop->set_row(node->son[0]->row);
+                        // TODO: prop->set_row(node->son[0]->row);
                     } else {  // Expression -> SimpleExpression
                         prop = cast<Expression>(node->son[0]->prop);
                     }
@@ -891,7 +891,7 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                         new BinaryExprAST(cast<std::string>(node->son[1]->prop),
                                           cast<ExprAST*>(node->son[0]->prop),
                                           cast<ExprAST*>(node->son[2]->prop));
-                    prop->set_row(node->son[1]->row);
+                    // TODO: prop->set_row(node->son[1]->row);
                 }
                 node->prop = prop;
             } else if (node->type == "Term") {
@@ -902,13 +902,13 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                     prop = new BinaryExprAST(
                         node->son[1]->raw, cast<ExprAST*>(node->son[0]->prop),
                         cast<ExprAST*>(node->son[2]->prop));
-                    prop->set_row(node->son[1]->row);
+                    // TODO: prop->set_row(node->son[1]->row);
                 }
                 node->prop = prop;
             } else if (node->type == "Factor") {
                 Factor prop = nullptr;
                 if (node->son[0]->type == "Value") {  // Factor -> Value
-                    prop = cast<Value>(node->son[0]->prop);
+                    // TODO: prop = cast<Value>(node->son[0]->prop);
                 } else if (node->son[0]->type == "Num") {  // Factor -> Num
                     prop = cast<Factor>(node->son[0]->prop);
                 } else if (node->son[0]->type ==
@@ -919,13 +919,13 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                     // Factor -> - Num
                     prop = new UnaryExprAST(node->son[0]->raw,
                                             cast<ExprAST*>(node->son[1]->prop));
-                    prop->assign(node->son[1]->prop);
+                    // TODO: prop->assign(node->son[1]->prop);
                 } else if (node->son[1]->type == "Factor") {
                     // Factor -> not Factor
                     // Factor -> uminus Factor
                     prop = new UnaryExprAST(node->son[0]->raw,
                                             cast<ExprAST*>(node->son[1]->prop));
-                    prop->assign(node->son[1]->prop);
+                    // TODO: prop->assign(node->son[1]->prop);
                 } else
                     exit(0);
                 node->prop = prop;
@@ -938,12 +938,12 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                 } else if (node->son[1]->type ==
                            "Expression") {  // ( Expression )
                     prop = cast<ComposedVariable>(node->son[1]->prop);
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop->set_row(node->son[0]->row);
                 } else {  // ComposedVariable -> ComposedVariable . ID
                     prop = new BinaryExprAST(
                         ".", cast<ExprAST*>(node->son[0]->prop),
                         new StringExprAST(node->son[2]->raw));
-                    prop->set_row(node->son[2]->row);
+                    // TODO: prop->set_row(node->son[2]->row);
                 }
                 node->prop = prop;
             } else if (node->type == "Num") {
@@ -955,11 +955,11 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                     prop = new NumberExprAST(std::stod(node->son[0]->raw));
                 } else
                     exit(0);
-                prop->set_row(node->son[0]->row);
+                // TODO: prop->set_row(node->son[0]->row);
                 node->prop = prop;
             } else if (node->type == "Digits") {  // Digits -> intVal
                 Digits prop = new NumberExprAST(std::stoi(node->son[0]->raw));
-                prop->set_row(node->son[0]->row);
+                // TODO: prop->set_row(node->son[0]->row);
                 node->prop = prop;
             } else if (node->type == "addOP") {  // fixme
                 node->prop = node->son[0]->raw;
@@ -967,14 +967,14 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                        node->son[0]->raw == "or");
                 assert(node->prop.type() == typeid(addOP));
             } else if (node->type == "Value") {
-                Value prop;
+                // TODO: Value prop;
                 if (node->son[0]->type == "Num") {  // Value -> Num
-                    prop = cast<Value>(node->son[0]->prop);
+                    // TODO: prop = cast<Value>(node->son[0]->prop);
                 } else {  // Value -> stringVal
-                    prop = new StringExprAST(node->son[0]->raw);
-                    prop->set_row(node->son[0]->row);
+                    // TODO: prop = new StringExprAST(node->son[0]->raw);
+                    // TODO: prop->set_row(node->son[0]->row);
                 }
-                node->prop = prop;
+                // TODO: node->prop = prop;
             } else
                 exit(0);
             // cerr << node->type << endl;

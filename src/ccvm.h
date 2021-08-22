@@ -1,62 +1,184 @@
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
+#include <stack>
 
 #include "data.h"
+#include "symbols.h"
+
+#ifndef _CPP_CCVM
+#define _CPP_CCVM
+
+std::string get_internal_function_name(std::string name,
+                                       std::vector<SymbolDescriptor*> args);
 
 class TagTable {
-    static int next_slot;
+    int next_slot;
 
    public:
-    static void init();
-    static std::string* create_tag_G();
+    void init();
+    std::string *create_tag_G();
 };
 
 
-class VMAbstract{
-public:
-    virtual std::string output()=0;
+class _SymbolTable {
+    int next_slot;
+    std::map<std::string, SymbolDescriptor*> refType;
+    std::map<std::string, VariableDescriptor*> refVar;
+
+    std::map<std::pair<SymbolDescriptor*, int>, std::string> hasArrayType;
+    std::map<SymbolDescriptor*, std::string> hasPointerType;
+
+   public:
+    int group;
+    _SymbolTable* parent;
+    _SymbolTable(int group) : group(group), next_slot(0), parent(NULL) {}
+    std::string get_slot();
+    void insert_variable(std::string sig, VariableDescriptor* var);
+    void insert_type(std::string sig, SymbolDescriptor* var);
+    ArrayTypeDescriptor* create_array_type(SymbolDescriptor* item, int sz,
+                                           int beg);
+    PointerTypeDescriptor* create_pointer_type(SymbolDescriptor* item);
+    VariableDescriptor* search_variable(std::string sig);
+    SymbolDescriptor* search_type(std::string sig);
 };
 
-class VMString:VMAbstract{
+class SymbolTable {
+   private:
+     _SymbolTable* root;
+     _SymbolTable* current;
+
+   public:
+     void init();
+     void enter();
+     void exit();
+     VariableDescriptor* create_variable(std::string sig,
+                                               SymbolDescriptor* type,
+                                               bool isRef, bool isConst);
+     VariableDescriptor* create_variable_G(std::string sig,
+                                                 SymbolDescriptor* type,
+                                                 bool isRef);
+     VariableDescriptor* create_variable(SymbolDescriptor* type,
+                                               bool isRef, bool isConst);
+     VariableDescriptor* create_variable_G(SymbolDescriptor* type,
+                                                 bool isRef);
+
+     VariableDescriptor* lookfor_variable(std::string sig);
+
+     SymbolDescriptor* insert_type(std::string sig, SymbolDescriptor* descriptor);
+     void insert_function(std::string sig,
+                                FunctionDescriptor* descriptor);
+     ArrayTypeDescriptor* create_array_type(SymbolDescriptor* item,
+                                                  int sz, int beg);
+     PointerTypeDescriptor* create_pointer_type(SymbolDescriptor* item);
+     SymbolDescriptor* lookfor_type(std::string sig);
+     FunctionDescriptor* lookfor_function(
+        std::string sig, std::vector<SymbolDescriptor*> args);
+};
+
+class VMAbstract {
+   public:
+    virtual std::string output() = 0;
+};
+
+class VMString : public VMAbstract {
     std::string str;
-    VMString(std::string str):str(str){}
-    std::string output() override{
-        return str;
-    }
+
+   public:
+    VMString(std::string str) : str(str) {}
+    std::string output() override { return str; }
 };
-class VMBlock:VMAbstract{
-    VMAbstract *prefix;
-    std::vector<VMAbstract*> children;
 
-    VMBlock(VMAbstract *prefix,std::vector<VMAbstract*> children):prefix(prefix),children(children){}
+class VMWhiteBlock : public VMAbstract {
+   protected:
+    std::vector<VMAbstract *> children;
 
-    std::string output() override{
+   public:
+    void push_back(VMAbstract *vm) { children.push_back(vm); }
+    std::string output() override {
         std::stringstream ss;
-        ss<<prefix->output()+"{"<<std::endl;
-        for(auto child:children){
-            ss<<child->output()<<std::endl;
+        for (auto child : children) {
+            ss << child->output() << std::endl;
         }
-        ss<<"}"<<std::endl;
+        return ss.str();
     }
+
+    void clear() { children.clear(); }
 };
-
-
-class VMBranch:VMAbstract{
-    Value *cond;
-    VMAbstract *ok,*no;
-    VMBranch(Value *cond,VMAbstract *ok,VMAbstract *no):cond(cond),ok(ok),no(no){}
-    std::string output() override{
+class VMBlock : public VMWhiteBlock {
+   public:
+    std::string output() override {
         std::stringstream ss;
-        auto notag=TagTable::create_tag_G();
-        auto endtag=TagTable::create_tag_G();
-        ss<<"if(!"<<cond->name<<") goto "<<notag<<";"<<std::endl;
-        ss<<ok->output()<<std::endl;
-        ss<<"goto "<<endtag<<";"<<std::endl;
-        ss<<notag<<":"<<std::endl;
-        ss<<no->output()<<std::endl;
-        ss<<endtag<<":"<<std::endl;
+        ss << "{" << std::endl;
+        for (auto child : children) {
+            ss << child->output() << std::endl;
+        }
+        ss << "}" << std::endl;
+
         return ss.str();
     }
 };
 
+/// 直接存储代码
+///
+/// 看起来，至少在直接翻译到 C
+/// 的情况下，并不会出现“回填”的情况，所以完全可以这么搞。
+class CodeCollector {
+   private:
+    VMWhiteBlock *root;
+    std::stack<VMWhiteBlock*> cur;
+
+   public:
+    void push_block(VMWhiteBlock *block);
+    void pop_block();
+    /// 将代码压入段尾
+    void push_back(VMAbstract *vm);
+
+    VMWhiteBlock* createWhiteBlock();
+    VMBlock * createBlock();
+
+    void createTypeDecl(ArrayTypeDescriptor *arrayTypeDescriptor);
+    void createTypeDecl(PointerTypeDescriptor *pointTypeDescriptor);
+    void createTypeDecl(StructDescriptor *structDescriptor);
+    // finally there's a day i will remove this f**king stupid function
+    void createAkaType(std::string newName,SymbolDescriptor *typeDescriptor);
+    void createVariableDecl(Value *value);
+    
+    void createCondBr(Value *cond,VMWhiteBlock *ok, VMWhiteBlock *no);
+
+    void createLoop(Value *cond,VMWhiteBlock *init,VMWhiteBlock *calCond,VMWhiteBlock *step,VMWhiteBlock *body);
+
+    void createConstDecl(VariableDescriptor *var,int value);
+    void createConstDecl(VariableDescriptor *var,double value);
+    void createConstDecl(VariableDescriptor *var,char value);
+
+    void createFunctionCall(VariableDescriptor *var, FunctionDescriptor *function, std::vector<VariableDescriptor*> args);
+
+    void createReturn();
+    void createReturn(VariableDescriptor *t);
+
+    void createVarAssign(VariableDescriptor *lhs,VariableDescriptor *rhs);
+    void createArrayAssign(Value *var,Value *array,Value *index);
+    void createStructAssign(Value *var,StructDescriptor *array,std::string index);
+    void createOptBinary(VariableDescriptor *res,VariableDescriptor *a,VariableDescriptor *b,std::string opt);
+
+    /// 清空段
+    void clear();
+    /// 输出代码
+    void output(std::ostream &out);
+    void output();
+};
+
+class VMContext {
+   public:
+    CodeCollector *code_collector;
+    TagTable *tag_table;
+    SymbolTable *symbalTable;
+
+    VMContext(){
+        this->code_collector=new CodeCollector();
+        this->tag_table=new TagTable();
+        this->symbalTable=new SymbolTable();
+    }
+};
+#endif
