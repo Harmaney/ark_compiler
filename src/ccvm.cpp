@@ -167,7 +167,7 @@ FunctionDescriptor* SymbolTable::lookfor_function(
 
 ////////////////////////////
 CodeCollector::CodeCollector() {
-    root=new VMWhiteBlock();
+    root = new VMWhiteBlock();
     push_block(root);
 }
 void CodeCollector::push_block(VMWhiteBlock* block) { cur.push(block); }
@@ -267,10 +267,15 @@ std::string getVarialbeDecl(Value* value, std::string assign) {
     return ss.str();
 }
 
-std::string getVariableExpr(Value* value) { return value->name; }
+std::string getVariableExpr(Value* value) {
+    std::stringstream ss;
+    if (value->isRef) ss << "*";
+    ss << value->name;
+    return ss.str();
+}
 
 void CodeCollector::createVariableDecl(Value* value) {
-    auto span = new VMString(getVarialbeDecl(value)+";",true);
+    auto span = new VMString(getVarialbeDecl(value) + ";", true);
     push_back(span);
 }
 
@@ -380,7 +385,18 @@ void CodeCollector::createVarAssign(VariableDescriptor* lhs,
 }
 void CodeCollector::createArrayAssign(Value* var, Value* array, Value* index,
                                       bool fetchRef) {
-    push_back(new VMString("array assign not implemented"));
+    std::stringstream ss;
+    if (var->isRef && !fetchRef) ss << "*";
+    ss << var->name;
+
+    ss << "=";
+
+    if (fetchRef) ss << "&";
+    ss << "(" << getVariableExpr(array);
+    ss << "[" << getVariableExpr(index) << "]";
+    ss << ");";
+
+    push_back(new VMString(ss.str(), true));
 }
 void CodeCollector::createStructAssign(Value* var, Value* struct1,
                                        std::string index, bool fetchRef) {
@@ -389,5 +405,12 @@ void CodeCollector::createStructAssign(Value* var, Value* struct1,
 void CodeCollector::createOptBinary(VariableDescriptor* res,
                                     VariableDescriptor* a,
                                     VariableDescriptor* b, std::string opt) {
-    push_back(new VMString("opt not implemented"));
+    std::stringstream ss;
+    ss << getVariableExpr(res) << "=";
+    ss << getVariableExpr(a);
+    ss << opt;
+    ss << getVariableExpr(b);
+    ss << ";";
+
+    push_back(new VMString(ss.str(), true));
 }
