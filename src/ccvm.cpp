@@ -358,10 +358,10 @@ void CodeCollector::createFunctionCall(VariableDescriptor* var,
 }
 
 void CodeCollector::createReturn() {
-    push_back(new VMString("function call not implemented"));
+    push_back(new VMString("return not implemented"));
 }
 void CodeCollector::createReturn(VariableDescriptor* t) {
-    push_back(new VMString("function call not implemented"));
+    push_back(new VMString("return not implemented"));
 }
 
 void CodeCollector::createVarAssign(VariableDescriptor* lhs,
@@ -380,14 +380,14 @@ void CodeCollector::createVarAssign(VariableDescriptor* lhs,
 }
 void CodeCollector::createArrayAssign(Value* var, Value* array, Value* index,
                                       bool fetchRef) {
-    push_back(new VMString("function call not implemented"));
+    push_back(new VMString("array assign not implemented"));
 }
 void CodeCollector::createStructAssign(Value* var, Value* struct1,
                                        std::string index, bool fetchRef) {
-    push_back(new VMString("function call not implemented"));
+    push_back(new VMString("struct assign not implemented"));
 }
 void CodeCollector::createOptBinary(VariableDescriptor* res,
                                     VariableDescriptor* a,
                                     VariableDescriptor* b, std::string opt) {
-    push_back(new VMString("function call not implemented"));
+    push_back(new VMString("opt not implemented"));
 }
