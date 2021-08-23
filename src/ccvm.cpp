@@ -269,8 +269,10 @@ std::string getVarialbeDecl(Value* value, std::string assign) {
 
 std::string getVariableExpr(Value* value) {
     std::stringstream ss;
+    ss<<"(";
     if (value->isRef) ss << "*";
     ss << value->name;
+    ss<<")";
     return ss.str();
 }
 
