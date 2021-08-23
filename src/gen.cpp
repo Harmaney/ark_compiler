@@ -496,7 +496,7 @@ std::any ASTDispatcher::gen_while_statement(WhileStatementAST *ast) {
     ast->body->accept(*this);
     code()->pop_block();
 
-    code()->createLoop(subCond, nullptr, nullptr, nullptr, blockBody);
+    code()->createLoop(subCond, nullptr, blockCond, nullptr, blockBody);
 
     return nullptr;
 }
