@@ -583,6 +583,8 @@ std::any ASTDispatcher::gen_block(BlockAST *ast) {
     }
     code()->pop_block();
 
+    code()->push_back(block);
+
     return nullptr;
 }
 
