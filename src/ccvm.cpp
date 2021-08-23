@@ -214,8 +214,8 @@ std::string map_variable_type(SymbolDescriptor* type) {
     } else if (type->name == TYPE_BASIC_INT64) {
         return "long long";
     } else {
-        // return type->name;
-        throw std::invalid_argument("unknown map type " + type->name);
+        return type->name;
+        // throw std::invalid_argument("unknown map type " + type->name);
     }
 }
 
