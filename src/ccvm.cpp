@@ -269,10 +269,10 @@ std::string getVarialbeDecl(Value* value, std::string assign) {
 
 std::string getVariableExpr(Value* value) {
     std::stringstream ss;
-    ss<<"(";
+    ss << "(";
     if (value->isRef) ss << "*";
     ss << value->name;
-    ss<<")";
+    ss << ")";
     return ss.str();
 }
 
@@ -328,19 +328,26 @@ void CodeCollector::createCondBr(Value* cond, VMWhiteBlock* ok,
 void CodeCollector::createLoop(Value* cond, VMWhiteBlock* init,
                                VMWhiteBlock* calCond, VMWhiteBlock* step,
                                VMWhiteBlock* body) {
-    push_back(init);
+    if (init) push_back(init);
+
     auto tagCalCond = create_tag_G();
     auto tagEnd = create_tag_G();
     push_back(new VMString(tagCalCond + ":", true));
+
+    assert(calCond != nullptr);
     push_back(calCond);
+
     {
         std::stringstream ss;
         ss << "if(!" << getVariableExpr(cond) << ") goto " << tagEnd << ";"
            << std::endl;
         push_back(new VMString(ss.str()));
     }
+
+    assert(body != nullptr);
     push_back(body);
-    push_back(step);
+    
+    if (step) push_back(step);
     push_back(new VMString("goto " + tagCalCond + ";", true));
     push_back(new VMString(tagEnd + ":", true));
 }
