@@ -10,4 +10,7 @@ add_executable(arkcompiler ${SOURCES})
 
 set(CMAKE_CXX_STANDARD 17)
 target_compile_features(arkcompiler PRIVATE cxx_std_17)
+target_link_libraries(arkcompiler
+  -fsanitize=undefined
+)
 include(CPack)
