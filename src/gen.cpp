@@ -224,7 +224,7 @@ std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
             symbolTable()->create_variable(array->itemDescriptor, true, false);
         code()->createVariableDecl(t);
 
-        code()->createArrayAssign(t, lhs, rhs);
+        code()->createArrayAssign(t, lhs, rhs,true);
         // CodeCollector::src() << t->name;
         // CodeCollector::src() << "=&";
         // put_variable_expr(lhs);
