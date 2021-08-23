@@ -17,6 +17,8 @@ std::any ASTDispatcher::gen_global(GlobalAST *ast) {
     VMWhiteBlock *global_block = new VMWhiteBlock();
     code()->push_block(global_block);
     ast->mainBlock->accept(*this);
+
+    return nullptr;
 }
 
 std::any ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
@@ -35,6 +37,7 @@ std::any ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
     auto descriptor = symbolTable()->create_array_type(
         itemDescriptor, ast->rangeR->val_int - ast->rangeL->val_int + 1,
         ast->rangeL->val_int);
+    ast->_descriptor=descriptor;
 
     // this is wrong when using custom type
     // to fix this, you should think about how to resolve typedef in struct too
@@ -418,6 +421,8 @@ std::any ASTDispatcher::gen_if_statement(IfStatementAST *ast) {
     code()->pop_block();
 
     code()->createCondBr(t, blockOk, blockNo);
+
+    return nullptr;
 }
 
 std::any ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
@@ -492,6 +497,8 @@ std::any ASTDispatcher::gen_while_statement(WhileStatementAST *ast) {
     code()->pop_block();
 
     code()->createLoop(subCond, nullptr, nullptr, nullptr, blockBody);
+
+    return nullptr;
 }
 
 std::any ASTDispatcher::gen_function(FunctionAST *ast) {
@@ -622,4 +629,6 @@ std::any ASTDispatcher::gen_variable_decl(VariableDeclAST *ast) {
     } else {
         code()->createVariableDecl(var);
     }
+
+    return nullptr;
 }
