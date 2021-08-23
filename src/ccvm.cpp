@@ -166,6 +166,10 @@ FunctionDescriptor* SymbolTable::lookfor_function(
 }
 
 ////////////////////////////
+CodeCollector::CodeCollector() {
+    root=new VMWhiteBlock();
+    push_block(root);
+}
 void CodeCollector::push_block(VMWhiteBlock* block) { cur.push(block); }
 void CodeCollector::pop_block() { cur.pop(); }
 
@@ -266,7 +270,7 @@ std::string getVarialbeDecl(Value* value, std::string assign) {
 std::string getVariableExpr(Value* value) { return value->name; }
 
 void CodeCollector::createVariableDecl(Value* value) {
-    auto span = new VMString(getVarialbeDecl(value));
+    auto span = new VMString(getVarialbeDecl(value)+";",true);
     push_back(span);
 }
 

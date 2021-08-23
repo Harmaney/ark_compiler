@@ -123,6 +123,7 @@ class CodeCollector {
     std::stack<VMWhiteBlock*> cur;
 
    public:
+   CodeCollector();
     void push_block(VMWhiteBlock *block);
     void pop_block();
     /// 将代码压入段尾
@@ -174,6 +175,8 @@ class VMContext {
     VMContext(){
         this->code_collector=new CodeCollector();
         this->symbalTable=new SymbolTable();
+
+        this->symbalTable->init();
     }
 };
 #endif
