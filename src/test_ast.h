@@ -11,8 +11,7 @@ void TEST_vardecl() {
     auto ast = new VariableDeclAST(new VariableExprAST("a"),
                                    new BasicTypeAST(TYPE_BASIC_INT),false,false);
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_arraydecl() {
@@ -20,8 +19,7 @@ void TEST_arraydecl() {
         new VariableExprAST("a"),
         new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), new NumberExprAST(1), new NumberExprAST(2)),false,false);
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_arrayofarray() {
@@ -29,8 +27,7 @@ void TEST_arrayofarray() {
         new VariableExprAST("a"),
         new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(1),new NumberExprAST(10)), new NumberExprAST(1), new NumberExprAST(100)),false,false)});
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_arrayuse() {
@@ -46,7 +43,7 @@ void TEST_arrayuse() {
             false,false
         ),
         new BinaryExprAST(
-            "=",
+            ":=",
             new VariableExprAST("i"),
             new BinaryExprAST(
                 "[]",
@@ -56,8 +53,7 @@ void TEST_arrayuse() {
         ),
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_arrayofarrayuse() {
@@ -75,7 +71,7 @@ void TEST_arrayofarrayuse() {
             false,false
         ),
         new BinaryExprAST(
-            "=",
+            ":=",
             new BinaryExprAST(
                 "[]",
                 new BinaryExprAST(
@@ -88,7 +84,7 @@ void TEST_arrayofarrayuse() {
             new NumberExprAST(233)
         ),
         new BinaryExprAST(
-            "=",
+            ":=",
             new VariableExprAST("i"),
             new BinaryExprAST(
                 "[]",
@@ -102,8 +98,7 @@ void TEST_arrayofarrayuse() {
         ),
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_struct() {
@@ -158,8 +153,7 @@ void TEST_struct() {
 
     GlobalAST *ast=new GlobalAST({},{},{},block_ast);
 
-    ASTDispatcher dispacher;
-    ast->accept(dispacher);
+    code_gen_work(ast);
 }
 
 void TEST_arrinstruct(){
@@ -198,8 +192,7 @@ void TEST_arrinstruct(){
         )
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    code_gen_work(ast);
 }
 
 void TEST_while() {
@@ -217,8 +210,7 @@ void TEST_while() {
 
     env->exprs.push_back(while_ast);
 
-    ASTDispatcher dispacher;
-    env->accept(dispacher);
+    code_gen_work(env);
 }
 
 void TEST_for() {
@@ -236,8 +228,7 @@ void TEST_for() {
 
     env->exprs.push_back(for_ast);
 
-    ASTDispatcher dispacher;
-    env->accept(dispacher);
+    code_gen_work(env);
 }
 
 void TEST_funcdef(){
@@ -263,8 +254,7 @@ void TEST_funcdef(){
         })
     );
 
-    ASTDispatcher dispacher;
-    ast->accept(dispacher);
+    code_gen_work(ast);
 }
 
 void TEST_funccall() {
@@ -286,8 +276,7 @@ void TEST_funccall() {
 
     GlobalAST *global = new GlobalAST({}, {},{},block);
 
-    ASTDispatcher dispacher;
-    global->accept(dispacher);
+    code_gen_work(global);
 }
 
 void TEST_pointer() {
@@ -301,8 +290,7 @@ void TEST_pointer() {
          new BinaryExprAST("=", new VariableExprAST("a"),
                            new UnaryExprAST("*", new VariableExprAST("p")))});
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    code_gen_work(ast);
 }
 
 void TEST_case1() {
@@ -339,8 +327,7 @@ void TEST_case1() {
         )
     );
 
-    ASTDispatcher dispacher;
-    global->accept(dispacher);
+    code_gen_work(global);
 }
 
 void TEST_fibonacci(){
@@ -449,8 +436,7 @@ void TEST_fibonacci(){
         )
     );
 
-    ASTDispatcher dispacher;
-    global->accept(dispacher);
+    code_gen_work(global);
 }
 
 ////////////////////////////////////////////////////////////
@@ -461,8 +447,7 @@ void TEST_typeequal(){
         new BinaryExprAST("=",new VariableExprAST("a"),new NumberExprAST(1)),
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    code_gen_work(ast);
 }
 
 void TEST_typeassignerror(){
@@ -471,8 +456,7 @@ void TEST_typeassignerror(){
         new BinaryExprAST("=",new VariableExprAST("a"),new NumberExprAST(1.1)),
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    code_gen_work(ast);
 }
 
 void TEST_leftvarassignerror(){
@@ -481,8 +465,7 @@ void TEST_leftvarassignerror(){
         new BinaryExprAST("=",new NumberExprAST(1),new VariableExprAST("a")),
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    code_gen_work(ast);
 }
 
 void TEST_undefinedval(){
@@ -491,8 +474,7 @@ void TEST_undefinedval(){
         new BinaryExprAST("=",new VariableExprAST("b"),new NumberExprAST(1)),
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    code_gen_work(ast);
 }
 
 void TEST_nomember(){
@@ -507,8 +489,7 @@ void TEST_nomember(){
         new BinaryExprAST("=",new BinaryExprAST(".",new VariableExprAST("a"),new StringExprAST("a")),new NumberExprAST(1)),
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    code_gen_work(ast);
 }
 
 void TEST_opbetweendiffobj(){
@@ -518,25 +499,20 @@ void TEST_opbetweendiffobj(){
         new BinaryExprAST("<",new VariableExprAST("a"),new VariableExprAST("b")),
     });
 
-    ASTDispatcher dispatcher;
-    ast->accept(dispatcher);
+    code_gen_work(ast);
 }
 
 int RUN_TEST(){
-    init_code_generator();
-    init_basic_type();
-
-    CodeCollector::begin_section("main");
-    TEST_vardecl();
+    // TEST_vardecl();
     // TEST_arraydecl();
     // TEST_arrayuse();
     // TEST_arrayofarray();
-    // TEST_arrayofarrayuse();
+    TEST_arrayofarrayuse();
     // TEST_while();
     // TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
-    TEST_arrinstruct();
+    // TEST_arrinstruct();
     // TEST_pointer();
     // TEST_case1();
     // TEST_fibonacci();
@@ -547,17 +523,6 @@ int RUN_TEST(){
     // TEST_undefinedval();
     // TEST_nomember();
     // TEST_opbetweendiffobj();
-
-    CodeCollector::end_section(PLACE_END);
-    
-    CodeCollector::rearrange_section("struct", 0);
-    CodeCollector::rearrange_section("pre_array", 0);
-    CodeCollector::rearrange_section("pre_struct", 0);
-    CodeCollector::rearrange_section("global_define", 0);
-    CodeCollector::rearrange_section("prelude", 0);
-
-    ofstream codeOut("out.cpp");
-    CodeCollector::output(codeOut);
 
     return 0;
 }
