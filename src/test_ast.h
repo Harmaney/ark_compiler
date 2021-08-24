@@ -210,7 +210,7 @@ void TEST_while() {
 
     env->exprs.push_back(while_ast);
 
-    code_gen_work(env);
+    cout<<code_gen_work(env);
 }
 
 void TEST_for() {
@@ -236,7 +236,7 @@ void TEST_funcdef(){
         new FunctionSignatureAST(
             "tryy",
             {
-                new VariableDeclAST(
+                new ParameterDeclAST(
                     new VariableExprAST("a"),
                     new BasicTypeAST(TYPE_BASIC_INT),
                     true,false
@@ -247,14 +247,14 @@ void TEST_funcdef(){
         {},
         new BlockAST({
             new BinaryExprAST(
-                "=",
+                ":=",
                 new VariableExprAST("a"),
                 new NumberExprAST(1)
             )
         })
     );
 
-    code_gen_work(ast);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_funccall() {
@@ -360,9 +360,9 @@ void TEST_fibonacci(){
                 new FunctionSignatureAST(
                     "add",
                     {
-                        new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
-                        new VariableDeclAST(new VariableExprAST("b"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
-                        new VariableDeclAST(new VariableExprAST("c"),new BasicTypeAST(TYPE_BASIC_INT),true,false),
+                        new ParameterDeclAST (new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
+                        new ParameterDeclAST(new VariableExprAST("b"),new BasicTypeAST(TYPE_BASIC_INT),false,false),
+                        new ParameterDeclAST(new VariableExprAST("c"),new BasicTypeAST(TYPE_BASIC_INT),true,false),
                     },
                     new BasicTypeAST(TYPE_BASIC_VOID)
                 ),
@@ -507,9 +507,9 @@ int RUN_TEST(){
     // TEST_arraydecl();
     // TEST_arrayuse();
     // TEST_arrayofarray();
-    TEST_arrayofarrayuse();
+    // TEST_arrayofarrayuse();
     // TEST_while();
-    // TEST_funcdef();
+    TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
     // TEST_arrinstruct();
