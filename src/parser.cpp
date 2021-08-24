@@ -639,16 +639,18 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                 SubprogramHead prop;
                 if (node->son.size() ==
                     3) {  // SubprogramHead -> procedure ID FormalParameter
-                    prop = new FunctionSignatureAST(
-                        node->son[1]->raw,
-                        cast<FormalParameter>(node->son[2]->prop),
-                        new BasicTypeAST("void"));
+                    // TODO: replace vardecl with parameterDeclAST
+                    // prop = new FunctionSignatureAST(
+                    //     node->son[1]->raw,
+                    //     cast<FormalParameter>(node->son[2]->prop),
+                    //     new BasicTypeAST("void"));
                 } else {  // SubprogramHead -> function ID FormalParameter :
                           // BasicType
-                    prop = new FunctionSignatureAST(
-                        node->son[1]->raw,
-                        cast<FormalParameter>(node->son[2]->prop),
-                        cast<BasicType>(node->son[4]->prop));
+                    // TODO: replace vardecl with parameterDeclAST
+                    // prop = new FunctionSignatureAST(
+                    //     node->son[1]->raw,
+                    //     cast<FormalParameter>(node->son[2]->prop),
+                    //     cast<BasicType>(node->son[4]->prop));
                 }
                 // TODO: prop->set_row(node->son[0]->row);
                 node->prop = prop;
