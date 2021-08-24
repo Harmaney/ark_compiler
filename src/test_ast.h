@@ -107,7 +107,7 @@ void TEST_struct() {
             new StructDeclAST(
                 "Test",
                 {
-                    new VariableDeclAST(
+                    new ParameterDeclAST(
                         new VariableExprAST("a"),
                         new BasicTypeAST(TYPE_BASIC_INT),
                         false,false
@@ -161,7 +161,7 @@ void TEST_arrinstruct(){
         new StructDeclAST(
             "SP",
             {
-                new VariableDeclAST(
+                new ParameterDeclAST(
                     new VariableExprAST("arr1"),
                     new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(0),new NumberExprAST(10)),
                     false,false
@@ -507,7 +507,7 @@ void TEST_nomember(){
         new StructDeclAST(
             "st",
             {
-                new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false)
+                new ParameterDeclAST(new VariableExprAST("a"),new BasicTypeAST(TYPE_BASIC_INT),false,false)
             }
         ),
         new VariableDeclAST(new VariableExprAST("a"),new BasicTypeAST("st"),false,false),
@@ -535,8 +535,8 @@ int RUN_TEST(){
     // TEST_arrayofarrayuse();
     // TEST_while();
     // TEST_funcdef();
-    TEST_funccall();
-    // TEST_struct();
+    // TEST_funccall();
+    TEST_struct();
     // TEST_arrinstruct();
     // TEST_pointer();
     // TEST_case1();

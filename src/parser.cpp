@@ -568,8 +568,9 @@ AnalyseTreeNode* analyse(TokenQueue& tq) {
                 if (node->son.size() == 1) {  // ActualType -> Type
                     prop = cast<Type>(node->son[0]->prop);
                 } else {  // ActualType -> record VarDeclaration ; end
-                    prop = new StructDeclAST(
-                        rand_name(), cast<VarDeclaration>(node->son[1]->prop));
+                // TODO: replace vardeclast with parameterdeclast
+                    // prop = new StructDeclAST(
+                    //     rand_name(), cast<VarDeclaration>(node->son[1]->prop));
                     // TODO: prop->set_row(node->son[0]->row);
                 }
                 node->prop = prop;

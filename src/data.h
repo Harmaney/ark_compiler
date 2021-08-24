@@ -279,8 +279,8 @@ class FunctionAST : public AST {
 class StructDeclAST : public TypeDeclAST {
    public:
     std::string sig;
-    std::vector<VariableDeclAST*> varDecl;
-    StructDeclAST(std::string sig, std::vector<VariableDeclAST*> varDecl)
+    std::vector<ParameterDeclAST*> varDecl;
+    StructDeclAST(std::string sig, std::vector<ParameterDeclAST*> varDecl)
         : TypeDeclAST(AST_STRUCT_DECL), sig(sig), varDecl(varDecl) {}
     std::any accept(ASTDispatcher& dispatcher) override;
 };
