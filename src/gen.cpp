@@ -15,7 +15,7 @@ Value *castValue(std::any x) { return std::any_cast<Value *>(x); }
 
 std::any ASTDispatcher::gen_global(GlobalAST *ast) {
     VMWhiteBlock *global_block = new VMWhiteBlock();
-    code()->push_block(global_block);
+    code()->set_block(global_block);
     ast->mainBlock->accept(*this);
 
     return nullptr;
@@ -37,7 +37,7 @@ std::any ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
     auto descriptor = symbolTable()->create_array_type(
         itemDescriptor, ast->rangeR->val_int - ast->rangeL->val_int + 1,
         ast->rangeL->val_int);
-    ast->_descriptor=descriptor;
+    ast->_descriptor = descriptor;
 
     // this is wrong when using custom type
     // to fix this, you should think about how to resolve typedef in struct too
@@ -224,7 +224,7 @@ std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
             symbolTable()->create_variable(array->itemDescriptor, true, false);
         code()->createVariableDecl(t);
 
-        code()->createArrayAssign(t, lhs, rhs,true);
+        code()->createArrayAssign(t, lhs, rhs, true);
         // CodeCollector::src() << t->name;
         // CodeCollector::src() << "=&";
         // put_variable_expr(lhs);
@@ -408,15 +408,15 @@ std::any ASTDispatcher::gen_if_statement(IfStatementAST *ast) {
     auto blockOk = code()->createWhiteBlock();
     auto blockNo = code()->createWhiteBlock();
 
-    code()->push_block(blockCond);
+    code()->set_block(blockCond);
     auto t = castValue(ast->condition->accept(*this));
     code()->pop_block();
 
-    code()->push_block(blockOk);
+    code()->set_block(blockOk);
     ast->body_true->accept(*this);
     code()->pop_block();
 
-    code()->push_block(blockNo);
+    code()->set_block(blockNo);
     ast->body_false->accept(*this);
     code()->pop_block();
 
@@ -454,20 +454,20 @@ std::any ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
     //         "a integer", 0, 0);
     // }
 
-    code()->push_block(blockInit);
+    code()->set_block(blockInit);
     auto iterVar = castValue(ast->itervar->accept(*this));
     auto rangeL = castValue(ast->rangeL->accept(*this));
     code()->createVarAssign(iterVar, rangeL);
     code()->pop_block();
 
-    code()->push_block(blockCond);
+    code()->set_block(blockCond);
     auto rangeR = castValue(ast->rangeR->accept(*this));
     auto cond = symbolTable()->create_variable(
         symbolTable()->lookfor_type(TYPE_BASIC_INT), false, false);
     code()->createOptBinary(cond, iterVar, rangeR, "<=");
     code()->pop_block();
 
-    code()->push_block(blockStep);
+    code()->set_block(blockStep);
     auto const1 = symbolTable()->create_variable(
         symbolTable()->lookfor_type(TYPE_BASIC_INT), false, false);
     code()->createVariableDecl(const1);
@@ -475,7 +475,7 @@ std::any ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
     code()->createOptBinary(iterVar, iterVar, const1, "+");
     code()->pop_block();
 
-    code()->push_block(blockBody);
+    code()->set_block(blockBody);
     ast->body->accept(*this);
     code()->pop_block();
 
@@ -488,11 +488,11 @@ std::any ASTDispatcher::gen_while_statement(WhileStatementAST *ast) {
     auto blockCond = code()->createWhiteBlock();
     auto blockBody = code()->createWhiteBlock();
 
-    code()->push_block(blockCond);
+    code()->set_block(blockCond);
     auto subCond = castValue(ast->condition->accept(*this));
     code()->pop_block();
 
-    code()->push_block(blockBody);
+    code()->set_block(blockBody);
     ast->body->accept(*this);
     code()->pop_block();
 
@@ -502,6 +502,34 @@ std::any ASTDispatcher::gen_while_statement(WhileStatementAST *ast) {
 }
 
 std::any ASTDispatcher::gen_function(FunctionAST *ast) {
+    auto blockBody = code()->createBlock();
+
+    code()->set_block(blockBody);
+    symbolTable()->enter();
+
+    std::vector<Value *> argTypes;
+    for (auto arg : ast->sig->args) {
+        arg->accept(*this);
+        auto argVar = symbolTable()->create_variable(arg->sig->name,arg->varType->_descriptor,
+                                                     arg->isRef, false);
+        argTypes.push_back(argVar);
+    }
+
+    ast->sig->resultType->accept(*this);
+    auto functionDescriptor = symbolTable()->insert_function(
+        ast->sig->sig,
+        new FunctionDescriptor(ast->sig->sig, argTypes,
+                               ast->sig->resultType->_descriptor));
+
+    code()->createFunctionSignature(functionDescriptor, false);
+    ast->body->accept(*this);
+
+    symbolTable()->exit();
+
+    code()->pop_block();
+    code()->push_back(blockBody);
+
+    return nullptr;
     // // FIX: too ugly but work
     // // the reason for this is that we should inject args descriptor to its
     // block
@@ -572,19 +600,23 @@ std::any ASTDispatcher::gen_function(FunctionAST *ast) {
 }
 
 std::any ASTDispatcher::gen_function_signature(FunctionSignatureAST *ast) {
-    assert(false);
+    // assert(false);
+    // TODO: !!!
+
+    return nullptr;
 }
 
 std::any ASTDispatcher::gen_block(BlockAST *ast) {
     VMBlock *block = code()->createBlock();
-    code()->push_block(block);
+    code()->set_block(block);
+    symbolTable()->enter();
     for (auto expr : ast->exprs) {
         expr->accept(*this);
     }
+    symbolTable()->exit();
     code()->pop_block();
 
     code()->push_back(block);
-
     return nullptr;
 }
 
@@ -632,5 +664,16 @@ std::any ASTDispatcher::gen_variable_decl(VariableDeclAST *ast) {
         code()->createVariableDecl(var);
     }
 
+    return nullptr;
+}
+
+std::any ASTDispatcher::gen_parameter_decl(ParameterDeclAST *ast) {
+    VariableDescriptor *var = nullptr;
+    ast->varType->accept(*this);
+    auto varType = ast->varType->_descriptor;
+    var = symbolTable()->create_variable(ast->sig->name, varType, ast->isRef,
+                                         false);
+
+    // parameters needs no real code.
     return nullptr;
 }

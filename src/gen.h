@@ -26,6 +26,7 @@ class UnaryExprAST;
 class BinaryExprAST;
 class CallExprAST;
 class VariableDeclAST;
+class ParameterDeclAST;
 
 class IfStatementAST;
 class WhileStatementAST;
@@ -69,6 +70,7 @@ class ADispatcher {
     virtual std::any gen_block(BlockAST *ast) = 0;
 
     virtual std::any gen_variable_decl(VariableDeclAST *ast) = 0;
+    virtual std::any gen_parameter_decl(ParameterDeclAST *ast) = 0;
 };
 
 /// 输出代码的 visitor
@@ -112,6 +114,7 @@ class ASTDispatcher : public ADispatcher {
     std::any gen_block(BlockAST *ast) override;
 
     std::any gen_variable_decl(VariableDeclAST *ast) override;
+    std::any gen_parameter_decl(ParameterDeclAST *ast) override;
 };
 
 enum PlaceHolder { PLACE_VOID, PLACE_BEGIN = 1, PLACE_END = 2 };

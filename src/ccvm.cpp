@@ -127,8 +127,8 @@ SymbolDescriptor* SymbolTable::insert_type(std::string sig,
     return descriptor;
 }
 
-void SymbolTable::insert_function(std::string sig,
-                                  FunctionDescriptor* descriptor) {
+FunctionDescriptor* SymbolTable::insert_function(
+    std::string sig, FunctionDescriptor* descriptor) {
     std::vector<SymbolDescriptor*> symbols;
     for (auto arg : descriptor->args) {
         symbols.push_back(arg->varType);
@@ -138,6 +138,8 @@ void SymbolTable::insert_function(std::string sig,
     term_print.debug() << "???? " << name << " " << descriptor->name
                        << std::endl;
     insert_type(name, descriptor);
+
+    return descriptor;
 }
 
 ArrayTypeDescriptor* SymbolTable::create_array_type(SymbolDescriptor* item,
@@ -168,9 +170,9 @@ FunctionDescriptor* SymbolTable::lookfor_function(
 ////////////////////////////
 CodeCollector::CodeCollector() {
     root = new VMWhiteBlock();
-    push_block(root);
+    set_block(root);
 }
-void CodeCollector::push_block(VMWhiteBlock* block) { cur.push(block); }
+void CodeCollector::set_block(VMWhiteBlock* block) { cur.push(block); }
 void CodeCollector::pop_block() { cur.pop(); }
 
 void CodeCollector::push_back(VMAbstract* vm) {
@@ -295,6 +297,21 @@ void CodeCollector::createTypeDecl(StructDescriptor* structDescriptor) {
     push_back(new VMString(ss.str()));
 }
 
+void CodeCollector::createFunctionSignature(
+    FunctionDescriptor* functionDescriptor, bool onlySig) {
+    std::stringstream ss;
+    ss << map_variable_type(functionDescriptor->resultDescriptor) << " ";
+    ss << functionDescriptor->name;
+    ss << "(";
+    for (auto arg : functionDescriptor->args) {
+        ss << getVarialbeDecl(arg) << ",";
+    }
+    ss << ")";
+    if (onlySig) ss << ";";
+
+    push_back(new VMString(ss.str()));
+}
+
 void CodeCollector::createCondBr(Value* cond, VMWhiteBlock* ok,
                                  VMWhiteBlock* no) {
     auto tagElse = create_tag_G();
@@ -318,7 +335,7 @@ void CodeCollector::createCondBr(Value* cond, VMWhiteBlock* ok,
     {
         auto block = new VMBlock();
         block->push_back(no);
-        push_block(block);
+        set_block(block);
         std::stringstream ss;
         ss << tagEnd << ":" << std::endl;
         push_back(new VMString(ss.str()));
@@ -346,7 +363,7 @@ void CodeCollector::createLoop(Value* cond, VMWhiteBlock* init,
 
     assert(body != nullptr);
     push_back(body);
-    
+
     if (step) push_back(step);
     push_back(new VMString("goto " + tagCalCond + ";", true));
     push_back(new VMString(tagEnd + ":", true));

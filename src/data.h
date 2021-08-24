@@ -10,10 +10,7 @@
 #include "logger.h"
 #include "symbols.h"
 
-
 class ASTDispatcher;
-
-
 
 ////////////////////////////////////////
 
@@ -45,7 +42,7 @@ class ExprAST : public AST {
 class TypeDeclAST : public AST {
    public:
     TypeDeclAST(ASTKind kind) : AST(kind) {}
-    SymbolDescriptor *_descriptor;
+    SymbolDescriptor* _descriptor;
 };
 
 /// 基本类型。比如 int
@@ -194,6 +191,23 @@ class VariableDeclAST : public AST {
     std::any accept(ASTDispatcher& dispatcher) override;
 };
 
+/// 变量声明表达式
+class ParameterDeclAST : public AST {
+   public:
+    VariableExprAST* sig;
+    TypeDeclAST* varType;
+    // 这个东西的意义并不和指针等价！
+    // 它只是在C中使用指针模拟，用于处理pascal里的引用类型
+    bool isRef;
+
+    ParameterDeclAST(VariableExprAST* sig, TypeDeclAST* varType, bool isRef,
+                     bool isConst = false, NumberExprAST* initVal = nullptr)
+        : AST(AST_VARIABLE_DECL), sig(sig), varType(varType), isRef(isRef) {
+        assert(varType);
+    }
+    std::any accept(ASTDispatcher& dispatcher) override;
+};
+
 /// for表达式
 class ForStatementAST : public AST {
    public:
@@ -240,9 +254,9 @@ class IfStatementAST : public AST {
 class FunctionSignatureAST : public AST {
    public:
     std::string sig;
-    std::vector<VariableDeclAST*> args;
+    std::vector<ParameterDeclAST*> args;
     TypeDeclAST* resultType;
-    FunctionSignatureAST(std::string sig, std::vector<VariableDeclAST*> args,
+    FunctionSignatureAST(std::string sig, std::vector<ParameterDeclAST*> args,
                          TypeDeclAST* result)
         : AST(AST_FUNCTION_SIGNATURE),
           sig(sig),

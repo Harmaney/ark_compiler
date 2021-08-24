@@ -58,7 +58,7 @@ class SymbolTable {
      VariableDescriptor* lookfor_variable(std::string sig);
 
      SymbolDescriptor* insert_type(std::string sig, SymbolDescriptor* descriptor);
-     void insert_function(std::string sig,
+     FunctionDescriptor* insert_function(std::string sig,
                                 FunctionDescriptor* descriptor);
      ArrayTypeDescriptor* create_array_type(SymbolDescriptor* item,
                                                   int sz, int beg);
@@ -124,7 +124,7 @@ class CodeCollector {
 
    public:
    CodeCollector();
-    void push_block(VMWhiteBlock *block);
+    void set_block(VMWhiteBlock *block);
     void pop_block();
     /// 将代码压入段尾
     void push_back(VMAbstract *vm);
@@ -140,6 +140,7 @@ class CodeCollector {
     // finally there's a day i will remove this f**king stupid function
     void createAkaType(std::string newName,SymbolDescriptor *typeDescriptor);
     void createVariableDecl(Value *value);
+    void createFunctionSignature(FunctionDescriptor *functionDescriptor,bool onlySig);
     
     void createCondBr(Value *cond,VMWhiteBlock *ok, VMWhiteBlock *no);
 

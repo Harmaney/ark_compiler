@@ -68,6 +68,10 @@ std::any VariableDeclAST::accept(ASTDispatcher& dispatcher) {
     return dispatcher.gen_variable_decl(this);
 }
 
+std::any ParameterDeclAST::accept(ASTDispatcher& dispatcher){
+    return dispatcher.gen_parameter_decl(this);
+}
+
 std::any ForStatementAST::accept(ASTDispatcher& dispatcher) {
     return dispatcher.gen_for_statement(this);
 }
