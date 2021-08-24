@@ -258,25 +258,50 @@ void TEST_funcdef(){
 }
 
 void TEST_funccall() {
-    BlockAST *block = new BlockAST({});
-
-    VariableDeclAST *decl = new VariableDeclAST(
-        new VariableExprAST("a"), new BasicTypeAST(TYPE_BASIC_INT),false,false);
-    block->exprs.push_back(decl);
-
-    BinaryExprAST *t1 = new BinaryExprAST("=", new VariableExprAST("a"),
-                                          new NumberExprAST(123));
-    block->exprs.push_back(t1);
-
-    vector<ExprAST *> callargs;
-    callargs.push_back(
-        new VariableExprAST("a"));
-    CallExprAST *call = new CallExprAST("write_int", callargs);
-    block->exprs.push_back(call);
+    BlockAST *block = new BlockAST({
+        new FunctionAST(
+            new FunctionSignatureAST(
+                "tryy",
+                {
+                    new ParameterDeclAST(
+                        new VariableExprAST("a"),
+                        new BasicTypeAST(TYPE_BASIC_INT),
+                        true,false
+                    ),
+                },
+                new BasicTypeAST(TYPE_BASIC_INT)
+            ),
+            {},
+            new BlockAST({
+                new BinaryExprAST(
+                    ":=",
+                    new VariableExprAST("a"),
+                    new NumberExprAST(1)
+                )
+            })
+        ),
+        new VariableDeclAST(
+            new VariableExprAST("a"),
+            new BasicTypeAST(TYPE_BASIC_INT),
+            false,
+            false
+        ),
+        new BinaryExprAST(
+            ":=",
+            new VariableExprAST("a"),
+            new NumberExprAST(123)
+        ),
+        new CallExprAST(
+            "tryy",
+            {
+                new VariableExprAST("a")
+            }
+        )
+    });
 
     GlobalAST *global = new GlobalAST({}, {},{},block);
 
-    code_gen_work(global);
+    cout<<code_gen_work(global);
 }
 
 void TEST_pointer() {
@@ -509,8 +534,8 @@ int RUN_TEST(){
     // TEST_arrayofarray();
     // TEST_arrayofarrayuse();
     // TEST_while();
-    TEST_funcdef();
-    // TEST_funccall();
+    // TEST_funcdef();
+    TEST_funccall();
     // TEST_struct();
     // TEST_arrinstruct();
     // TEST_pointer();
