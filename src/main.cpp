@@ -5,8 +5,12 @@
 #include "lex.h"
 #include "logger.h"
 #include "parser.h"
-
+#include "test_ast.h"
 int main(int argc, char **argv) {
+    RUN_TEST();
+    return 0;
+
+
     std::string input_pas, out_c = "out.c";
     if (argc == 1) {
         std::cerr << "Usage: p2c input.pas [-o out.c] [-l LOG_LEVEL(0-5)].\n";
