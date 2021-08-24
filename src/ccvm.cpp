@@ -135,8 +135,7 @@ FunctionDescriptor* SymbolTable::insert_function(
     }
     auto name = get_internal_function_name(sig, symbols);
     descriptor->name = name;
-    term_print.debug() << "???? " << name << " " << descriptor->name
-                       << std::endl;
+    std::cout << "???? " << name << " " << descriptor->name << std::endl;
     insert_type(name, descriptor);
 
     return descriptor;
@@ -164,7 +163,10 @@ SymbolDescriptor* SymbolTable::lookfor_type(std::string sig) {
 
 FunctionDescriptor* SymbolTable::lookfor_function(
     std::string sig, std::vector<SymbolDescriptor*> args) {
-    assert(false);
+    auto internalSigName = get_internal_function_name(sig, args);
+    std::cout << internalSigName << std::endl;
+    auto descriptor = this->lookfor_type(internalSigName);
+    return static_cast<FunctionDescriptor*>(descriptor);
 }
 
 ////////////////////////////
@@ -269,10 +271,14 @@ std::string getVarialbeDecl(Value* value, std::string assign) {
     return ss.str();
 }
 
-std::string getVariableExpr(Value* value) {
+std::string getVariableExpr(Value* value, bool fetchRef) {
     std::stringstream ss;
     ss << "(";
-    if (value->isRef) ss << "*";
+    if (value->isRef) {
+        if (!fetchRef) ss << "*";
+    } else {
+        if (fetchRef) ss << "&";
+    }
     ss << value->name;
     ss << ")";
     return ss.str();
@@ -318,7 +324,7 @@ void CodeCollector::createCondBr(Value* cond, VMWhiteBlock* ok,
     auto tagEnd = create_tag_G();
     {
         std::stringstream ss;
-        ss << "if(!" << getVariableExpr(cond) << ") goto " << tagElse << ";"
+        ss << "if(!" << getVariableExpr(cond,false) << ") goto " << tagElse << ";"
            << std::endl;
         push_back(new VMString(ss.str()));
     }
@@ -356,7 +362,7 @@ void CodeCollector::createLoop(Value* cond, VMWhiteBlock* init,
 
     {
         std::stringstream ss;
-        ss << "if(!" << getVariableExpr(cond) << ") goto " << tagEnd << ";"
+        ss << "if(!" << getVariableExpr(cond,false) << ") goto " << tagEnd << ";"
            << std::endl;
         push_back(new VMString(ss.str()));
     }
@@ -385,7 +391,16 @@ void CodeCollector::createConstDecl(VariableDescriptor* var, char value) {
 void CodeCollector::createFunctionCall(VariableDescriptor* var,
                                        FunctionDescriptor* function,
                                        std::vector<VariableDescriptor*> args) {
-    push_back(new VMString("function call not implemented"));
+    std::stringstream ss;
+    if (var) ss << getVariableExpr(var,false) << "=";
+    ss << function->name;
+    ss << "(";
+    for (int i=0;i<args.size();i++) {
+        auto arg=args[i];
+        ss << getVariableExpr(arg,function->args[i]->isRef) << ",";
+    }
+    ss << ");";
+    push_back(new VMString(ss.str(), true));
 }
 
 void CodeCollector::createReturn() {
@@ -403,8 +418,7 @@ void CodeCollector::createVarAssign(VariableDescriptor* lhs,
 
     ss << "=";
 
-    if (fetchRef) ss << "&";
-    ss << getVariableExpr(rhs);
+    ss << getVariableExpr(rhs,fetchRef);
     ss << ";";
 
     push_back(new VMString(ss.str(), true));
@@ -417,9 +431,8 @@ void CodeCollector::createArrayAssign(Value* var, Value* array, Value* index,
 
     ss << "=";
 
-    if (fetchRef) ss << "&";
-    ss << "(" << getVariableExpr(array);
-    ss << "[" << getVariableExpr(index) << "]";
+    ss << "(" << getVariableExpr(array,fetchRef);
+    ss << "[" << getVariableExpr(index,false) << "]";
     ss << ");";
 
     push_back(new VMString(ss.str(), true));
@@ -432,10 +445,10 @@ void CodeCollector::createOptBinary(VariableDescriptor* res,
                                     VariableDescriptor* a,
                                     VariableDescriptor* b, std::string opt) {
     std::stringstream ss;
-    ss << getVariableExpr(res) << "=";
-    ss << getVariableExpr(a);
+    ss << getVariableExpr(res,false) << "=";
+    ss << getVariableExpr(a,false);
     ss << opt;
-    ss << getVariableExpr(b);
+    ss << getVariableExpr(b,false);
     ss << ";";
 
     push_back(new VMString(ss.str(), true));
