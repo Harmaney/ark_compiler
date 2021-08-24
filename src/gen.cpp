@@ -18,6 +18,9 @@ std::any ASTDispatcher::gen_global(GlobalAST *ast) {
     code()->set_block(global_block);
     ast->mainBlock->accept(*this);
 
+    code()->pop_block();
+    code()->push_back(global_block);
+
     return nullptr;
 }
 
@@ -510,21 +513,20 @@ std::any ASTDispatcher::gen_function(FunctionAST *ast) {
     std::vector<Value *> argTypes;
     for (auto arg : ast->sig->args) {
         arg->accept(*this);
-        auto argVar = symbolTable()->create_variable(arg->sig->name,arg->varType->_descriptor,
-                                                     arg->isRef, false);
+        auto argVar = symbolTable()->create_variable(
+            arg->sig->name, arg->varType->_descriptor, arg->isRef, false);
         argTypes.push_back(argVar);
     }
 
     ast->sig->resultType->accept(*this);
-    auto functionDescriptor = symbolTable()->insert_function(
-        ast->sig->sig,
-        new FunctionDescriptor(ast->sig->sig, argTypes,
-                               ast->sig->resultType->_descriptor));
+    auto functionDescriptor = new FunctionDescriptor(
+        ast->sig->sig, argTypes, ast->sig->resultType->_descriptor);
 
     code()->createFunctionSignature(functionDescriptor, false);
     ast->body->accept(*this);
 
     symbolTable()->exit();
+    symbolTable()->insert_function(ast->sig->sig, functionDescriptor);
 
     code()->pop_block();
     code()->push_back(blockBody);
