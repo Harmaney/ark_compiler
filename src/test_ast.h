@@ -159,7 +159,7 @@ void TEST_arrinstruct(){
             false,false
         ),
         new BinaryExprAST(
-            "=",
+            ":=",
             new BinaryExprAST(
                 "[]",
                 new BinaryExprAST(
@@ -177,7 +177,7 @@ void TEST_arrinstruct(){
         )
     });
 
-    code_gen_work(ast);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_while() {
@@ -521,8 +521,8 @@ int RUN_TEST(){
     // TEST_while();
     // TEST_funcdef();
     // TEST_funccall();
-    TEST_struct();
-    // TEST_arrinstruct();
+    // TEST_struct();
+    TEST_arrinstruct();
     // TEST_pointer();
     // TEST_case1();
     // TEST_fibonacci();
