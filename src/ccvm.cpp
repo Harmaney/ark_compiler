@@ -284,6 +284,20 @@ std::string getVariableExpr(Value* value, bool fetchRef) {
     return ss.str();
 }
 
+std::string getStructVariableExpr(Value* value, std::string index,
+                                  bool fetchRef) {
+    std::stringstream ss;
+
+    if (fetchRef) ss << "&";
+
+    ss << "(";
+    ss << getVariableExpr(value, false);
+    ss << ".";
+    ss << index << ")";
+
+    return ss.str();
+}
+
 void CodeCollector::createVariableDecl(Value* value) {
     auto span = new VMString(getVarialbeDecl(value) + ";", true);
     push_back(span);
@@ -293,10 +307,9 @@ void CodeCollector::createTypeDecl(StructDescriptor* structDescriptor) {
     std::stringstream ss;
     ss << "struct " << structDescriptor->name << "{" << std::endl;
     for (auto item : structDescriptor->refVar) {
-        // TODO: 重新定义形参
         ss << getVarialbeDecl(
                   new VariableDescriptor(item.first, item.second, false, false))
-           << std::endl;
+           << ";" << std::endl;
     }
     ss << "};";
 
@@ -324,8 +337,8 @@ void CodeCollector::createCondBr(Value* cond, VMWhiteBlock* ok,
     auto tagEnd = create_tag_G();
     {
         std::stringstream ss;
-        ss << "if(!" << getVariableExpr(cond,false) << ") goto " << tagElse << ";"
-           << std::endl;
+        ss << "if(!" << getVariableExpr(cond, false) << ") goto " << tagElse
+           << ";" << std::endl;
         push_back(new VMString(ss.str()));
     }
     {
@@ -362,8 +375,8 @@ void CodeCollector::createLoop(Value* cond, VMWhiteBlock* init,
 
     {
         std::stringstream ss;
-        ss << "if(!" << getVariableExpr(cond,false) << ") goto " << tagEnd << ";"
-           << std::endl;
+        ss << "if(!" << getVariableExpr(cond, false) << ") goto " << tagEnd
+           << ";" << std::endl;
         push_back(new VMString(ss.str()));
     }
 
@@ -388,16 +401,22 @@ void CodeCollector::createConstDecl(VariableDescriptor* var, char value) {
         new VMString(getVarialbeDecl(var, std::to_string(value)) + ";", true));
 }
 
+void CodeCollector::createConstDecl(VariableDescriptor* var,
+                                    std::string value) {
+    push_back(
+        new VMString(getVarialbeDecl(var, "\"" + value + "\"") + ";", true));
+}
+
 void CodeCollector::createFunctionCall(VariableDescriptor* var,
                                        FunctionDescriptor* function,
                                        std::vector<VariableDescriptor*> args) {
     std::stringstream ss;
-    if (var) ss << getVariableExpr(var,false) << "=";
+    if (var) ss << getVariableExpr(var, false) << "=";
     ss << function->name;
     ss << "(";
-    for (int i=0;i<args.size();i++) {
-        auto arg=args[i];
-        ss << getVariableExpr(arg,function->args[i]->isRef) << ",";
+    for (int i = 0; i < args.size(); i++) {
+        auto arg = args[i];
+        ss << getVariableExpr(arg, function->args[i]->isRef) << ",";
     }
     ss << ");";
     push_back(new VMString(ss.str(), true));
@@ -418,7 +437,7 @@ void CodeCollector::createVarAssign(VariableDescriptor* lhs,
 
     ss << "=";
 
-    ss << getVariableExpr(rhs,fetchRef);
+    ss << getVariableExpr(rhs, fetchRef);
     ss << ";";
 
     push_back(new VMString(ss.str(), true));
@@ -426,29 +445,37 @@ void CodeCollector::createVarAssign(VariableDescriptor* lhs,
 void CodeCollector::createArrayAssign(Value* var, Value* array, Value* index,
                                       bool fetchRef) {
     std::stringstream ss;
-    if (var->isRef && !fetchRef) ss << "*";
-    ss << var->name;
+    ss << getVariableExpr(var, fetchRef);
 
     ss << "=";
 
-    ss << "(" << getVariableExpr(array,fetchRef);
-    ss << "[" << getVariableExpr(index,false) << "]";
+    ss << "(" << getVariableExpr(array, fetchRef);
+    ss << "[" << getVariableExpr(index, false) << "]";
     ss << ");";
 
     push_back(new VMString(ss.str(), true));
 }
 void CodeCollector::createStructAssign(Value* var, Value* struct1,
                                        std::string index, bool fetchRef) {
-    push_back(new VMString("struct assign not implemented"));
+    std::stringstream ss;
+    ss << getVariableExpr(var, fetchRef);
+
+    ss << "=";
+
+    ss<<getStructVariableExpr(struct1,index,fetchRef);
+
+    ss<<";";
+
+    push_back(new VMString(ss.str()));
 }
 void CodeCollector::createOptBinary(VariableDescriptor* res,
                                     VariableDescriptor* a,
                                     VariableDescriptor* b, std::string opt) {
     std::stringstream ss;
-    ss << getVariableExpr(res,false) << "=";
-    ss << getVariableExpr(a,false);
+    ss << getVariableExpr(res, false) << "=";
+    ss << getVariableExpr(a, false);
     ss << opt;
-    ss << getVariableExpr(b,false);
+    ss << getVariableExpr(b, false);
     ss << ";";
 
     push_back(new VMString(ss.str(), true));

@@ -125,35 +125,20 @@ void TEST_struct() {
                 false,false
             ),
             new BinaryExprAST(
-                "=",
-                new BinaryExprAST(
-                    ".",
-                    new VariableExprAST("test"),
-                    new StringExprAST("a")
-                ),
-                new CallExprAST("read_int",{})
-            ),
-            new BinaryExprAST(
-                "=",
+                ":=",
                 new VariableExprAST("p"),
                 new BinaryExprAST(
                     ".",
                     new VariableExprAST("test"),
                     new StringExprAST("a")
                 )
-            ),
-            new CallExprAST(
-                "write_int",
-                {
-                    new VariableExprAST("p")
-                }
             )
         }
     );
 
     GlobalAST *ast=new GlobalAST({},{},{},block_ast);
 
-    code_gen_work(ast);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_arrinstruct(){

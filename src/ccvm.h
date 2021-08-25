@@ -149,6 +149,7 @@ class CodeCollector {
     void createConstDecl(VariableDescriptor *var,int value);
     void createConstDecl(VariableDescriptor *var,double value);
     void createConstDecl(VariableDescriptor *var,char value);
+    void createConstDecl(VariableDescriptor *var,std::string value);
 
     void createFunctionCall(VariableDescriptor *var, FunctionDescriptor *function, std::vector<VariableDescriptor*> args);
 

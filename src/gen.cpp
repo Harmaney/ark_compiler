@@ -128,22 +128,18 @@ std::any ASTDispatcher::gen_number_expr(NumberExprAST *ast) {
 }
 
 std::any ASTDispatcher::gen_string_expr(StringExprAST *ast) {
-    // TODO: implement this
-    throw InternalErrorException("not implemented", 0, 0);
-    return nullptr;
+    VariableDescriptor *t = symbolTable()->create_variable_G(
+        symbolTable()->lookfor_type(TYPE_BASIC_STRING), false);
+    t->isLeftVar = false;
+
+    code()->createConstDecl(t,ast->val);
+    return t;
 }
 
 std::any ASTDispatcher::gen_char_expr(CharExprAST *ast) {
     VariableDescriptor *t = symbolTable()->create_variable_G(
         symbolTable()->lookfor_type(TYPE_BASIC_STRING), false);
     t->isLeftVar = false;
-
-    // TODO: move those code to ccvm.h
-    // CodeCollector::begin_section("global_define");
-    // CodeCollector::src() << map_variable_type(t->varType) << " " << t->name
-    //                      << " = \'" << ast->val << "\';";
-    // CodeCollector::push_back();
-    // CodeCollector::end_section();
 
     code()->createConstDecl(t, ast->val);
     return t;
@@ -258,7 +254,7 @@ std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
 
         code()->createVariableDecl(t);
 
-        code()->createStructAssign(t, lhs, child_id);
+        code()->createStructAssign(t, lhs, child_id,true);
         // CodeCollector::src() << t->name;
         // CodeCollector::src() << "=&(";
         // put_variable_expr(lhs);
