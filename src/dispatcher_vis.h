@@ -1,11 +1,12 @@
 #include "gen.h"
+#include "templatelogger.h"
 
 class VisDispatcher : public ADispatcher {
    private:
-    VMContext *context;
+    CustomLogger *logger;
 
    public:
-    VisDispatcher(VMContext *context) : context(context) {}
+    VisDispatcher(CustomLogger *logger) : logger(logger) {}
 
     std::any gen_global(GlobalAST *ast) override;
 
