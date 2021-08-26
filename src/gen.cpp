@@ -14,11 +14,27 @@
 Value *castValue(std::any x) { return std::any_cast<Value *>(x); }
 
 std::any ASTDispatcher::gen_global(GlobalAST *ast) {
+    VMWhiteBlock *global_vars=new VMWhiteBlock();
+    VMWhiteBlock *global_funcs=new VMWhiteBlock();
     VMWhiteBlock *global_block = new VMWhiteBlock();
+    code()->set_block(global_vars);
+    for(auto var:ast->vars){
+        var->accept(*this);
+    }
+    code()->pop_block();
+
+    code()->set_block(global_funcs);
+    for(auto func:ast->functions){
+        func->accept(*this);
+    }
+    code()->pop_block();
+
     code()->set_block(global_block);
     ast->mainBlock->accept(*this);
-
     code()->pop_block();
+
+    code()->push_back(global_vars);
+    code()->push_back(global_funcs);
     code()->push_back(global_block);
 
     return nullptr;
@@ -430,29 +446,6 @@ std::any ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
     auto blockStep = code()->createWhiteBlock();
     auto blockBody = code()->createWhiteBlock();
 
-    // if (std::any_cast<VariableDescriptor *>(ast->rangeL->value)->varType !=
-    //         SymbolTable::lookfor_type(TYPE_BASIC_INT64) &&
-    //     is_possible_to_level_up(
-    //         std::any_cast<VariableDescriptor *>(ast->rangeL->value)->varType,
-    //         SymbolTable::lookfor_type(TYPE_BASIC_INT64)) == false) {
-    //     throw TypeErrorException(
-    //         "left range of `for` is not an integer",
-    //         std::any_cast<VariableDescriptor *>(ast->rangeL->value)
-    //             ->varType->name,
-    //         "a integer", 0, 0);
-    // }
-    // if (std::any_cast<VariableDescriptor *>(ast->rangeR->value)->varType !=
-    //         SymbolTable::lookfor_type(TYPE_BASIC_INT64) &&
-    //     is_possible_to_level_up(
-    //         std::any_cast<VariableDescriptor *>(ast->rangeR->value)->varType,
-    //         SymbolTable::lookfor_type(TYPE_BASIC_INT64)) == false) {
-    //     throw TypeErrorException(
-    //         "right range of `for` is not an integer",
-    //         std::any_cast<VariableDescriptor *>(ast->rangeL->value)
-    //             ->varType->name,
-    //         "a integer", 0, 0);
-    // }
-
     code()->set_block(blockInit);
     auto iterVar = castValue(ast->itervar->accept(*this));
     auto rangeL = castValue(ast->rangeL->accept(*this));
@@ -469,7 +462,6 @@ std::any ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
     code()->set_block(blockStep);
     auto const1 = symbolTable()->create_variable(
         symbolTable()->lookfor_type(TYPE_BASIC_INT), false, false);
-    code()->createVariableDecl(const1);
     code()->createConstDecl(const1, 1);
     code()->createOptBinary(iterVar, iterVar, const1, "+");
     code()->pop_block();
