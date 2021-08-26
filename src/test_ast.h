@@ -514,7 +514,7 @@ int RUN_TEST(){
     // TEST_arrinstruct();
     // TEST_pointer();
     // TEST_case1();
-    TEST_fibonacci();
+    // TEST_fibonacci();
 
     // TEST_typeequal();
     // TEST_typeassignerror();
