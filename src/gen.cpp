@@ -330,7 +330,7 @@ std::any ASTDispatcher::gen_unary_expr(UnaryExprAST *ast) {
             false);
 
         code()->createVariableDecl(t);
-        code()->createVarAssign(t, var);
+        code()->createVarAssign(t, var,true);
 
         return t;
     } else {

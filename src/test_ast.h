@@ -293,14 +293,14 @@ void TEST_pointer() {
     BlockAST *ast = new BlockAST(
         {new VariableDeclAST(new VariableExprAST("a"),
                              new BasicTypeAST(TYPE_BASIC_INT),false,false),
-         new BinaryExprAST("=", new VariableExprAST("a"), new NumberExprAST(1)),
+         new BinaryExprAST(":=", new VariableExprAST("a"), new NumberExprAST(1)),
          new VariableDeclAST(
              new VariableExprAST("p"),
              new PointerTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT)),false,false),
-         new BinaryExprAST("=", new VariableExprAST("a"),
+         new BinaryExprAST(":=", new VariableExprAST("a"),
                            new UnaryExprAST("*", new VariableExprAST("p")))});
 
-    code_gen_work(ast);
+    cout<<code_gen_work(ast);
 }
 
 void TEST_case1() {
@@ -522,8 +522,8 @@ int RUN_TEST(){
     // TEST_funcdef();
     // TEST_funccall();
     // TEST_struct();
-    TEST_arrinstruct();
-    // TEST_pointer();
+    // TEST_arrinstruct();
+    TEST_pointer();
     // TEST_case1();
     // TEST_fibonacci();
 
