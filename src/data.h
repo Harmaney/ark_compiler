@@ -10,7 +10,7 @@
 #include "logger.h"
 #include "symbols.h"
 
-class ASTDispatcher;
+class ADispatcher;
 
 ////////////////////////////////////////
 
@@ -19,7 +19,7 @@ class AST {
     ASTKind type;
     std::map<std::string, std::any> extraData;
     AST(ASTKind type) : type(type) {}
-    virtual std::any accept(ASTDispatcher& dispatcher) = 0;
+    virtual std::any accept(ADispatcher* dispatcher) = 0;
 };
 
 /// Pascal 的 Block 看起来并不是 Expr
@@ -27,7 +27,7 @@ class BlockAST : public AST {
    public:
     std::vector<AST*> exprs;
     BlockAST(const std::vector<AST*> exprs) : AST(AST_BLOCK), exprs(exprs) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// Expr，具有返回值的表达式
@@ -35,7 +35,7 @@ class ExprAST : public AST {
    public:
     ExprAST(ASTKind type) : AST(type) {}
     virtual ~ExprAST() {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// 类型定义AST的抽象类
@@ -51,7 +51,7 @@ class BasicTypeAST : public TypeDeclAST {
     std::string varType;
     BasicTypeAST(std::string varType)
         : TypeDeclAST(AST_BASIC_TYPE), varType(varType) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 class TypeDefAST : public TypeDeclAST {
@@ -60,7 +60,7 @@ class TypeDefAST : public TypeDeclAST {
     TypeDeclAST* oldName;
     TypeDefAST(BasicTypeAST* newName, TypeDeclAST* oldName)
         : TypeDeclAST(AST_TYPE_DEF), newName(newName), oldName(oldName) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// 指针类型
@@ -70,7 +70,7 @@ class PointerTypeDeclAST : public TypeDeclAST {
     BasicTypeAST* ref;
     PointerTypeDeclAST(BasicTypeAST* ref)
         : TypeDeclAST(AST_POINTER_TYPE), ref(ref) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// 数字常量
@@ -84,7 +84,7 @@ class NumberExprAST : public ExprAST {
     NumberExprAST(int val)
         : ExprAST(AST_NUMBER_EXPR), val_int(val), const_type(CONSTANT_INT) {}
 
-    std::any accept(ASTDispatcher& dispacher) override;
+    std::any accept(ADispatcher* dispacher) override;
 };
 
 /// 数组类型。可以继续在它下面挂数组，但是我不知道翻译会不会出问题
@@ -99,7 +99,7 @@ class ArrayTypeDeclAST : public TypeDeclAST {
           itemAST(itemAST),
           rangeL(rangeL),
           rangeR(rangeR) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// 字符串常量
@@ -107,7 +107,7 @@ class StringExprAST : public ExprAST {
    public:
     std::string val;
     StringExprAST(std::string val) : ExprAST(AST_STRING_EXPR), val(val) {}
-    std::any accept(ASTDispatcher& dispacher) override;
+    std::any accept(ADispatcher* dispacher) override;
 };
 
 /// 字符常量
@@ -115,7 +115,7 @@ class CharExprAST : public ExprAST {
    public:
     char val;
     CharExprAST(char val) : ExprAST(AST_CHAR_EXPR), val(val) {}
-    std::any accept(ASTDispatcher& dispacher) override;
+    std::any accept(ADispatcher* dispacher) override;
 };
 
 /// VariableExprAST - Expression class for referencing a variable, like "a".
@@ -124,7 +124,7 @@ class VariableExprAST : public ExprAST {
     std::string name;
     VariableExprAST(const std::string& name)
         : ExprAST(AST_VARIABLE_EXPR), name(name) {}
-    std::any accept(ASTDispatcher& dispacher) override;
+    std::any accept(ADispatcher* dispacher) override;
 };
 
 /// 一元运算符
@@ -134,7 +134,7 @@ class UnaryExprAST : public ExprAST {
     std::string op;
     UnaryExprAST(std::string op, ExprAST* expr)
         : ExprAST(AST_UNARY_EXPR), expr(expr), op(op) {}
-    std::any accept(ASTDispatcher& dispacher) override;
+    std::any accept(ADispatcher* dispacher) override;
 };
 
 /// BinaryExprAST - Expression class for a binary operator.
@@ -145,7 +145,7 @@ class BinaryExprAST : public ExprAST {
 
     BinaryExprAST(std::string op, ExprAST* lhs, ExprAST* rhs)
         : ExprAST(AST_BINARY_EXPR), op(op), LHS(lhs), RHS(rhs) {}
-    std::any accept(ASTDispatcher& dispacher) override;
+    std::any accept(ADispatcher* dispacher) override;
 };
 
 /// 返回表达式
@@ -154,7 +154,7 @@ class ReturnAST : public AST {
     ExprAST* expr;
     ReturnAST(ExprAST* expr) : AST(AST_RETURN), expr(expr) {}
     ReturnAST() : AST(AST_RETURN), expr(nullptr) {}
-    std::any accept(ASTDispatcher& dispacher) override;
+    std::any accept(ADispatcher* dispacher) override;
 };
 
 /// CallExprAST - Expression class for function calls.
@@ -164,7 +164,7 @@ class CallExprAST : public ExprAST {
     std::vector<ExprAST*> args;
     CallExprAST(const std::string& callee, const std::vector<ExprAST*>& args)
         : ExprAST(AST_CALL_EXPR), callee(callee), args(args) {}
-    std::any accept(ASTDispatcher& dispacher) override;
+    std::any accept(ADispatcher* dispacher) override;
 };
 
 /// 变量声明表达式
@@ -188,7 +188,7 @@ class VariableDeclAST : public AST {
           initVal(initVal) {
         assert(varType);
     }
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// 变量声明表达式
@@ -205,7 +205,7 @@ class ParameterDeclAST : public AST {
         : AST(AST_VARIABLE_DECL), sig(sig), varType(varType), isRef(isRef) {
         assert(varType);
     }
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// for表达式
@@ -222,7 +222,7 @@ class ForStatementAST : public AST {
           rangeL(rangeL),
           rangeR(rangeR),
           body(body) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 class WhileStatementAST : public AST {
@@ -232,7 +232,7 @@ class WhileStatementAST : public AST {
 
     WhileStatementAST(ExprAST* condition, BlockAST* body)
         : AST(AST_WHILE_STATEMENT), condition(condition), body(body) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 class IfStatementAST : public AST {
@@ -247,7 +247,7 @@ class IfStatementAST : public AST {
           condition(condition),
           body_true(body_true),
           body_false(body_false) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// 函数的签名，指函数名和函数参数
@@ -262,7 +262,7 @@ class FunctionSignatureAST : public AST {
           sig(sig),
           args(args),
           resultType(result) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 class FunctionAST : public AST {
@@ -273,7 +273,7 @@ class FunctionAST : public AST {
     FunctionAST(FunctionSignatureAST* sig,
                 std::vector<VariableDeclAST*> varDecls, BlockAST* body)
         : AST(AST_FUNCTION), sig(sig), varDecls(varDecls), body(body) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 class StructDeclAST : public TypeDeclAST {
@@ -282,7 +282,7 @@ class StructDeclAST : public TypeDeclAST {
     std::vector<ParameterDeclAST*> varDecl;
     StructDeclAST(std::string sig, std::vector<ParameterDeclAST*> varDecl)
         : TypeDeclAST(AST_STRUCT_DECL), sig(sig), varDecl(varDecl) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };
 
 /// 代表程序代码全局的AST
@@ -300,5 +300,5 @@ class GlobalAST : public AST {
           vars(vars),
           functions(functions),
           mainBlock(mainBlock) {}
-    std::any accept(ASTDispatcher& dispatcher) override;
+    std::any accept(ADispatcher* dispatcher) override;
 };

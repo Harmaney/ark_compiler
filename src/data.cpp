@@ -8,96 +8,96 @@
 #include "parser.h"
 
 
-std::any ExprAST::accept(ASTDispatcher& dispatcher) {
+std::any ExprAST::accept(ADispatcher* dispatcher) {
     throw std::invalid_argument("unknown type of expr");
 }
 
-std::any BasicTypeAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_basic_type(this);
+std::any BasicTypeAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_basic_type(this);
 }
 
-std::any TypeDefAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_type_def(this);
+std::any TypeDefAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_type_def(this);
 }
 
-std::any ArrayTypeDeclAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_array_type_decl(this);
+std::any ArrayTypeDeclAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_array_type_decl(this);
 }
 
-std::any PointerTypeDeclAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_pointer_type_decl(this);
+std::any PointerTypeDeclAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_pointer_type_decl(this);
 }
 
-std::any NumberExprAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_number_expr(this);
+std::any NumberExprAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_number_expr(this);
 }
 
-std::any StringExprAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_string_expr(this);
+std::any StringExprAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_string_expr(this);
 }
 
-std::any CharExprAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_char_expr(this);
+std::any CharExprAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_char_expr(this);
 }
 
-std::any VariableExprAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_variable_expr(this);
+std::any VariableExprAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_variable_expr(this);
 }
 
-std::any BinaryExprAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_binary_expr(this);
+std::any BinaryExprAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_binary_expr(this);
 }
 
-std::any UnaryExprAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_unary_expr(this);
+std::any UnaryExprAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_unary_expr(this);
 }
 
-std::any ReturnAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_return(this);
+std::any ReturnAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_return(this);
 }
 
-std::any CallExprAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_call_expr(this);
+std::any CallExprAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_call_expr(this);
 }
 
-std::any BlockAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_block(this);
+std::any BlockAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_block(this);
 }
 
-std::any VariableDeclAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_variable_decl(this);
+std::any VariableDeclAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_variable_decl(this);
 }
 
-std::any ParameterDeclAST::accept(ASTDispatcher& dispatcher){
-    return dispatcher.gen_parameter_decl(this);
+std::any ParameterDeclAST::accept(ADispatcher* dispatcher){
+    return dispatcher->gen_parameter_decl(this);
 }
 
-std::any ForStatementAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_for_statement(this);
+std::any ForStatementAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_for_statement(this);
 }
 
-std::any WhileStatementAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_while_statement(this);
+std::any WhileStatementAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_while_statement(this);
 }
 
-std::any IfStatementAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_if_statement(this);
+std::any IfStatementAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_if_statement(this);
 }
 
-std::any GlobalAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_global(this);
+std::any GlobalAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_global(this);
 }
 
-std::any FunctionAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_function(this);
+std::any FunctionAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_function(this);
 }
 
-std::any FunctionSignatureAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_function_signature(this);
+std::any FunctionSignatureAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_function_signature(this);
 }
 
-std::any StructDeclAST::accept(ASTDispatcher& dispatcher) {
-    return dispatcher.gen_struct(this);
+std::any StructDeclAST::accept(ADispatcher* dispatcher) {
+    return dispatcher->gen_struct(this);
 }
 
 ///////////////////////////////////////

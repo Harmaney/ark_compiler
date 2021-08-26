@@ -39,7 +39,7 @@ std::string code_gen_work(AST *ast) {
 
 
     ASTDispatcher dispatcher(context);
-    ast->accept(dispatcher);
+    ast->accept(&dispatcher);
 
 
 

@@ -19,18 +19,18 @@ std::any ASTDispatcher::gen_global(GlobalAST *ast) {
     VMWhiteBlock *global_block = new VMWhiteBlock();
     code()->set_block(global_vars);
     for(auto var:ast->vars){
-        var->accept(*this);
+        var->accept(this);
     }
     code()->pop_block();
 
     code()->set_block(global_funcs);
     for(auto func:ast->functions){
-        func->accept(*this);
+        func->accept(this);
     }
     code()->pop_block();
 
     code()->set_block(global_block);
-    ast->mainBlock->accept(*this);
+    ast->mainBlock->accept(this);
     code()->pop_block();
 
     code()->push_back(global_vars);
@@ -41,9 +41,9 @@ std::any ASTDispatcher::gen_global(GlobalAST *ast) {
 }
 
 std::any ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
-    Value *rangeL = castValue(ast->rangeL->accept(*this));
-    Value *rangeR = castValue(ast->rangeR->accept(*this));
-    ast->itemAST->accept(*this);
+    Value *rangeL = castValue(ast->rangeL->accept(this));
+    Value *rangeR = castValue(ast->rangeR->accept(this));
+    ast->itemAST->accept(this);
     auto itemDescriptor = ast->itemAST->_descriptor;
     // 检查数组区间是否是整数
     if (rangeL->varType->name != TYPE_BASIC_INT ||
@@ -67,7 +67,7 @@ std::any ASTDispatcher::gen_array_type_decl(ArrayTypeDeclAST *ast) {
 }
 
 std::any ASTDispatcher::gen_pointer_type_decl(PointerTypeDeclAST *ast) {
-    ast->ref->accept(*this);
+    ast->ref->accept(this);
     auto descriptor = symbolTable()->create_pointer_type(ast->ref->_descriptor);
 
     code()->createTypeDecl(descriptor);
@@ -77,8 +77,8 @@ std::any ASTDispatcher::gen_pointer_type_decl(PointerTypeDeclAST *ast) {
 
 std::any ASTDispatcher::gen_type_def(TypeDefAST *ast) {
     // 这看起来不太靠谱
-    ast->newName->accept(*this);
-    ast->oldName->accept(*this);
+    ast->newName->accept(this);
+    ast->oldName->accept(this);
     auto descriptor = symbolTable()->insert_type(ast->newName->varType,
                                                  ast->oldName->_descriptor);
 
@@ -178,7 +178,7 @@ std::any ASTDispatcher::gen_variable_expr(VariableExprAST *ast) {
 
 std::any ASTDispatcher::gen_return(ReturnAST *ast) {
     if (ast->expr != nullptr) {
-        Value *t = castValue(ast->expr->accept(*this));
+        Value *t = castValue(ast->expr->accept(this));
 
         code()->createReturn(t);
 
@@ -197,8 +197,8 @@ std::any ASTDispatcher::gen_return(ReturnAST *ast) {
 }
 
 std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
-    Value *lhs = castValue(ast->LHS->accept(*this));
-    Value *rhs = castValue(ast->RHS->accept(*this));
+    Value *lhs = castValue(ast->LHS->accept(this));
+    Value *rhs = castValue(ast->RHS->accept(this));
 
     if (ast->op == ":=") {
         // TODO: solve level up
@@ -333,7 +333,7 @@ std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
 }
 
 std::any ASTDispatcher::gen_unary_expr(UnaryExprAST *ast) {
-    Value *var = castValue(ast->expr->accept(*this));
+    Value *var = castValue(ast->expr->accept(this));
 
     if (ast->op == "*") {
         if (var->varType->type != DESCRIPTOR_POINTER_TYPE) {
@@ -362,7 +362,7 @@ std::any ASTDispatcher::gen_call_expr(CallExprAST *ast) {
     std::vector<SymbolDescriptor *> argsymbols;
     std::vector<Value *> argValues;
     for (auto arg : ast->args) {
-        auto t = castValue(arg->accept(*this));
+        auto t = castValue(arg->accept(this));
         argsymbols.push_back(t->varType);
         argValues.push_back(t);
     }
@@ -424,15 +424,15 @@ std::any ASTDispatcher::gen_if_statement(IfStatementAST *ast) {
     auto blockNo = code()->createWhiteBlock();
 
     code()->set_block(blockCond);
-    auto t = castValue(ast->condition->accept(*this));
+    auto t = castValue(ast->condition->accept(this));
     code()->pop_block();
 
     code()->set_block(blockOk);
-    ast->body_true->accept(*this);
+    ast->body_true->accept(this);
     code()->pop_block();
 
     code()->set_block(blockNo);
-    ast->body_false->accept(*this);
+    ast->body_false->accept(this);
     code()->pop_block();
 
     code()->createCondBr(t, blockOk, blockNo);
@@ -447,13 +447,13 @@ std::any ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
     auto blockBody = code()->createWhiteBlock();
 
     code()->set_block(blockInit);
-    auto iterVar = castValue(ast->itervar->accept(*this));
-    auto rangeL = castValue(ast->rangeL->accept(*this));
+    auto iterVar = castValue(ast->itervar->accept(this));
+    auto rangeL = castValue(ast->rangeL->accept(this));
     code()->createVarAssign(iterVar, rangeL);
     code()->pop_block();
 
     code()->set_block(blockCond);
-    auto rangeR = castValue(ast->rangeR->accept(*this));
+    auto rangeR = castValue(ast->rangeR->accept(this));
     auto cond = symbolTable()->create_variable(
         symbolTable()->lookfor_type(TYPE_BASIC_INT), false, false);
     code()->createOptBinary(cond, iterVar, rangeR, "<=");
@@ -467,7 +467,7 @@ std::any ASTDispatcher::gen_for_statement(ForStatementAST *ast) {
     code()->pop_block();
 
     code()->set_block(blockBody);
-    ast->body->accept(*this);
+    ast->body->accept(this);
     code()->pop_block();
 
     code()->createLoop(cond, blockInit, blockCond, blockStep, blockBody);
@@ -480,11 +480,11 @@ std::any ASTDispatcher::gen_while_statement(WhileStatementAST *ast) {
     auto blockBody = code()->createWhiteBlock();
 
     code()->set_block(blockCond);
-    auto subCond = castValue(ast->condition->accept(*this));
+    auto subCond = castValue(ast->condition->accept(this));
     code()->pop_block();
 
     code()->set_block(blockBody);
-    ast->body->accept(*this);
+    ast->body->accept(this);
     code()->pop_block();
 
     code()->createLoop(subCond, nullptr, blockCond, nullptr, blockBody);
@@ -500,18 +500,18 @@ std::any ASTDispatcher::gen_function(FunctionAST *ast) {
 
     std::vector<Value *> argTypes;
     for (auto arg : ast->sig->args) {
-        arg->accept(*this);
+        arg->accept(this);
         auto argVar = symbolTable()->create_variable(
             arg->sig->name, arg->varType->_descriptor, arg->isRef, false);
         argTypes.push_back(argVar);
     }
 
-    ast->sig->resultType->accept(*this);
+    ast->sig->resultType->accept(this);
     auto functionDescriptor = new FunctionDescriptor(
         ast->sig->sig, argTypes, ast->sig->resultType->_descriptor);
 
     code()->createFunctionSignature(functionDescriptor, false);
-    ast->body->accept(*this);
+    ast->body->accept(this);
 
     symbolTable()->exit();
     symbolTable()->insert_function(ast->sig->sig, functionDescriptor);
@@ -601,7 +601,7 @@ std::any ASTDispatcher::gen_block(BlockAST *ast) {
     code()->set_block(block);
     symbolTable()->enter();
     for (auto expr : ast->exprs) {
-        expr->accept(*this);
+        expr->accept(this);
     }
     symbolTable()->exit();
     code()->pop_block();
@@ -614,7 +614,7 @@ std::any ASTDispatcher::gen_struct(StructDeclAST *ast) {
     StructDescriptor *structD = new StructDescriptor(ast->sig, {});
 
     for (auto var : ast->varDecl) {
-        var->accept(*this);
+        var->accept(this);
         auto typeDescriptor = var->varType->_descriptor;
         structD->push(var->sig->name, typeDescriptor);
     }
@@ -628,12 +628,12 @@ std::any ASTDispatcher::gen_struct(StructDeclAST *ast) {
 std::any ASTDispatcher::gen_variable_decl(VariableDeclAST *ast) {
     VariableDescriptor *var = nullptr;
     if (ast->varType) {
-        ast->varType->accept(*this);
+        ast->varType->accept(this);
         auto varType = ast->varType->_descriptor;
         var = symbolTable()->create_variable(ast->sig->name, varType,
                                              ast->isRef, ast->isConst);
     } else if (ast->initVal) {
-        auto initVal = castValue(ast->initVal->accept(*this));
+        auto initVal = castValue(ast->initVal->accept(this));
         auto varType = initVal->varType;
         var = symbolTable()->create_variable(ast->sig->name, varType,
                                              ast->isRef, ast->isConst);
@@ -659,7 +659,7 @@ std::any ASTDispatcher::gen_variable_decl(VariableDeclAST *ast) {
 
 std::any ASTDispatcher::gen_parameter_decl(ParameterDeclAST *ast) {
     VariableDescriptor *var = nullptr;
-    ast->varType->accept(*this);
+    ast->varType->accept(this);
     auto varType = ast->varType->_descriptor;
     var = symbolTable()->create_variable(ast->sig->name, varType, ast->isRef,
                                          false);
