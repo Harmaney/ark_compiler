@@ -380,7 +380,7 @@ void TEST_fibonacci(){
                 new BlockAST(
                     {
                         new BinaryExprAST(
-                            "=",
+                            ":=",
                             new VariableExprAST("c"),
                             new BinaryExprAST(
                                 "+",
@@ -395,12 +395,12 @@ void TEST_fibonacci(){
         new BlockAST(
             {
                 new BinaryExprAST(
-                    "=",
+                    ":=",
                     new VariableExprAST("a"),
                     new NumberExprAST(0)
                 ),
                 new BinaryExprAST(
-                    "=",
+                    ":=",
                     new VariableExprAST("b"),
                     new NumberExprAST(1)
                 ),
@@ -419,26 +419,15 @@ void TEST_fibonacci(){
                                 }
                             ),
                             new BinaryExprAST(
-                                "=",
+                                ":=",
                                 new VariableExprAST("a"),
                                 new VariableExprAST("b")
                             ),
                             new BinaryExprAST(
-                                "=",
+                                ":=",
                                 new VariableExprAST("b"),
                                 new VariableExprAST("c")
                             ),
-                            new CallExprAST("write_int", 
-                                {
-                                    new VariableExprAST("a")
-                                }
-                            ),
-                            new CallExprAST(
-                                "write_str",
-                                {
-                                    new StringExprAST("\\n")
-                                }
-                            )
                         }
                     )
                 )
@@ -446,7 +435,7 @@ void TEST_fibonacci(){
         )
     );
 
-    code_gen_work(global);
+    cout<<code_gen_work(global);
 }
 
 ////////////////////////////////////////////////////////////
@@ -523,9 +512,9 @@ int RUN_TEST(){
     // TEST_funccall();
     // TEST_struct();
     // TEST_arrinstruct();
-    TEST_pointer();
+    // TEST_pointer();
     // TEST_case1();
-    // TEST_fibonacci();
+    TEST_fibonacci();
 
     // TEST_typeequal();
     // TEST_typeassignerror();
