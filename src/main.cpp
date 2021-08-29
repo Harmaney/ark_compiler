@@ -6,7 +6,7 @@
 #include "logger.h"
 #include "parser.h"
 #include "test_ast.h"
-#include "templatelogger.h"
+#include "templatelogger.hpp"
 int main(int argc, char **argv) {
     RUN_TEST();
     return 0;
