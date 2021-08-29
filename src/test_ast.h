@@ -2,6 +2,7 @@
 #include "data.h"
 #include "gen.h"
 #include "codegen.h"
+#include "templatelogger.hpp"
 #include <vector>
 #include <fstream>
 
@@ -11,7 +12,7 @@ void TEST_vardecl() {
     auto ast = new VariableDeclAST(new VariableExprAST("a"),
                                    new BasicTypeAST(TYPE_BASIC_INT),false,false);
 
-    cout<<code_gen_work(ast);
+    LOG(code_gen_work(ast));
 }
 
 void TEST_arraydecl() {
@@ -19,7 +20,7 @@ void TEST_arraydecl() {
         new VariableExprAST("a"),
         new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT), new NumberExprAST(1), new NumberExprAST(2)),false,false);
 
-    cout<<code_gen_work(ast);
+    LOG(code_gen_work(ast));
 }
 
 void TEST_arrayofarray() {
@@ -27,7 +28,7 @@ void TEST_arrayofarray() {
         new VariableExprAST("a"),
         new ArrayTypeDeclAST(new ArrayTypeDeclAST(new BasicTypeAST(TYPE_BASIC_INT),new NumberExprAST(1),new NumberExprAST(10)), new NumberExprAST(1), new NumberExprAST(100)),false,false)});
 
-    cout<<code_gen_work(ast);
+    LOG(code_gen_work(ast));
 }
 
 void TEST_arrayuse() {
@@ -53,7 +54,7 @@ void TEST_arrayuse() {
         ),
     });
 
-    cout<<code_gen_work(ast);
+    LOG(code_gen_work(ast));
 }
 
 void TEST_arrayofarrayuse() {
@@ -98,7 +99,7 @@ void TEST_arrayofarrayuse() {
         ),
     });
 
-    cout<<code_gen_work(ast);
+    LOG(code_gen_work(ast));
 }
 
 void TEST_struct() {
@@ -138,7 +139,7 @@ void TEST_struct() {
 
     GlobalAST *ast=new GlobalAST({},{},{},block_ast);
 
-    cout<<code_gen_work(ast);
+    LOG(code_gen_work(ast));
 }
 
 void TEST_arrinstruct(){
@@ -177,7 +178,7 @@ void TEST_arrinstruct(){
         )
     });
 
-    cout<<code_gen_work(ast);
+    LOG(code_gen_work(ast));
 }
 
 void TEST_while() {
@@ -195,7 +196,7 @@ void TEST_while() {
 
     env->exprs.push_back(while_ast);
 
-    cout<<code_gen_work(env);
+    LOG(code_gen_work(env));
 }
 
 void TEST_for() {
@@ -213,7 +214,7 @@ void TEST_for() {
 
     env->exprs.push_back(for_ast);
 
-    code_gen_work(env);
+    LOG(code_gen_work(env));
 }
 
 void TEST_funcdef(){
@@ -239,7 +240,7 @@ void TEST_funcdef(){
         })
     );
 
-    cout<<code_gen_work(ast);
+    LOG(code_gen_work(ast));
 }
 
 void TEST_funccall() {
@@ -286,7 +287,7 @@ void TEST_funccall() {
 
     GlobalAST *global = new GlobalAST({}, {},{},block);
 
-    cout<<code_gen_work(global);
+    LOG(code_gen_work(global));
 }
 
 void TEST_pointer() {
@@ -300,7 +301,7 @@ void TEST_pointer() {
          new BinaryExprAST(":=", new VariableExprAST("a"),
                            new UnaryExprAST("*", new VariableExprAST("p")))});
 
-    cout<<code_gen_work(ast);
+   LOG(code_gen_work(ast));
 }
 
 void TEST_case1() {
@@ -435,7 +436,7 @@ void TEST_fibonacci(){
         )
     );
 
-    cout<<code_gen_work(global);
+    LOG(code_gen_work(global));
 }
 
 ////////////////////////////////////////////////////////////
@@ -514,7 +515,7 @@ int RUN_TEST(){
     // TEST_arrinstruct();
     // TEST_pointer();
     // TEST_case1();
-    // TEST_fibonacci();
+    TEST_fibonacci();
 
     // TEST_typeequal();
     // TEST_typeassignerror();
