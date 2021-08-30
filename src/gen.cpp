@@ -116,21 +116,6 @@ std::any ASTDispatcher::gen_number_expr(NumberExprAST *ast) {
             break;
     }
 
-    // TODO: move those code to ccvm.h
-    // CodeCollector::begin_section("global_define");
-    // CodeCollector::src() << map_variable_type(t->varType) << " " << t->name
-    //                      << "=";
-    // if (ast->const_type == CONSTANT_REAL)
-    //     CodeCollector::src() << ast->val_float << ";";
-    // else if (ast->const_type == CONSTANT_INT)
-    //     CodeCollector::src() << ast->val_int << ";";
-    // else {
-    //     throw InternalErrorException(
-    //         "unknown constant type: " + ast->const_type, 0, 0);
-    // }
-    // CodeCollector::push_back();
-    // CodeCollector::end_section();
-
     if (ast->const_type == CONSTANT_INT) {
         code()->createConstDecl(t, ast->val_int);
     } else if (ast->const_type == CONSTANT_REAL) {
@@ -181,17 +166,8 @@ std::any ASTDispatcher::gen_return(ReturnAST *ast) {
         Value *t = castValue(ast->expr->accept(this));
 
         code()->createReturn(t);
-
-        // TODO: move this
-        // CodeCollector::src()
-        //     << "return "
-        //     << std::any_cast<VariableDescriptor *>(ast->expr->value)->name
-        //     << ";";
     } else {
         code()->createReturn();
-        // TODO: move this
-        // CodeCollector::src() << "return "
-        //                      << ";";
     }
     return nullptr;
 }
@@ -240,13 +216,6 @@ std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
         code()->createVariableDecl(t);
 
         code()->createArrayAssign(t, lhs, rhs, true);
-        // CodeCollector::src() << t->name;
-        // CodeCollector::src() << "=&";
-        // put_variable_expr(lhs);
-        // CodeCollector::src() << "[";
-        // put_variable_expr(rhs);
-        // CodeCollector::src() << "];";
-        // CodeCollector::push_back();
         return t;
     } else if (ast->op == ".") {
         if (lhs->varType->type != DESCRIPTOR_STRUCT) {
@@ -271,12 +240,6 @@ std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
         code()->createVariableDecl(t);
 
         code()->createStructAssign(t, lhs, child_id,true);
-        // CodeCollector::src() << t->name;
-        // CodeCollector::src() << "=&(";
-        // put_variable_expr(lhs);
-        // CodeCollector::src() << "." << child_id;
-        // CodeCollector::src() << ");";
-        // CodeCollector::push_back();
         return t;
     } else {
         if (ast->op == "<>") ast->op = "!=";
@@ -304,26 +267,6 @@ std::any ASTDispatcher::gen_binary_expr(BinaryExprAST *ast) {
             code()->createVariableDecl(t);
 
             code()->createOptBinary(t, lhs, rhs, ast->op);
-            // if (lhs->varType->name == "string") {
-            //     assert(rhs->varType->name == "string");
-            //     assert(ast->op == "+");
-            //     CodeCollector::src() << "assign_string_(&";
-            //     put_variable_expr(t);
-            //     CodeCollector::src() << ",add_string_(";
-            //     put_variable_expr(lhs);
-            //     CodeCollector::src() << ",";
-            //     put_variable_expr(rhs);
-            //     CodeCollector::src() << "));";
-            //     CodeCollector::push_back();
-            // } else {
-            //     put_variable_expr(t);
-            //     CodeCollector::src() << "=";
-            //     put_variable_expr(lhs);
-            //     CodeCollector::src() << ast->op;
-            //     put_variable_expr(rhs);
-            //     CodeCollector::src() << ";";
-            //     CodeCollector::push_back();
-            // }
             return t;
         } else {
             throw UndefinedBehaviorException("unknown operator " + ast->op, 0,
@@ -397,25 +340,6 @@ std::any ASTDispatcher::gen_call_expr(CallExprAST *ast) {
         code()->createFunctionCall(nullptr, descriptor, argValues);
         return nullptr;
     }
-
-    // CodeCollector::src() << descriptor->name << "(";
-    // for (int i = 0; i < ast->args.size(); i++) {
-    //     auto d = std::any_cast<VariableDescriptor *>(ast->args[i]->value);
-    //     // if (d->varType != descriptor->args[i]->varType) {
-    //     //     throw TypeErrorException(
-    //     //         "wrong type of arg of function " + ast->callee,
-    //     //         d->varType->name, descriptor->args[i]->varType->name,
-    //     //         0, 0);
-    //     // }
-    //     // check whether the function wants ref or not
-    //     // we use pointer to simulate this process in c
-    //     CodeCollector::src() << (descriptor->args[i]->isRef ? "&" : "");
-    //     put_variable_expr(d);
-    //     if (i != ast->args.size() - 1) CodeCollector::src() << ",";
-    // }
-
-    // CodeCollector::src() << ");";
-    // CodeCollector::push_back();
 }
 
 std::any ASTDispatcher::gen_if_statement(IfStatementAST *ast) {
@@ -520,79 +444,10 @@ std::any ASTDispatcher::gen_function(FunctionAST *ast) {
     code()->push_back(blockBody);
 
     return nullptr;
-    // // FIX: too ugly but work
-    // // the reason for this is that we should inject args descriptor to its
-    // block
-    // // 这段代码太裂了
-
-    // // add symbol for function
-    // // and also there is need to create new node for processing 形参
-    // for (auto arg : ast->sig->args) {
-    //     arg->varType->accept(*this);
-    //     arg->_varType = arg->varType->_descriptor;
-    // }
-
-    // std::vector<VariableDescriptor *> argsDescriptors;
-    // for (int i = 0; i < (int)ast->sig->args.size(); i++) {
-    //     // FIX: too ugly
-    //     auto tempDescriptor = new VariableDescriptor(
-    //         ast->sig->args[i]->sig->name, ast->sig->args[i]->_varType,
-    //         ast->sig->args[i]->isRef, false);
-    //     argsDescriptors.push_back(tempDescriptor);
-    // }
-    // auto functiondesciptor = new FunctionDescriptor(
-    //     ast->sig->sig, argsDescriptors, ast->sig->_resultType);
-    // SymbolTable::insert_function(ast->sig->sig, functiondesciptor);
-
-    // CodeCollector::src() << map_variable_type(ast->sig->_resultType) << " ";
-    // CodeCollector::src() << functiondesciptor->name;
-    // CodeCollector::src() << "(";
-
-    // for (int i = 0; i < (int)ast->sig->args.size(); i++) {
-    //     // FIX: too ugly
-    //     auto tempDescriptor = new VariableDescriptor(
-    //         ast->sig->args[i]->sig->name, ast->sig->args[i]->_varType,
-    //         ast->sig->args[i]->isRef, false);
-    //     put_variable_decl(tempDescriptor);
-    //     if (i + 1 != ast->sig->args.size()) CodeCollector::src() << ", ";
-    // }
-    // CodeCollector::src() << ")";
-    // CodeCollector::push_back();
-
-    // SymbolTable::enter();
-    // for (auto arg : ast->sig->args) {
-    //     SymbolTable::create_variable(arg->sig->name, arg->_varType,
-    //     arg->isRef,
-    //                                  false);
-    // }
-    // // used for pascal's strange return
-    // if (ast->sig->_resultType != SymbolTable::lookfor_type(TYPE_BASIC_VOID))
-    // {
-    //     ast->body->exprs.insert(
-    //         ast->body->exprs.begin(),
-    //         new VariableDeclAST(new VariableExprAST("__ret"),
-    //                             ast->sig->resultType, false, false));
-    //     // add result call to body
-    //     ast->body->exprs.push_back(new ReturnAST(new
-    //     VariableExprAST("__ret")));
-    // } else {
-    //     //无用指令
-    //     ast->body->exprs.push_back(new VariableDeclAST(
-    //         new VariableExprAST("__ret"), new BasicTypeAST(TYPE_BASIC_INT),
-    //         false, false));
-    // }
-
-    // // I am nearly throwing up
-    // ast->body->accept(*this);
-    // SymbolTable::exit();
-
-    return nullptr;
 }
 
 std::any ASTDispatcher::gen_function_signature(FunctionSignatureAST *ast) {
-    // assert(false);
-    // TODO: !!!
-
+    // this function is useless in AST dispatcher
     return nullptr;
 }
 
