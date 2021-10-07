@@ -25,26 +25,27 @@ string new_string_(const char* s) {
     return p;
 }
 
+void read_integer_integer(int*  a2,int*  a1) { scanf("%d%d", a2, a1); }
 void write_integer(int a1) { printf("%d", a1); }
 //global_define
-string t0_0 = NULL;
-int t0_1=0;
+int t0_0=0;
 //pre_struct
 //pre_array
 //struct
 //init_global_var
 void init_global_var_() {
-t0_0= new_string_("123");
 }
 //main
-int i;
-int j;
-int k;
+int a;
+int b;
 int main()
 {
 init_global_var_();
 int __ret;
-write_integer((i));
-return t0_1;
+read_integer_integer(&(a),&(b));
+int t2_0;
+(t2_0)=(a)+(b);
+write_integer((t2_0));
+return t0_0;
 return __ret;
 }

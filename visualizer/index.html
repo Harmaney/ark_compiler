@@ -5,45 +5,70 @@
   <meta charset="utf-8" />
   <title>Webpack App</title>
   <style>
-    .lex-token {
-      background-color: #fffaf0;
-      border-radius: 5px;
-      font-size: 20px;
-      padding: 2px;
-      margin: 2px;
-      transition: all 0.5s;
+    .act {
+      font-family: 'CMU Concrete';
+      border-bottom: 1px solid gainsboro;
+      transition: all 1s;
+      cursor: pointer;
     }
 
-    .lex-token-active {
-      background-color: aliceblue !important;
+    .done {
+      background-color: #efefef;
+    }
+
+    .act:hover {
+      background-color: #d9d9d9;
+    }
+
+    h1 {
+      font-family: 'CMU Serif Extra';
+    }
+
+    .formula {
+      font-family: 'CMU Serif';
+    }
+
+    .state {
+      font-family: 'CMU Sans Serif';
+    }
+
+    .tok {
+      font-family: 'CMU Concrete';
     }
   </style>
 </head>
 
 <body>
   <div class="row justify-content-md-center">
-    <div class="col-10" style="width:1200px">
-      <div class="row">
-        <h1 style="padding-top: 20px;text-align: center;">Grammtree</h1>
-        <div id="editor" style="height:600px;">
-          <textarea id="pas-code"></textarea>
-          <div style="width:100%;padding-top:20px;">
-            <button type="button" class="btn btn-outline-secondary" id="compile"
-              style="position: relative;right:0px;width:100%">RUN</button>
-          </div>
+    <div class="row" style="padding:30px">
+      <h1 style="text-align: center;">Grammtree</h1>
+      <div class="col-3"></div>
+      <div id="editor" class="col-6" style="height:80vh;">
+        <textarea id="pas-code" style="width:100%;"></textarea>
+        <div style="width:100%;padding-top:20px;">
+          <button type="button" class="btn btn-outline-secondary" id="compile"
+            style="position: relative;right:0px;width:100%">RUN</button>
         </div>
-        <div id="animation" style="display: none;padding:0;">
-          <div class="row">
-            <div class="col-3">
-              <div id="stream"
-                style="padding: 0 600px 0 600px;white-space: nowrap;overflow-y: hidden;cursor:pointer;user-select: none;">
-              </div>
-              <span style="padding: 0 600px 0 600px"><span id="dash">↑</span></span>
-            </div>
-            <div class="col">
-              <div id="pst" style="height:800px;border: 1px solid black; border-radius: 10px;"></div>
-            </div>
+      </div>
+      <div class="col-3"></div>
+      <div id="animation" style="display: none;padding:0;">
+        <div class="row" style="height:90vh">
+          <div class="col-6" style="overflow-y: scroll;height:100%;">
+            <table style="user-select: none;height:100%;width:100%">
+              <thead>
+                <tr>
+                  <th>token</th>
+                  <th>action</th>
+                  <th>states</th>
+                  <th>recognized prefix</th>
+                </tr>
+              </thead>
+              <tbody id="action">
+
+              </tbody>
+            </table>
           </div>
+          <div id="pst" class="col-6" style="height:100%;border: 1px solid black; border-radius: 10px;"></div>
         </div>
       </div>
     </div>

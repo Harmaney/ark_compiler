@@ -7,4 +7,4 @@ using Json = nlohmann::json;
 DevNull dev_null;
 TerminalPrinter term_print(std::cerr, dev_null);
 
-Json lex_info, parser_info, gen_info;
+Json lex_info, parser_info, gen_info, parser_action;

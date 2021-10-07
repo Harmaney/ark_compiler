@@ -4,8 +4,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
 
-import info from './info.json';
-// let info;
+//import info from './info.json';
+let info;
+import grammarText from './grammar.json';
 
 let speedRatio = 1;
 
@@ -177,27 +178,28 @@ import cytoscape from 'cytoscape';
 class TreeGraph {
   constructor(elemID) {
     this.elemID = elemID;
+    this.Init();
+  }
+
+  Init() {
     this.nodes = [];
     this.edges = [];
     this.labelOf = {};
     this.allNode = new Set();
   }
-  UpdateView(callback, highlight) {
+
+  UpdateView(highlight) {
     let { nodes, edges } = this;
-    if (!highlight)
-      highlight = nodes.length - 1;
-    else {
+
+    for (let n of nodes)
+      n.data.active = "";
+    for (let h of highlight) {
       for (let i = 0; i < nodes.length; ++i)
-        if (highlight == nodes[i].data.id) {
-          highlight = i;
+        if (h == nodes[i].data.id) {
+          nodes[i].data.active = "active";
           break;
         }
     }
-    console.log(highlight);
-    for (let n of nodes)
-      n.data.active = "";
-    nodes[highlight].data.active = "active";
-
 
     let [prePan, preZoom] = this.cy ? [this.cy.pan(), this.cy.zoom()] : [-1, -1];
 
@@ -221,13 +223,13 @@ class TreeGraph {
             'text-halign': 'center',
             'height': '30px',
             'background-opacity': '0',
-            'font-family': 'Consolas',
+            'font-family': 'CMU Typewriter Text',
           }
         },
         {
           selector: `node[active="active"]`,
           css: {
-            'background-color': 'red',
+            'background-color': '#d9d9d9',
             'background-opacity': '1'
           }
         },
@@ -260,7 +262,6 @@ class TreeGraph {
           this.cy.zoom(preZoom);
           this.cy.pan(prePan);
         }
-        callback();
       }
     )
   }
@@ -354,6 +355,8 @@ let pst = new TreeGraph("pst"), ast = new TreeGraph("ast");
 
 let buildOperations = [], genOperations = [];
 
+/*
+
 function SyncToken() {
   let found = false;
   for (let e of document.getElementById("stream").childNodes) {
@@ -378,10 +381,44 @@ document.getElementById("stream").onmousedown = (e) => {
   dragging = true;
 }
 
+
 document.onmouseup = (e) => {
   dragging = false;
 }
+*/
 
+let lastAction = -1, node = {};
+
+function Action(k) {
+  let entries = document.getElementById("action").childNodes;
+  console.log(k);
+  for (let i = 0; i < entries.length; ++i)
+    if (i <= k)
+      entries[i].classList.add("done");
+    else
+      entries[i].classList.remove("done");
+
+  let hl = [];
+  if (lastAction > k) {
+    lastAction = -1;
+    pst.Init();
+    hl = undefined;
+  }
+  for (let i = lastAction + 1; i <= k; ++i) {
+    if (info.action[i].newnodes)
+      for (let n of info.action[i].newnodes) {
+        if (node[n].type == "grammar") {
+          pst.Add(node[n]);
+          if (hl)
+            hl.push(node[n].ID);
+        }
+      }
+  }
+  pst.UpdateView(hl || []);
+  lastAction = k;
+}
+
+window.Action = Action;
 
 function Animations() {
   let tokens = '';
@@ -389,36 +426,35 @@ function Animations() {
     let c = typeColor[GetType(e.type)];
     tokens += `<span class="lex-token" style="display:block"><code style="color:rgb(${c.r},${c.g},${c.b}) ">${e.word}</code></span>`;
   }
-  document.getElementById("stream").innerHTML = tokens;
+  // document.getElementById("stream").innerHTML = tokens;
 
-  SyncToken();
+
+  //SyncToken();
+
+
+  let actions = ``;
+  for (let i in info.action) {
+    let a = info.action[i];
+    let fmtState = '';
+    for (let s of a.states)
+      fmtState += `${s} `;
+    let fmtPrefix = '';
+    for (let p of a.prefix)
+      fmtPrefix += `${p} `;
+    let suf = `<td class="state">${fmtState}</td><td>${fmtPrefix}</td>`;
+    if (a.action == 'reduce')
+      actions += `<tr class="act" onclick="Action(${i})"><td class="tok">${a.tok[1]}</td><td><b>Reduce</b> with <span class="formula">${grammarText[a.reduce - 1].replace('-> @', '-> ε').replace('->', '→').replace('@', '')}</span></td>${suf}</tr>`;
+    else if (a.action == 'shift')
+      actions += `<tr class="act" onclick="Action(${i})"><td class="tok">${a.tok[1]}</td><td><b>Shift</b> to <span class="state">${a.states[a.states.length - 1]}</span></td>${suf}</tr>`;
+    else
+      actions += `<tr class="act" onclick="Action(${i})"><td class="tok">${a.tok[1]}</td><td><b>ACC</b></td>${suf}</tr>`;
+  }
+
+  document.getElementById("action").innerHTML = actions;
 
   for (let n of info.parser) {
     n.label = n.type == "grammar" ? (n.raw == "" ? n.parserSymbol : n.raw) : n.type;
-
-    let goal = (n.type == "grammar" ? pst : ast);
-    buildOperations.push(() => new Promise((res) => {
-      // console.log(n);
-      goal.Add(n);
-      goal.UpdateView(res);
-    }));
-
-    buildOperations.push(PromiseSleep(1000));
-  }
-
-  for (let g of info.gen) {
-    if (g.ARRIVE) {
-      // console.log(g.ARRIVE);
-      genOperations.push(() => new Promise((res) => {
-        ast.UpdateView(res, g.ARRIVE);
-      }));
-    } else {
-      genOperations.push(PromiseFn(() => {
-        let block = document.getElementById(g.GEN.TO);
-        block.innerHTML = block.innerHTML + g.GEN.CODE + '\n';
-      }));
-    }
-    genOperations.push(PromiseSleep(1000));
+    node[n.ID] = n;
   }
 }
 
@@ -435,8 +471,8 @@ const SEC = ["prelude", "global_define", "pre_struct",
   "main"];
 let code_head = "", code_pre = "";
 for (let code_section of SEC) {
-  code_head += `<td ${code_section == "main" ? `style="width:400px"` : ""}>${code_section} </td>`;
-  code_pre += `<td><pre id = "${code_section}" ></pre></td>`
+  code_head += `< td ${code_section == "main" ? `style="width:400px"` : ""}> ${code_section} </td > `;
+  code_pre += `< td > <pre id="${code_section}" ></pre></td > `
 }
 // document.getElementById("ccodehd").innerHTML = code_head;
 //document.getElementById("ccode").innerHTML = code_pre;
@@ -460,8 +496,6 @@ function Work() {
   document.getElementById("animation").style.display = "block";
   Animations();
 }
-
-Work();
 
 /*
 document.getElementById("do-lex").onclick = () => {
