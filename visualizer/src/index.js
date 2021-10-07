@@ -4,7 +4,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
 
-let info;
+import info from './info.json';
+// let info;
+
 let speedRatio = 1;
 
 let standard = new Konva.Text({
@@ -352,53 +354,45 @@ let pst = new TreeGraph("pst"), ast = new TreeGraph("ast");
 
 let buildOperations = [], genOperations = [];
 
+function SyncToken() {
+  let found = false;
+  for (let e of document.getElementById("stream").childNodes) {
+    if (e.getBoundingClientRect().right >= document.getElementById("dash").getBoundingClientRect().right && !found) {
+      found = true;
+      e.classList.add("lex-token-active");
+    } else
+      e.classList.remove("lex-token-active");
+  }
+}
+
+
+let dragging = false;
+document.onmousemove = (e) => {
+  if (dragging) {
+    document.getElementById("stream").scrollBy(-e.movementX, 0);
+    SyncToken();
+  }
+}
+
+document.getElementById("stream").onmousedown = (e) => {
+  dragging = true;
+}
+
+document.onmouseup = (e) => {
+  dragging = false;
+}
+
 
 function Animations() {
-  stage = new Konva.Stage({
-    container: 'container',   // id of container <div>
-    width: 1000,
-    height: Math.floor(info.lex[info.lex.length - 1].row * CHR_HEIGHT + 2 * CODE_PAD)
-  });
-  stage.add(layer);
-
-  for (let i in info.lex) {
-    let e = info.lex[i];
-    let [x, y] = [CODE_PAD + CHR_WIDTH * (e.column - 1), CODE_PAD + CHR_HEIGHT * (e.row - 1)]
-    let tcolor = typeColor[GetType(e.type)];
-
-    let fixed = new Konva.Text({
-      x: x,
-      y: y,
-      text: e.word,
-      fontSize: 20,
-      fontFamily: 'Consolas',
-      fill: 'rgb(0,0,0)',
-      padding: 0,
-      opacity: 1,
-      align: 'left',
-    });
-
-    layer.add(fixed);
-    console.log(fixed, 'added');
-
-    floatWords.push(
-      new FloatWord(e.word,
-        { x: x, y: y },
-        { x: 600, y: CODE_PAD + CHR_HEIGHT * (e.row - 1) },
-        tcolor,
-        fixed,
-        parseInt(i),
-        () => { console.log(i); }
-      )
-    );
+  let tokens = '';
+  for (let e of info.lex) {
+    let c = typeColor[GetType(e.type)];
+    tokens += `<span class="lex-token" style="display:block"><code style="color:rgb(${c.r},${c.g},${c.b}) ">${e.word}</code></span>`;
   }
+  document.getElementById("stream").innerHTML = tokens;
 
-  layer.draw();
+  SyncToken();
 
-  for (let w of floatWords)
-    lexOperations.push.apply(lexOperations, w.AnimationSequence());
-
-  // console.log(info.parser)
   for (let n of info.parser) {
     n.label = n.type == "grammar" ? (n.raw == "" ? n.parserSymbol : n.raw) : n.type;
 
@@ -444,9 +438,9 @@ for (let code_section of SEC) {
   code_head += `<td ${code_section == "main" ? `style="width:400px"` : ""}>${code_section} </td>`;
   code_pre += `<td><pre id = "${code_section}" ></pre></td>`
 }
-document.getElementById("ccodehd").innerHTML = code_head;
+// document.getElementById("ccodehd").innerHTML = code_head;
+//document.getElementById("ccode").innerHTML = code_pre;
 
-document.getElementById("ccode").innerHTML = code_pre;
 document.getElementById("compile").onclick = () => {
   console.log(cm.getValue());
   $.ajax({
@@ -456,13 +450,20 @@ document.getElementById("compile").onclick = () => {
     success: (resp) => {
       info = resp;
       console.log(resp);
-      document.getElementById("editor").style.display = "none";
-      document.getElementById("animation").style.display = "block";
-      Animations();
+      Work();
     },
   });
 }
 
+function Work() {
+  document.getElementById("editor").style.display = "none";
+  document.getElementById("animation").style.display = "block";
+  Animations();
+}
+
+Work();
+
+/*
 document.getElementById("do-lex").onclick = () => {
   Perform(lexOperations);
   document.getElementById("do-build").disabled = false;
@@ -487,3 +488,4 @@ document.getElementById("speedbar").oninput = function () {
   else if (this.value == this.min)
     speedRatio = 10;
 }
+*/

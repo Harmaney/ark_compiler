@@ -4,13 +4,27 @@
 <head>
   <meta charset="utf-8" />
   <title>Webpack App</title>
+  <style>
+    .lex-token {
+      background-color: #fffaf0;
+      border-radius: 5px;
+      font-size: 20px;
+      padding: 2px;
+      margin: 2px;
+      transition: all 0.5s;
+    }
+
+    .lex-token-active {
+      background-color: aliceblue !important;
+    }
+  </style>
 </head>
 
 <body>
   <div class="row justify-content-md-center">
     <div class="col-10" style="width:1200px">
       <div class="row">
-        <h1 style="padding-top: 20px;text-align: center;">LLLFCS Compiler Visualizer</h1>
+        <h1 style="padding-top: 20px;text-align: center;">Grammtree</h1>
         <div id="editor" style="height:600px;">
           <textarea id="pas-code"></textarea>
           <div style="width:100%;padding-top:20px;">
@@ -18,58 +32,21 @@
               style="position: relative;right:0px;width:100%">RUN</button>
           </div>
         </div>
-        <div id="animation" style="display: none;">
-          <div class="row" style="text-align: center;">
-            <div style="width:600px;margin: auto;">
-              <table style="width:100%">
-                <tr>
-                  <td>
-                    <button type="button" class="btn btn-outline-secondary" id="do-lex">Lex</button>
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-outline-secondary" id="do-build" disabled="disabled">Build
-                      Tree</button>
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-outline-secondary" id="do-generate"
-                      disabled="disabled">Generate</button>
-                  </td>
-                  <td width="200px">
-                    <input type="range" min="1" max="100" value="50" class="slider" id="speedbar" style="width:100%">
-                  </td>
-                </tr>
-              </table>
-            </div>
-          </div>
-          <div id="container"></div>
+        <div id="animation" style="display: none;padding:0;">
           <div class="row">
-            <div class="col-6">
-              <div id="pst" style="height:500px;border: 1px solid black; border-radius: 10px;"></div>
+            <div class="col-3">
+              <div id="stream"
+                style="padding: 0 600px 0 600px;white-space: nowrap;overflow-y: hidden;cursor:pointer;user-select: none;">
+              </div>
+              <span style="padding: 0 600px 0 600px"><span id="dash">↑</span></span>
             </div>
-            <div class="col-6">
-              <div id="ast" style="height:500px;border: 1px solid black; border-radius: 10px;"></div>
+            <div class="col">
+              <div id="pst" style="height:800px;border: 1px solid black; border-radius: 10px;"></div>
             </div>
           </div>
-
-          <table height="auto" width="100%" style="table-layout:fixed">
-            <thead>
-              <tr id="ccodehd">
-
-              </tr>
-            </thead>
-            <tbody>
-              <tr id="ccode" valign="top" halign="left">
-                <td>a</td>
-                <td>b</td>
-                <td>c</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
-
     </div>
-
 </body>
 
 </html>
