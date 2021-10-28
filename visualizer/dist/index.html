@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-  <meta charset="utf-8" />
-  <title>Grammtree</title>
-  <style>
-    .act {
+<!doctype html><html><head><meta charset="utf-8"/><title>Grammtree</title><style>.act {
       font-family: 'CMU Concrete';
       border-bottom: 1px solid gainsboro;
       transition: all 1s;
@@ -55,70 +48,4 @@
 
     body {
       overflow: hidden;
-    }
-  </style>
-<script defer src="main.js"></script></head>
-
-<body>
-  <div class="row justify-content-md-center">
-    <div class="row" style="padding:30px">
-      <h1 style="text-align: center;">Grammtree</h1>
-      <div class="col-3"></div>
-      <div id="editor" class="col-6" style="height:80vh;">
-        <table class="custom-control custom-radio">
-          <tr>
-            <td class="demo-select">
-              <input onchange="SetCode(0);" type="radio" class="custom-control-input" id="demo1" name="demos"><label
-                class="custom-control-label" for="demo1">a+b</label>
-            </td>
-            <td class="demo-select">
-              <input onchange="SetCode(1);" type="radio" class="custom-control-input" id="demo2" name="demos"><label
-                class="custom-control-label" for="demo2">gcd</label>
-            </td>
-            <td class="demo-select">
-              <input onchange="SetCode(2);" type="radio" class="custom-control-input" id="demo3" name="demos"><label
-                class="custom-control-label" for="demo3">2darray</label>
-            </td>
-            <td class="demo-select">
-              <input onchange="SetCode(3);" type="radio" class="custom-control-input" id="demo4" name="demos"><label
-                class="custom-control-label" for="demo4">knapsack</label>
-            </td>
-            <td class="demo-select">
-              <input onchange="SetCode(4);" type="radio" class="custom-control-input" id="demo5" name="demos"><label
-                class="custom-control-label" for="demo5">qsort</label>
-            </td>
-          </tr>
-
-        </table>
-
-        <textarea id="pas-code" style="width:100%;"></textarea>
-        <div style="width:100%;padding-top:20px;">
-          <button type="button" class="btn btn-outline-secondary" id="compile"
-            style="position: relative;right:0px;width:100%">RUN</button>
-        </div>
-      </div>
-      <div class="col-3"></div>
-      <div id="animation" style="display: none;padding:0;">
-        <div class="row" style="height:90vh">
-          <div class="col-6" style="overflow-y: scroll;height:100%;">
-            <table style="user-select: none;height:100%;width:100%">
-              <thead>
-                <tr>
-                  <th>token</th>
-                  <th>action</th>
-                  <th>states</th>
-                  <th>recognized prefix</th>
-                </tr>
-              </thead>
-              <tbody id="action">
-
-              </tbody>
-            </table>
-          </div>
-          <div id="pst" class="col-6" style="height:100%;border: 1px solid black; border-radius: 10px;"></div>
-        </div>
-      </div>
-    </div>
-</body>
-
-</html>
+    }</style><script defer="defer" src="main.js"></script></head><body><div class="row justify-content-md-center"><div class="row" style="padding:30px"><h1 style="text-align: center;">Grammtree</h1><div class="col-3"></div><div id="editor" class="col-6" style="height:80vh;"><table class="custom-control custom-radio"><tr><td class="demo-select"><input onchange="SetCode(0);" type="radio" class="custom-control-input" id="demo1" name="demos"><label class="custom-control-label" for="demo1">a+b</label></td><td class="demo-select"><input onchange="SetCode(1);" type="radio" class="custom-control-input" id="demo2" name="demos"><label class="custom-control-label" for="demo2">gcd</label></td><td class="demo-select"><input onchange="SetCode(2);" type="radio" class="custom-control-input" id="demo3" name="demos"><label class="custom-control-label" for="demo3">2darray</label></td><td class="demo-select"><input onchange="SetCode(3);" type="radio" class="custom-control-input" id="demo4" name="demos"><label class="custom-control-label" for="demo4">knapsack</label></td><td class="demo-select"><input onchange="SetCode(4);" type="radio" class="custom-control-input" id="demo5" name="demos"><label class="custom-control-label" for="demo5">qsort</label></td></tr></table><textarea id="pas-code" style="width:100%;"></textarea><div style="width:100%;padding-top:20px;"><button type="button" class="btn btn-outline-secondary" id="compile" style="position: relative;right:0px;width:100%">RUN</button></div></div><div class="col-3"></div><div id="animation" style="display: none;padding:0;"><div class="row" style="height:90vh"><div class="col-6" style="overflow-y: scroll;height:100%;"><table style="user-select: none;height:100%;width:100%"><thead><tr><th>token</th><th>action</th><th>states</th><th>recognized prefix</th></tr></thead><tbody id="action"></tbody></table></div><div id="pst" class="col-6" style="height:100%;border: 1px solid black; border-radius: 10px;"></div></div></div></div></div></body></html>
