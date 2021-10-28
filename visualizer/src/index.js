@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
 
+import './style.css';
+
 //import info from './info.json';
 let info;
 import grammarText from './grammar.json';
@@ -479,12 +481,21 @@ for (let code_section of SEC) {
 
 document.getElementById("compile").onclick = () => {
   console.log(cm.getValue());
+  let done = false;
+  setTimeout(() => {
+    if (!done) {
+      alert("出错了，大概率是编译不通过，小概率是网络问题，如果实在找不到问题的话可以发给我看看，邮箱是mail@yiren.lu。");
+      location.reload();
+    }
+  }, 5000);
+
   $.ajax({
     method: 'POST', dataType: "json",
-    url: 'http://localhost:8848/compile',
+    url: 'http://81.70.144.208:8848/compile',
     data: { code: cm.getValue() },
     success: (resp) => {
       info = resp;
+      done = true;
       console.log(resp);
       Work();
     },
@@ -523,3 +534,107 @@ document.getElementById("speedbar").oninput = function () {
     speedRatio = 10;
 }
 */
+
+function SetCode(id) {
+  const CODE = [
+    `program Hello;
+var a,b:integer;
+begin
+    read(a,b);
+    write(a+b);
+end.`,
+    `program example(input,output);
+var x,y:integer;
+function gcd(a,b:integer):integer;
+    begin 
+        if b=0 then gcd:=a
+        else gcd:=gcd(b, a mod b)
+    end;
+begin
+    read(x, y);
+    write(gcd(x, y))
+end.`,
+    `program Hello;
+var a:array[1..10,10..20] of integer;
+begin
+    a[1,14]:=2;
+    a[2,12]:=3;
+    a[10,20]:=a[1,14]+a[2,12];
+    write(a[10,20]);
+end.`,
+    `program backpack;
+var c,n:longint;f,w,v:array[0..1005] of longint;
+var i,j:longint;
+function max(i,j:longint):longint;
+begin
+    if i<j then max:=j
+    else max:=i;
+end;
+begin
+    read(c,n);
+    for i:=1 to n do
+        read(w[i],v[i]);
+    for i:=1 to n do
+    begin
+        j:=C;
+        while j>=w[i] do
+        begin
+            f[j]:=max(f[j],f[j-w[i]]+v[i]);
+            j:=j-1;
+        end;
+    end;
+    write(f[c]);
+end.`,
+    `program quicksort(input,output);
+var a:array[0..200000] of int64;
+var n:int64;i:longint;
+
+procedure swap(var i,j:int64);
+var t:int64;
+begin
+    t:=i;
+    i:=j;
+    j:=t;
+end;
+
+procedure qsort(l,r:int64);
+var i,j,key:int64;
+var m:int64;
+begin
+    if l>=r then exit();
+    i:=l;
+    j:=r;
+    m:=(l+r) div 2;
+    key:=a[m];
+    swap(a[m],a[l]);
+    while i<>j do
+    begin
+        while (a[j]>=key) and (i<j) do j:=j-1;
+        while (a[i]<=key) and (i<j) do i:=i+1;
+        swap(a[i],a[j]);
+    end;
+    swap(a[l],a[i]);
+    while (l < i) and (a[i] = a[i-1]) do i := i - 1;
+    while (j < r) and (a[j] = a[j+1]) do j := j + 1;
+    qsort(l,i-1);
+    qsort(j+1,r);
+end;
+
+begin
+	read(n);
+	for i:=1 to n do
+		read(a[i]);
+	qsort(1,n);
+    for i:=1 to n do
+    begin
+        write(a[i]);
+        if (i <> n) then write(' ');
+    end;
+    write('\\n');
+end.`
+  ];
+
+  cm.setValue(CODE[id]);
+}
+
+window.SetCode = SetCode;

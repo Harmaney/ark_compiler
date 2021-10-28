@@ -1,0 +1,27 @@
+@font-face {
+  font-family: 'CMU Concrete';
+  src        : url('./fonts/cmunorm.otf') format('truetype');
+  font-weight: normal;
+  font-style : normal;
+}
+
+@font-face {
+  font-family: 'CMU Serif';
+  src        : url('./fonts/cmunrm.otf') format('truetype');
+  font-weight: normal;
+  font-style : normal;
+}
+
+@font-face {
+  font-family: 'CMU Sans Serif';
+  src        : url('./fonts/cmunsx.otf') format('truetype');
+  font-weight: normal;
+  font-style : normal;
+}
+
+@font-face {
+  font-family: 'CMU Typewriter Text';
+  src        : url('./fonts/cmuntt.otf') format('truetype');
+  font-weight: normal;
+  font-style : normal;
+}

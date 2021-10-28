@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Webpack App</title>
+  <title>Grammtree</title>
   <style>
     .act {
       font-family: 'CMU Concrete';
@@ -21,7 +21,7 @@
     }
 
     h1 {
-      font-family: 'CMU Serif Extra';
+      font-family: 'CMU Concrete';
     }
 
     .formula {
@@ -35,6 +35,27 @@
     .tok {
       font-family: 'CMU Concrete';
     }
+
+    .CodeMirror {
+      font-family: 'CMU Typewriter Text' !important;
+      font-size: 20px;
+    }
+
+    .custom-control {
+      display: inline;
+    }
+
+    .custom-control-label {
+      font-family: 'CMU Typewriter Text';
+    }
+
+    .demo-select {
+      width: 100px;
+    }
+
+    body {
+      overflow: hidden;
+    }
   </style>
 </head>
 
@@ -44,6 +65,32 @@
       <h1 style="text-align: center;">Grammtree</h1>
       <div class="col-3"></div>
       <div id="editor" class="col-6" style="height:80vh;">
+        <table class="custom-control custom-radio">
+          <tr>
+            <td class="demo-select">
+              <input onchange="SetCode(0);" type="radio" class="custom-control-input" id="demo1" name="demos"><label
+                class="custom-control-label" for="demo1">a+b</label>
+            </td>
+            <td class="demo-select">
+              <input onchange="SetCode(1);" type="radio" class="custom-control-input" id="demo2" name="demos"><label
+                class="custom-control-label" for="demo2">gcd</label>
+            </td>
+            <td class="demo-select">
+              <input onchange="SetCode(2);" type="radio" class="custom-control-input" id="demo3" name="demos"><label
+                class="custom-control-label" for="demo3">2darray</label>
+            </td>
+            <td class="demo-select">
+              <input onchange="SetCode(3);" type="radio" class="custom-control-input" id="demo4" name="demos"><label
+                class="custom-control-label" for="demo4">knapsack</label>
+            </td>
+            <td class="demo-select">
+              <input onchange="SetCode(4);" type="radio" class="custom-control-input" id="demo5" name="demos"><label
+                class="custom-control-label" for="demo5">qsort</label>
+            </td>
+          </tr>
+
+        </table>
+
         <textarea id="pas-code" style="width:100%;"></textarea>
         <div style="width:100%;padding-top:20px;">
           <button type="button" class="btn btn-outline-secondary" id="compile"

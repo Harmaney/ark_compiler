@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
   } else
     input_pas = argv[1];
 
+  std::string infoName = "info.json";
   for (int i = 2; i < argc; i += 2) {
     if (strcmp(argv[i], "-o") == 0) {
       out_c = argv[i + 1];
@@ -23,6 +24,8 @@ int main(int argc, char **argv) {
         term_print.fatal() << "Invalid info level.\n";
         exit(0);
       }
+    } else if (strcmp(argv[i], "-f") == 0) {
+      infoName = argv[i + 1];
     }
   }
   std::ifstream src_file_stream(input_pas);
@@ -44,7 +47,7 @@ int main(int argc, char **argv) {
   ccode_file << ccode;
   term_print.info() << "Finished!\n";
 
-  std::ofstream info("info.json");
+  std::ofstream info(infoName);
   info << (Json{{"code", src_code},
                 {"lex", lex_info},
                 {"parser", parser_info},
