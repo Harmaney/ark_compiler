@@ -1,3 +1,5 @@
+// compille: g++ server.cpp -o server -lpthread
+
 #include "include/httplib.h"
 #include "include/json.hpp"
 
@@ -10,14 +12,14 @@ int main() {
   svr.Post("/compile", [&](const Request &req, Response &res) {
     auto val = req.get_param_value("code");
     std::cerr << val << '\n';
-    std::ofstream user_code("in.pas");
+    std::string rid = std::to_string(rng());
+    std::ofstream user_code(rid + ".pas");
     user_code << val;
     user_code.close();
-    int rid = rng();
-    system(("./p2c in.pas -o out.c -f " + std::to_string(rid)).c_str());
+    system(("./p2c " + rid + ".pas -o " + rid + ".c -f " + rid).c_str());
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(1000ms);
-    std::ifstream info(std::to_string(rid));
+    std::ifstream info(rid);
     res.set_header("Access-Control-Allow-Origin", "*");
     res.set_header("Cache-Control", "no-cache");
     res.set_content(std::string((std::istreambuf_iterator<char>(info)),
